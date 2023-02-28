@@ -1,29 +1,25 @@
-# project name (gera executável com este nome)
-Target=cot
+TARGET=cot
 CC=gcc
-
-# flags de compilação
 CFLAGS=-std=c99 -Wpedantic -Wconversion -Wall -Werror
 LDFLAGS=-lm #permite linkar a biblioteca de matemática <math.h>
-
 SRCS=$(wildcard *.c)
 OBJS=$(SRCS:.c=*.o)
-HEADER=$(wildcard *.h)
+HEADERS=$(wildcard *.h)
 
 # compile and clean
 .PHONY: all clean
 
 all: ## -> opção geral -> 'make' ou 'make all'
-		CFLAGS+= -O3
-		$(TARGET)
+all: CFLAGS+=-O3
+all: $(TARGET)
 
 $(TARGET): $(OBJS) Makefile
-		$(CC) $(CFLAGS) $(OBJS) $(LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(OBJS) $(LDFLAGS) -o $@
+	@echo "Compiling is done :]"
 
 %.o: %.c $(HEADERS) Makefile
-		$(CC) -c $(CFLAGS) -o $@ $<
-		echo "Compiling complete :]"
-
+	$(CC) -c $(CFLAGS) -o $@ $<
+	
 clean: ## -> opção CLEAN para limpar os object files e o executável -> 'make clean'
-		rm -f *.o $(TARGET)
-		echo "Cleaned Executable :]"
+	rm -f *.o $(TARGET)
+	@echo "files were cleansed"
