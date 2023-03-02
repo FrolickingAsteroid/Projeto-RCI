@@ -12,8 +12,9 @@
 
 int main(int argc, char *argv[]) {
 
-  AddInvocInfo(argc, argv, usr_entries);
-  InvocCheck(argc, argv);
+  UsrInvoc *UsrInfo = InvocCheck(argc, argv);
+
+  // InvocCheck(argc, argv);
 
   // Main loop
   // printf(">>> ");

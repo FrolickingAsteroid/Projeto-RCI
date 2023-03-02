@@ -1,17 +1,17 @@
 #ifndef CHECKSYSTEM_H
 #define CHECKSYSTEM_H
 
-typedef struct usr {
+typedef struct UsrInvoc {
   char *IP;
-  char *ID;
+  int TCP;
   char *regIP;
-  char regUDP;
+  int regUDP;
+} UsrInvoc;
 
-} usr_entry;
+UsrInvoc *InitUsrInfo();
+UsrInvoc *InvocCheck(int argc, char *argv[]);
 
-usr_entry *AddInvocInfo(int argc, char *argv[], usr_entry *usr);
-void InvocCheck(int argc, char *argv[]);
-void usage(char *name);
+void Usage(char *name);
 int CheckValidAdress(char *IP);
 int CheckValidPort(char *PORT);
 
