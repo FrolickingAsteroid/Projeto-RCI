@@ -10,7 +10,17 @@
 
 // Usage Invocation
 void Usage(char *name) {
-  printf("Invocation: %s IP TCP regIP[Opcional] regUDP[Opcional]\n", name);
+  printf("Invocação: %s IP TCP regIP[Opcional] regUDP[Opcional]\n", name);
+}
+
+// Error Message and close -- Taken from Donahoo -- Place in Utils?
+void DieWithUsr(const char *msg, const char *detail) {
+  fputs(msg, stderr);
+  fputs(": ", stderr);
+  fputs(detail, stderr);
+  fputc('\n', stderr);
+  Usage("./cot");
+  exit(EXIT_FAILURE);
 }
 
 // Init UsrInvoc
@@ -19,50 +29,63 @@ UsrInvoc *InitUsrInfo() {
   if (UsrInfo == NULL) {
     exit(EXIT_FAILURE);
   }
+  UsrInfo->RegIP = "193.136.138.142";
+  UsrInfo->RegUDP = 59000;
   return UsrInfo;
 }
 
 // Check Valid Adress
-int CheckValidAdress(char *IP) {
-  /*! TODO: Redo, needs struct.
-   */
-  int result = inet_pton(AF_INET, IP, (struct sockaddr_in *)NULL);
-  return result;
+char *CheckValidAdress(char *IP, UsrInvoc *Usr) {
+  struct sockaddr_in sa;
+
+  if (inet_pton(AF_INET, IP, &(sa.sin_addr)) != 1) {
+    free(Usr);
+    DieWithUsr(IP, "Formato IP inválido");
+  };
+  return IP;
 }
 
-// Chceck Valid PORT
-int CheckValidPort(char *PORT) {
+// Check Valid PORT
+int CheckValidPort(char *PORT, UsrInvoc *Usr) {
 
-  /*! TODO: Check if only requirement is to be a number --> PORT_RANGER*/
+  if (IsNumber(PORT) == 0) {
+    free(Usr);
+    DieWithUsr(PORT, "Formato Porto Inválido");
+  }
+  int TCP = atoi(PORT);
 
-  int j = 0;
-  while (j < strlen(PORT)) {
-    if (isdigit(PORT[j]) == 0)
+  if (TCP > PORT_RANGE) {
+    free(Usr);
+    DieWithUsr(PORT, "Número Excede o Range Estipulado");
+  }
+  return TCP;
+}
+
+// Checks wether string has alphanumeric characthers
+int IsNumber(char *str) {
+  for (int i = 0; i < strlen(str); i++) {
+    if (isdigit(str[i]) == 0)
       return 0;
-    j++;
   }
   return 1;
 }
 
+// Usr invocation parcer
 UsrInvoc *InvocCheck(int argc, char *argv[]) {
 
   if (argc != 3 && argc != 5) {
-    printf("Invalid Invocation format\n");
-    Usage(argv[0]);
-    exit(EXIT_FAILURE);
+    DieWithUsr("Invocação Inválida", "Número de Argumentos Incorreto");
   }
 
   UsrInvoc *UsrInfo = InitUsrInfo();
 
-  if ((CheckValidAdress(argv[1]) || CheckValidPort(argv[2])) != 1) {
-    printf("Invalid Invocation format\n");
-    usage(argv[0]);
-    exit(1);
+  UsrInfo->HostIP = CheckValidAdress(argv[1], UsrInfo);
+  UsrInfo->HostTCP = CheckValidPort(argv[2], UsrInfo);
+
+  if (argc == 5) {
+    UsrInfo->RegIP = CheckValidAdress(argv[3], UsrInfo);
+    UsrInfo->RegUDP = CheckValidPort(argv[4], UsrInfo);
   }
 
-  if ((CheckValidPort(argv[3]) || CheckValidPort(argv[4])) != 1) {
-    printf("Invalid PORT format\n");
-    usage(argv[0]);
-    exit(1);
-  }
+  return UsrInfo;
 }

@@ -14,6 +14,13 @@ int main(int argc, char *argv[]) {
 
   UsrInvoc *UsrInfo = InvocCheck(argc, argv);
 
+  printf("Usr Node:\n");
+  printf("%s\n", UsrInfo->HostIP);
+  printf("%d\n", UsrInfo->HostTCP);
+  printf("%s\n", UsrInfo->RegIP);
+  printf("%d\n", UsrInfo->RegUDP);
+  free(UsrInfo);
+
   // InvocCheck(argc, argv);
 
   // Main loop
