@@ -8,35 +8,26 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "TCP.h"
 #include "checkInvocationInfo.h"
+#include "eventManager.h"
+
+#define KMAG "\x1B[35m"
+#define RESET "\x1B[0m"
+#define FOREVER while (1)
 
 int main(int argc, char *argv[]) {
-
+  int fd;
   UsrInvoc *UsrInfo = InvocCheck(argc, argv);
-
-  printf("Usr Node:\n");
-  printf("%s\n", UsrInfo->HostIP);
-  printf("%d\n", UsrInfo->HostTCP);
-  printf("%s\n", UsrInfo->RegIP);
-  printf("%d\n", UsrInfo->RegUDP);
-  free(UsrInfo);
-
-  // InvocCheck(argc, argv);
+  fd = TCPServer(UsrInfo);
 
   // Main loop
-  // printf(">>> ");
-  // fflush(stdout);
-  // while (1){
 
-  /*! TODO: Select
-   *
-   * Implement selet for parser
-   */
-
-  /*! TODO: Parser
-   *
-   * Implement select for parser
-   */
-  //}
+  FOREVER {
+    printf(KMAG ">>> " RESET);
+    fflush(stdout);
+    // Event Parser and Manage
+    EventManager(fd);
+  }
   return EXIT_SUCCESS;
 }

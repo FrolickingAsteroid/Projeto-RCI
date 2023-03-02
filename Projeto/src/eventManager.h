@@ -4,10 +4,5 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef enum Event {
-  UserMessage,
-  //(...)
-} ManageEvent;
-
-ManageEvent Manager(//(...));
+void EventManager(int fd);
 #endif

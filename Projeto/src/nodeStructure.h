@@ -1,6 +1,8 @@
 #ifndef NODESTRUCTURE_H
 #define NODESTRUCTURE_H
 
+#include "checkInvocationInfo.h"
+
 typedef struct Node {
   int ID;
   int FD;
@@ -12,12 +14,8 @@ typedef struct Node {
 
 typedef struct Host {
   int HostID;
-  char *HostIP;
-  int HostTCP;
-  int FdUDP;
 
-  char *RegIP;
-  int RegTCP;
+  UsrInvoc *InvocInfo;
 
   Node *Ext;
   Node *Bck;
