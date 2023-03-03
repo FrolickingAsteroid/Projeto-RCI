@@ -11,7 +11,6 @@ typedef struct UsrInvoc {
 UsrInvoc *InitUsrInfo();
 UsrInvoc *InvocCheck(int argc, char *argv[]);
 
-void Usage(char *name);
 char *CheckValidAdress(char *IP, UsrInvoc *Usr);
 int IsNumber(char *str);
 int CheckValidPort(char *PORT, UsrInvoc *Usr);

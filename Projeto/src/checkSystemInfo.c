@@ -1,27 +1,13 @@
 #include <arpa/inet.h>
 #include <ctype.h>
-#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "checkInvocationInfo.h"
+#include "utils.h"
+
 #define PORT_RANGE 65535
-
-// Usage Invocation
-void Usage(char *name) {
-  printf("Invocação: %s IP TCP regIP[Opcional] regUDP[Opcional]\n", name);
-}
-
-// Error Message and close -- Taken from Donahoo -- Place in Utils?
-void DieWithUsr(const char *msg, const char *detail) {
-  fputs(msg, stderr);
-  fputs(": ", stderr);
-  fputs(detail, stderr);
-  fputc('\n', stderr);
-  Usage("./cot");
-  exit(EXIT_FAILURE);
-}
 
 // Init UsrInvoc
 UsrInvoc *InitUsrInfo() {
