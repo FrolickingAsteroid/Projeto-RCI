@@ -1,15 +1,22 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 int main() {
-  char *miminhos = "0";
-  int hasLetters = strchr(miminhos, '[a-zA-Z]') != NULL;
-  if (hasLetters == 1) {
-    printf("Enro\n");
-    exit(EXIT_FAILURE);
+  char *miminhos = "0\0";
+
+  char Command[16], *Arg1 = NULL, *Arg2 = NULL, *Arg3 = NULL, *Arg4 = NULL,
+                    *Arg5 = NULL;
+
+  fscanf(stdin, "%s %s %s %s %s %s", Command, Arg1, Arg2, Arg3, Arg4, Arg5);
+  printf("%s %s %s %s %s %s", Command, Arg1, Arg2, Arg3, Arg4, Arg5);
+
+  for (int i = 0; i < strlen(Command); i++) {
+    if (isdigit(Command[i]) == 0)
+      printf("ENRRO???\n");
   }
-  int numb = atoi(miminhos);
-  printf("is this right? %d\n", numb);
-  return 0;
+
+  return EXIT_SUCCESS;
 }

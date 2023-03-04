@@ -9,11 +9,12 @@ typedef struct Node {
   char *IP;
   int TCPort;
 
-  Node *next;
+  struct Node *next;
 } Node;
 
 typedef struct Host {
   int HostID;
+  int FdListen;
 
   UsrInvoc *InvocInfo;
 
@@ -22,4 +23,5 @@ typedef struct Host {
   Node *NodeList;
 } Host;
 
+Host *InitHostStructure(int Fd, UsrInvoc *UsrInfo);
 #endif

@@ -6,6 +6,7 @@
 
 void DieWithUsr(const char *msg, const char *detail);
 void DieWithSys(const char *msg);
+int IsNumber(char *str);
 void Usage(char *name);
 
 #endif

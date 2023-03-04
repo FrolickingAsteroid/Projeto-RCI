@@ -1,5 +1,7 @@
 #ifndef EventManager_H
 #define EventManager_H
 
-void EventManager(int fd);
+#include "nodeStructure.h"
+
+void EventManager(Host *HostNode);
 #endif

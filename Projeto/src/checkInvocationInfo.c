@@ -1,5 +1,4 @@
 #include <arpa/inet.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,7 +12,7 @@
 UsrInvoc *InitUsrInfo() {
   UsrInvoc *UsrInfo = calloc(1, sizeof(UsrInvoc));
   if (UsrInfo == NULL) {
-    exit(EXIT_FAILURE);
+    DieWithSys("Function InitUsrInfo >> calloc() failed");
   }
   UsrInfo->RegIP = "193.136.138.142";
   UsrInfo->RegUDP = 59000;
@@ -26,7 +25,7 @@ char *CheckValidAdress(char *IP, UsrInvoc *Usr) {
 
   if (inet_pton(AF_INET, IP, &(sa.sin_addr)) != 1) {
     free(Usr);
-    DieWithUsr(IP, "Formato IP inválido");
+    DieWithUsr(IP, "Invalid IP format");
   };
   return IP;
 }
@@ -36,31 +35,23 @@ int CheckValidPort(char *PORT, UsrInvoc *Usr) {
 
   if (IsNumber(PORT) == 0) {
     free(Usr);
-    DieWithUsr(PORT, "Formato Porto Inválido");
+    DieWithUsr(PORT, "Invalid TCP port format");
   }
   int TCP = atoi(PORT);
 
   if (TCP > PORT_RANGE) {
     free(Usr);
-    DieWithUsr(PORT, "Número Excede o Range Estipulado");
+    DieWithUsr(PORT, "TCP port exceeds range of possible values");
   }
   return TCP;
-}
-
-// Checks wether string has alphanumeric characthers
-int IsNumber(char *str) {
-  for (int i = 0; i < strlen(str); i++) {
-    if (isdigit(str[i]) == 0)
-      return 0;
-  }
-  return 1;
 }
 
 // Usr invocation parcer
 UsrInvoc *InvocCheck(int argc, char *argv[]) {
 
   if (argc != 3 && argc != 5) {
-    DieWithUsr("Invocação Inválida", "Número de Argumentos Incorreto");
+    DieWithUsr("Invalid Invocation", "Wrong number of arguments");
+    Usage(argv[0]);
   }
 
   UsrInvoc *UsrInfo = InitUsrInfo();

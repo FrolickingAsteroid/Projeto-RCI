@@ -24,17 +24,17 @@ int TCPServer(UsrInvoc *usr) {
 
   HostAddr.sin_family = AF_INET;
   if (inet_pton(AF_INET, usr->HostIP, &(HostAddr.sin_addr)) != 1) {
-    DieWithSys("TCP.c:28 inet_pton() falhou");
+    DieWithSys("Function TCPServer >> inet_pton() failed");
   }
 
   HostAddr.sin_port = htons((in_port_t)usr->HostTCP);
 
   if (bind(fd, (struct sockaddr *)&HostAddr, sizeof(HostAddr)) < 0) {
-    DieWithSys("TCP.c:34 bind() falhou");
+    DieWithSys("Function TCPServer >> bind() failed");
   }
 
   if (listen(fd, MAXPENDING) < 0) {
-    DieWithSys("TCP.c:39 listen() falhou");
+    DieWithSys("Function TCPServer >> listen failed");
   }
 
   return fd;
