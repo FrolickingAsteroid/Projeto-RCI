@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 #include "UDP.h"
-#include "utils.h"
+
 #define MAXSIZE 128
 
 char *UDPClient(Host *HostNode, char *msg) {
@@ -16,7 +16,7 @@ char *UDPClient(Host *HostNode, char *msg) {
 
   // Set Timeout for Server answer
   struct timeval tv;
-  tv.tv_sec = 30;
+  tv.tv_sec = 5;
   tv.tv_usec = 0;
 
   int Fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
@@ -39,19 +39,27 @@ char *UDPClient(Host *HostNode, char *msg) {
              sizeof(ServerAddr)) == -1) {
     DieWithSys("Function UDPServer >> sendto() failed");
   }
+
   // Set timeout for server answer
   if (setsockopt(Fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
     DieWithSys("Function UDPServer >> setsockopt() failed");
   }
-  // Receive server answer
+  // Receive server answer:
   socklen_t addrlen = sizeof(ServerAddr);
   if (recvfrom(Fd, Buffer, MAXSIZE, 0, (struct sockaddr *)&ServerAddr,
                &addrlen) == -1) {
-    perror("Function UDPServer >> recvfrom() failed");
+    perror("Function UDPServer >>" RED "☠  recvfrom() failed");
+    free(Buffer);
     close(Fd);
     return (char *)NULL;
   }
-  printf("buffer: %s %d\n", Buffer, (int)sizeof(Buffer));
   close(Fd);
   return Buffer;
+}
+
+int CheckUDPAnswer(char *UDPAnswer) {
+  if (UDPAnswer == NULL) {
+    return 0;
+  }
+  return 1;
 }

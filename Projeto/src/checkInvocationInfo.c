@@ -12,7 +12,7 @@
 UsrInvoc *InitUsrInfo() {
   UsrInvoc *UsrInfo = calloc(1, sizeof(UsrInvoc));
   if (UsrInfo == NULL) {
-    DieWithSys("Function InitUsrInfo >> calloc() failed");
+    DieWithSys("Function InitUsrInfo >>" RED "☠  calloc() failed");
   }
   UsrInfo->RegIP = "193.136.138.142";
   UsrInfo->RegUDP = 59000;
@@ -20,27 +20,26 @@ UsrInvoc *InitUsrInfo() {
 }
 
 // Check Valid Adress
-char *CheckValidAdress(char *IP, UsrInvoc *Usr) {
+char *CheckValidAdress(char *IP) {
   struct sockaddr_in sa;
 
   if (inet_pton(AF_INET, IP, &(sa.sin_addr)) != 1) {
-    free(Usr);
     DieWithUsr(IP, "Invalid IP format");
-  };
+  }
   return IP;
 }
 
 // Check Valid PORT
-int CheckValidPort(char *PORT, UsrInvoc *Usr) {
+int CheckValidPort(char *PORT) {
 
   if (IsNumber(PORT) == 0) {
-    free(Usr);
+    Usage("./cot");
     DieWithUsr(PORT, "Invalid TCP port format");
   }
   int TCP = atoi(PORT);
 
-  if (TCP > PORT_RANGE) {
-    free(Usr);
+  if (TCP > PORT_RANGE || TCP < 0) {
+    Usage("./cot");
     DieWithUsr(PORT, "TCP port exceeds range of possible values");
   }
   return TCP;
@@ -50,18 +49,18 @@ int CheckValidPort(char *PORT, UsrInvoc *Usr) {
 UsrInvoc *InvocCheck(int argc, char *argv[]) {
 
   if (argc != 3 && argc != 5) {
-    DieWithUsr("Invalid Invocation", "Wrong number of arguments");
     Usage(argv[0]);
+    DieWithUsr("Invalid Invocation", "Wrong number of arguments");
   }
 
   UsrInvoc *UsrInfo = InitUsrInfo();
 
-  UsrInfo->HostIP = CheckValidAdress(argv[1], UsrInfo);
-  UsrInfo->HostTCP = CheckValidPort(argv[2], UsrInfo);
+  UsrInfo->HostIP = CheckValidAdress(argv[1]);
+  UsrInfo->HostTCP = CheckValidPort(argv[2]);
 
   if (argc == 5) {
-    UsrInfo->RegIP = CheckValidAdress(argv[3], UsrInfo);
-    UsrInfo->RegUDP = CheckValidPort(argv[4], UsrInfo);
+    UsrInfo->RegIP = CheckValidAdress(argv[3]);
+    UsrInfo->RegUDP = CheckValidPort(argv[4]);
   }
 
   return UsrInfo;

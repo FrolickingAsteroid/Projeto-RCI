@@ -31,7 +31,7 @@ void EventManager(Host *HostNode) {
                    (struct timeval *)NULL);
 
   if (Counter == -1) {
-    DieWithSys("Function EventManager >> select() failed");
+    DieWithSys("Function EventManager >>" RED "☠  select() failed");
   }
 
   while (Counter--) {
@@ -39,9 +39,8 @@ void EventManager(Host *HostNode) {
 
     if (FD_ISSET(STDIN_FILENO, &SockSet)) { // Check Keyboard
       if (read(STDIN_FILENO, buffer, MAXSIZE) == -1) {
-        DieWithSys("Function EventManager >> read() failed");
+        DieWithSys("Function EventManager >>" RED "☠  read() failed");
       }
-      printf("Is this working? %s", buffer);
       UserInterfaceParser(buffer, HostNode);
       FD_CLR(HostNode->FdListen, &SockSet);
 

@@ -9,7 +9,6 @@
 #include <unistd.h>
 
 #include "TCP.h"
-#include "utils.h"
 
 #define MAXPENDING 100
 
@@ -24,18 +23,20 @@ int TCPServer(UsrInvoc *usr) {
 
   HostAddr.sin_family = AF_INET;
   if (inet_pton(AF_INET, usr->HostIP, &(HostAddr.sin_addr)) != 1) {
-    DieWithSys("Function TCPServer >> inet_pton() failed");
+    DieWithSys("Function TCPServer >>" RED "☠  inet_pton() failed");
   }
 
   HostAddr.sin_port = htons((in_port_t)usr->HostTCP);
 
   if (bind(fd, (struct sockaddr *)&HostAddr, sizeof(HostAddr)) < 0) {
-    DieWithSys("Function TCPServer >> bind() failed");
+    DieWithSys("Function TCPServer >> " RED "☠  bind() failed");
   }
 
   if (listen(fd, MAXPENDING) < 0) {
-    DieWithSys("Function TCPServer >> listen failed");
+    DieWithSys("Function TCPServer >>" RED "☠  listen failed");
   }
 
   return fd;
 }
+
+char *TCPClient(Host *HostNode, char *msg) { return NULL; }

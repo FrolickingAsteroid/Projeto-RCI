@@ -4,19 +4,25 @@
 #include <string.h>
 #include <unistd.h>
 
-int main() {
-  char *miminhos = "0\0";
-
-  char Command[16], *Arg1 = NULL, *Arg2 = NULL, *Arg3 = NULL, *Arg4 = NULL,
-                    *Arg5 = NULL;
-
-  fscanf(stdin, "%s %s %s %s %s %s", Command, Arg1, Arg2, Arg3, Arg4, Arg5);
-  printf("%s %s %s %s %s %s", Command, Arg1, Arg2, Arg3, Arg4, Arg5);
-
-  for (int i = 0; i < strlen(Command); i++) {
-    if (isdigit(Command[i]) == 0)
-      printf("ENRRO???\n");
+void count(char *buffer) {
+  char *token = strtok(buffer, "\n");
+  printf("buffer: %s\n", buffer);
+  int i = 0;
+  for (char *aux = buffer; aux[i]; aux[i] == '\0' ? i++ : *aux++) {
+    /* ... */
+    printf("i = %d\n", i);
   }
+  int j = (int)(rand() % i);
+  printf("j = %d", j);
+  for (; j > 0 && token != NULL; token = strtok(NULL, "\n"), j--) {
+    printf("j = %d", j);
+  }
+  printf("i = %d\n", i);
+  printf("token: %s\n", token);
+}
 
+int main() {
+  char teste[] = "NODESLIST net\nID1 IP1 TCP1\nID2 IP2 TCP2\nID3 IP3 TCP3\n";
+  count(teste);
   return EXIT_SUCCESS;
 }

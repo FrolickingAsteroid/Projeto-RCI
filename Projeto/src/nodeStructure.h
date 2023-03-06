@@ -13,8 +13,10 @@ typedef struct Node {
 } Node;
 
 typedef struct Host {
-  int HostID;
+  char *HostID;
   int FdListen;
+
+  char *NET;
 
   UsrInvoc *InvocInfo;
 

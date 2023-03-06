@@ -15,13 +15,14 @@ int main(int argc, char *argv[]) {
   Host *HostNode = InitHostStructure(Fd, UsrInfo);
 
   // Main loop
+  clear();
+  printf(BLU "# User Interface Activated " GRN "🗹 \n" RESET);
 
   FOREVER {
     printf(KMAG ">>> " RESET);
     fflush(stdout);
     // Event Parser and Manage
     EventManager(HostNode);
-    // Event Parcer //
   }
   return EXIT_SUCCESS;
 }
