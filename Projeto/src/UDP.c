@@ -28,8 +28,7 @@ char *UDPClient(Host *HostNode, char *msg) {
   memset(&ServerAddr, 0, sizeof(ServerAddr));
 
   ServerAddr.sin_family = AF_INET;
-  if (inet_pton(AF_INET, HostNode->InvocInfo->RegIP, &(ServerAddr.sin_addr)) !=
-      1) {
+  if (inet_pton(AF_INET, HostNode->InvocInfo->RegIP, &(ServerAddr.sin_addr)) != 1) {
     DieWithSys("Function TCPServer >> inet_pton() failed");
   }
   ServerAddr.sin_port = htons((in_port_t)HostNode->InvocInfo->RegUDP);
@@ -46,9 +45,8 @@ char *UDPClient(Host *HostNode, char *msg) {
   }
   // Receive server answer:
   socklen_t addrlen = sizeof(ServerAddr);
-  if (recvfrom(Fd, Buffer, MAXSIZE, 0, (struct sockaddr *)&ServerAddr,
-               &addrlen) == -1) {
-    perror("Function UDPServer >>" RED "☠  recvfrom() failed");
+  if (recvfrom(Fd, Buffer, MAXSIZE, 0, (struct sockaddr *)&ServerAddr, &addrlen) == -1) {
+    perror("Function UDPServer >> " RED "☠  recvfrom() failed");
     free(Buffer);
     close(Fd);
     return (char *)NULL;

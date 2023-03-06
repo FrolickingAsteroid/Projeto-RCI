@@ -70,7 +70,7 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
   // Ask for NODELIST -> NODES NET
   sprintf(msg, "NODES %s", Net);
   UDPAnswer = UDPClient(HostNode, msg);
-  printf("%s", UDPAnswer);
+  printf("server answer: %s\n", UDPAnswer);
 
   // Wait for NODELIST, if recvfrom() returns nothing, return
   if (!CheckUDPAnswer(UDPAnswer)) {
