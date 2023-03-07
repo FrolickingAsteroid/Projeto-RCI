@@ -26,7 +26,7 @@ void Usage(char *name) {
               "\t  to 193.136.138.142 and 59000 respectively.\n\n");
 }
 
-// Error Message and close -- Taken from Donahoo -- Place in Utils?
+// Error Message and close
 void DieWithUsr(const char *msg, const char *detail) {
   fputs(RED, stderr);
   fputs("[☠ ] ", stderr);
@@ -53,5 +53,11 @@ int IsNumber(char *str) {
 }
 
 void CommandNotFound(char *Command, char *msg) {
-  fprintf(stderr, RED "⚠ WARNING >> %s >" RESET "input %s", Command, msg);
+
+  fputs(RED, stderr);
+  fputs("🚩 WARNING > ", stderr);
+  fputs(RESET, stderr);
+  fputs(Command, stderr);
+  fputs(": ", stderr);
+  fputs(msg, stderr);
 }

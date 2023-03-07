@@ -8,8 +8,6 @@
 #include <unistd.h>
 
 #include "eventManager.h"
-#include "userInterface.h"
-#include "utils.h"
 
 #define MAXSIZE 128
 
@@ -49,16 +47,9 @@ void EventManager(Host *HostNode) {
     else if (FD_ISSET(HostNode->FdListen, &SockSet)) {
       if ((NewFd = accept(HostNode->FdListen, &addr, &addrlen)) == -1) {
         exit(EXIT_FAILURE);
-
-        /*! TODO: needs node as arg, make DieWithSys.
-         */
       }
       if (read(HostNode->FdListen, buffer, MAXSIZE) == -1) {
-        exit(EXIT_FAILURE);
-
-        /*! TODO: Has mem leak, needs node as arg, make DieWithSys.
-         * Needs parcer for TPC requests
-         */
+        printf("%s", buffer);
       }
     }
   }

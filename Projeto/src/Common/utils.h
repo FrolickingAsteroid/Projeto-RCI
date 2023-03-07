@@ -8,6 +8,8 @@
 #define GRN "\x1B[32m"
 #define clear() printf("\033[H\033[J")
 
+extern int errno;
+
 void DieWithUsr(const char *msg, const char *detail);
 void DieWithSys(const char *msg);
 int IsNumber(char *str);

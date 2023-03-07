@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "TCP.h"
-#include "checkInvocationInfo.h"
-#include "eventManager.h"
-#include "nodeStructure.h"
-#include "utils.h"
+#include "Common/checkInvocationInfo.h"
+#include "Common/nodeStructure.h"
+#include "Common/utils.h"
+#include "Protocols/TCP.h"
+#include "Protocols/eventManager.h"
 
 #define FOREVER while (1)
 

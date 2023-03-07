@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "checkInvocationInfo.h"
-#include "utils.h"
 
 #define PORT_RANGE 65535
 
@@ -24,6 +23,7 @@ char *CheckValidAdress(char *IP) {
   struct sockaddr_in sa;
 
   if (inet_pton(AF_INET, IP, &(sa.sin_addr)) != 1) {
+    Usage("./cot");
     DieWithUsr(IP, "Invalid IP format");
   }
   return IP;

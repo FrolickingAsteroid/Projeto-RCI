@@ -1,8 +1,8 @@
 #ifndef UDP_H
 #define UDP_H
 
-#include "nodeStructure.h"
-#include "utils.h"
+#include "../Common/nodeStructure.h"
+#include "../Common/utils.h"
 
 char *UDPClient(Host *HostNode, char *msg);
 int CheckUDPAnswer(char *UDPAnswer);

@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -56,7 +57,10 @@ char *TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *Boot
 
   ExternAddr.sin_family = AF_INET;
   if (inet_pton(AF_INET, BootIp, &(ExternAddr.sin_addr)) != 1) {
-    DieWithSys("Function TCPServer >> inet_pton() failed");
+    errno = EFAULT; // set errno for inet_pton failure
+    perror("Function TCPClientExternConnect >> inet_pton() failed");
+    close(Fd);
+    return NULL;
   }
   ExternAddr.sin_port = htons((in_port_t)atoi(BootTCP));
 
@@ -81,7 +85,7 @@ char *TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *Boot
   };
 
   char *Buffer = calloc(MAXSIZE, sizeof(char));
-  // receive message from potential externz
+  // receive message from potential extern
   if (read(Fd, Buffer, MAXSIZE) == -1) {
     perror("Function UDPServer >> " RED "☠  read() failed");
     free(Buffer);

@@ -9,7 +9,7 @@
 
 #include "UDP.h"
 
-#define MAXSIZE 256
+#define MAXSIZE 1024
 
 char *UDPClient(Host *HostNode, char *msg) {
 

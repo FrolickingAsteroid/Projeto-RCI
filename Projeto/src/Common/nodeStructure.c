@@ -4,6 +4,13 @@
 
 #include "nodeStructure.h"
 
+/**
+ * @brief
+ *
+ * @param Fd
+ * @param UsrInfo
+ * @return
+ */
 Host *InitHostStructure(int Fd, UsrInvoc *UsrInfo) {
   Host *node = calloc(1, sizeof(Host));
   if (node == NULL) {
@@ -20,6 +27,13 @@ Host *InitHostStructure(int Fd, UsrInvoc *UsrInfo) {
   return node;
 }
 
+/**
+ * @brief
+ *
+ * @param Net
+ * @param Id
+ * @param HostNode
+ */
 void PlugHostNetId(char *Net, char *Id, Host *HostNode) {
 
   // Init char dependent variables for string copy and plug
@@ -35,6 +49,15 @@ void PlugHostNetId(char *Net, char *Id, Host *HostNode) {
   sprintf(HostNode->Net, "%s", Net);
 }
 
+/**
+ * @brief
+ *
+ * @param Ip
+ * @param TCP
+ * @param Id
+ * @param fd
+ * @return
+ */
 Node *InitNode(char *Ip, int TCP, char *Id, int fd) {
   // Init Node struct
   Node *Node = (struct Node *)malloc(sizeof(struct Node));
@@ -53,6 +76,7 @@ Node *InitNode(char *Ip, int TCP, char *Id, int fd) {
   }
   Node->Fd = fd;
   Node->TCPort = TCP;
+  Node->next = NULL;
 
   sprintf(Node->Id, "%s", Id);
   sprintf(Node->IP, "%s", Ip);

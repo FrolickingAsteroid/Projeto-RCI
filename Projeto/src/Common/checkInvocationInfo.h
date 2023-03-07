@@ -1,6 +1,8 @@
 #ifndef CHECKSYSTEM_H
 #define CHECKSYSTEM_H
 
+#include "utils.h"
+
 typedef struct UsrInvoc {
   char *HostIP;
   int HostTCP;
