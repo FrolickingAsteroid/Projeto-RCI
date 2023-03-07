@@ -52,7 +52,6 @@ int IsNumber(char *str) {
   return 1;
 }
 
-void CommandNotFound(char *Command) {
-  fprintf(stderr, RED "WARNING >> %s> " RESET "Command not found: Invalid Command\n",
-          Command);
+void CommandNotFound(char *Command, char *msg) {
+  fprintf(stderr, RED "⚠ WARNING >> %s >" RESET "input %s", Command, msg);
 }

@@ -9,10 +9,9 @@
 
 #include "UDP.h"
 
-#define MAXSIZE 128
+#define MAXSIZE 256
 
 char *UDPClient(Host *HostNode, char *msg) {
-  char *Buffer = calloc(MAXSIZE, sizeof(char));
 
   // Set Timeout for Server answer
   struct timeval tv;
@@ -36,20 +35,26 @@ char *UDPClient(Host *HostNode, char *msg) {
   // Send message to server
   if (sendto(Fd, msg, strlen(msg), 0, (struct sockaddr *)&ServerAddr,
              sizeof(ServerAddr)) == -1) {
-    DieWithSys("Function UDPServer >> sendto() failed");
+    perror("Function UDPServer >> " RED "☠  sendto() failed");
+    close(Fd);
+    return NULL;
   }
 
   // Set timeout for server answer
   if (setsockopt(Fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
-    DieWithSys("Function UDPServer >> setsockopt() failed");
+    perror("Function UDPServer >> " RED "☠  setsockopt() failed");
+    close(Fd);
+    return NULL;
   }
+
+  char *Buffer = calloc(MAXSIZE, sizeof(char));
   // Receive server answer:
   socklen_t addrlen = sizeof(ServerAddr);
   if (recvfrom(Fd, Buffer, MAXSIZE, 0, (struct sockaddr *)&ServerAddr, &addrlen) == -1) {
     perror("Function UDPServer >> " RED "☠  recvfrom() failed");
     free(Buffer);
     close(Fd);
-    return (char *)NULL;
+    return NULL;
   }
   close(Fd);
   return Buffer;

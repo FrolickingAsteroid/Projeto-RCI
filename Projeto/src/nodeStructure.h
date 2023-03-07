@@ -2,10 +2,11 @@
 #define NODESTRUCTURE_H
 
 #include "checkInvocationInfo.h"
+#include "utils.h"
 
 typedef struct Node {
-  int ID;
-  int FD;
+  char *Id;
+  int Fd;
   char *IP;
   int TCPort;
 
@@ -13,10 +14,10 @@ typedef struct Node {
 } Node;
 
 typedef struct Host {
-  char *HostID;
+  char *HostId;
   int FdListen;
 
-  char *NET;
+  char *Net;
 
   UsrInvoc *InvocInfo;
 
@@ -26,4 +27,6 @@ typedef struct Host {
 } Host;
 
 Host *InitHostStructure(int Fd, UsrInvoc *UsrInfo);
+void PlugHostNetId(char *Net, char *Id, Host *HostNode);
+Node *InitNode(char *Ip, int TCP, char *Id, int fd);
 #endif

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "TCP.h"
 #include "UDP.h"
 #include "checkInvocationInfo.h"
 #include "nodeStructure.h"
@@ -33,7 +34,7 @@ void UserInterfaceParser(char buffer[], Host *HostNode) {
   }
 
   else {
-    CommandNotFound(buffer);
+    CommandNotFound("Command not found", buffer);
     return;
   }
 }
@@ -46,28 +47,25 @@ void UserInterfaceParser(char buffer[], Host *HostNode) {
  * @param HostNode
  */
 void JoinNetworkServer(char buffer[], Host *HostNode) {
-  char Net[8] = " ", Id[8] = " ", msg[64] = "";
+  char Net[128] = " ", Id[128] = " ", msg[128] = "";
   char *UDPAnswer = NULL, *DjoinMsg = NULL;
   int FlagJoin = 1; // Tells Djoin function wheter to test its arguments or not
 
   // Retrieve command args and check their validity
   sscanf(buffer, "join %s %s", Net, Id);
   if ((IsNumber(Net) == 0) || (IsNumber(Id) == 0)) {
-    CommandNotFound(buffer);
-    /*! TODO: InterfaceUsage*/
+    CommandNotFound("Invalid argument format", buffer);
     return;
   }
 
   // Check if node is in a network
-  if (HostNode->NET != NULL) {
-    fprintf(stderr,
-            RED "WARNING >> " RESET
-                "Host is already registered in the network %s with ID %s\n",
-            HostNode->NET, HostNode->HostID);
+  if (HostNode->Net != NULL) {
+    CommandNotFound("Host is already registered in a network leave before joining again.",
+                    "\0");
     return;
   }
 
-  // Ask for NODELIST -> NODES NET
+  // Ask for NODELIST -> NODES Net
   sprintf(msg, "NODES %s", Net);
   UDPAnswer = UDPClient(HostNode, msg);
   printf("server answer: %s\n", UDPAnswer);
@@ -91,8 +89,8 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
     return;
   }
 
-  HostNode->NET = calloc(8, sizeof(char));
-  strcpy(HostNode->NET, Net);
+  HostNode->Net = calloc(8, sizeof(char));
+  strcpy(HostNode->Net, Net);
 
   // Check if there are no nodes in the network, bypasses djoin function
   if (DjoinMsg == NULL) {
@@ -121,25 +119,20 @@ char *ExternFetch(char *NODELIST, Host *HostNode, char *buffer) {
   char *array[99] = {" "};
   int i = 0;
 
-  // Discard Nodelist NET <LF>
-  strtok(NODELIST, "\n");
-
-  // Separate NODELIST into array
-  for (i = 0; array[i] != NULL; i++) {
-    array[i] = strtok(NULL, "\n");
-
-    // Return NULL if List is emply
-    if (i == 0 && array[i] == NULL) {
-      return (char *)NULL;
-    }
+  // Separate Nodelist into array
+  array[i] = strtok(NODELIST, "\n");
+  while (array[i] != NULL) {
+    array[++i] = strtok(NULL, "\n");
   }
-
+  // Return if list is empty
+  if (i == 1) {
+    return NULL;
+  }
   // choose a node from the array as extern and make Djoin command
-  char *Extern = array[rand() % i];
+  char *Extern = array[(rand() % i) + 1];
   // remove \n from end of line
   buffer[strlen(buffer) - 1] = '\0';
   sprintf(DjoinMsg, "d%s %s", buffer, Extern);
-
   return DjoinMsg;
 }
 
@@ -151,31 +144,43 @@ char *ExternFetch(char *NODELIST, Host *HostNode, char *buffer) {
  * @param FlagJoin
  */
 void DJoinNetworkServer(char buffer[], Host *HostNode, int FlagJoin) {
-  char Net[4] = "", Id[3] = "", msg[64] = "";
-  char BootIP[16] = "", BootId[3] = "", BootTCP[4] = "";
+  char msg[128] = "", *TCPAnswer = NULL;
+  char Net[128] = "", Id[128] = "";
+  char BootIp[128] = "", BootId[128] = "", BootTCP[128] = "";
 
-  // Check wether args come from JoinNetworkServer()
-  if (!FlagJoin) {
-
-    // Retrieve command args and check their validity
-    if (sscanf(buffer, "djoin %s %s %s %s %s", Net, Id, BootId, BootIP, BootTCP) < 5) {
-      perror("Function DJoinNetworkServer >> " RED "☠  sscanf() failed");
-    }
-    if ((IsNumber(Net) == 0) || (IsNumber(Id) == 0) || (IsNumber(BootId) == 0)) {
-      CommandNotFound(buffer);
-      /*! TODO: InterfaceUsage and IP PORT parser*/
-      return;
-    }
-    // Check if node is in a network
-    if (HostNode->NET != NULL) {
-      fprintf(stderr,
-              RED "WARNING >>" RESET
-                  "Host is already registered in the network %s with ID %s",
-              HostNode->NET, HostNode->HostID);
-      return;
-    }
+  // Retrieve command args
+  if (sscanf(buffer, "djoin %s %s %s %s %s", Net, Id, BootId, BootIp, BootTCP) < 5) {
+    /*! TODO: CommandNotFound*/
   }
 
+  // Check wether args come from JoinNetworkServer(), if not, check validity
+  if (!FlagJoin) {
+    /*! TODO: ValCheck()*/
+  }
+
+  // check if node is alone in the network
+  if (strcmp(Id, BootIp) == 0) {
+    // bypass communication with externa nd plug Net and Id directly
+    PlugHostNetId(Net, Id, HostNode);
+    return;
+  }
+
+  // init extern node
+  HostNode->Ext = InitNode(BootIp, atoi(BootTCP), BootId, -1);
+
+  // else connect with chosen extern and ask for bck
   sprintf(msg, "NEW %s %s %d\n", Id, HostNode->InvocInfo->HostIP,
           HostNode->InvocInfo->HostTCP);
+  TCPAnswer = TCPClientExternConnect(HostNode, msg, BootIp, BootId, BootTCP);
+
+  // if connection is not established return to userInterface and free initialized extern
+  // node
+  if (TCPAnswer == NULL) {
+    /*! TODO: freeNode() */
+    return;
+  }
+  // lastly, if all is well,parse bck and add it to Host, aswell as Net and HostId
+  sscanf(TCPAnswer, "EXTERN %s %s %s", BootId, BootIp, BootTCP);
+  PlugHostNetId(Net, Id, HostNode);
+  HostNode->Bck = InitNode(BootIp, atoi(BootTCP), BootId, -1);
 }

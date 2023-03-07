@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "TCP.h"
 #include "checkInvocationInfo.h"
@@ -13,6 +14,8 @@ int main(int argc, char *argv[]) {
   UsrInvoc *UsrInfo = InvocCheck(argc, argv);
   int Fd = TCPServer(UsrInfo);
   Host *HostNode = InitHostStructure(Fd, UsrInfo);
+
+  srand((unsigned int)time(0)); // seed the rand function
 
   // Main loop
   clear();

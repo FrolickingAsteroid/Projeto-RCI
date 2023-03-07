@@ -6,5 +6,6 @@
 #include "utils.h"
 
 int TCPServer(UsrInvoc *usr);
-char *TCPClient(Host *HostNode, char *msg);
+char *TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *BootId,
+                             char *BootTCP);
 #endif

@@ -12,6 +12,6 @@ void DieWithUsr(const char *msg, const char *detail);
 void DieWithSys(const char *msg);
 int IsNumber(char *str);
 void Usage(char *name);
-void CommandNotFound(char *Command);
+void CommandNotFound(char *Command, char *msg);
 
 #endif
