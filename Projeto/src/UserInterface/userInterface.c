@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "exitMod.h"
 #include "userInterface.h"
 
 /**
@@ -26,6 +27,12 @@ void UserInterfaceParser(char buffer[], Host *HostNode) {
   } else if (strcmp(Command, "clear") == 0) {
     clear();
     printf(BLU "# User Interface Activated " GRN "🗹 \n" RESET);
+
+  } else if (strcmp(Command, "leave") == 0) {
+    LeaveNetwork(HostNode);
+
+  } else if (strcmp(Command, "exit") == 0) {
+    ExitProgram(HostNode);
   }
 
   else {

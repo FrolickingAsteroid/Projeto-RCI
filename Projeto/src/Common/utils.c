@@ -45,7 +45,7 @@ void DieWithSys(const char *msg) {
 
 // Checks wether string has alphanumeric characthers
 int IsNumber(char *str) {
-  for (int i = 0; i < strlen(str); i++) {
+  for (int i = 0; i < (int)strlen(str); i++) {
     if (isdigit(str[i]) == 0)
       return 0;
   }

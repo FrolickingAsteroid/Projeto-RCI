@@ -3,7 +3,9 @@
 
 #include "../Common/nodeStructure.h"
 #include "../Common/utils.h"
+#include "exitMod.h"
 #include "joinMod.h"
+#include "showMod.h"
 
 void UserInterfaceParser(char buffer[], Host *HostNode);
 

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "nodeStructure.h"
 
@@ -17,6 +18,7 @@ Host *InitHostStructure(int Fd, UsrInvoc *UsrInfo) {
     DieWithSys("Function InitHostStructure: calloc() failed");
   }
 
+  node->Name = NULL;
   node->HostId = NULL;
   node->Bck = NULL;
   node->Ext = NULL;
@@ -81,4 +83,38 @@ Node *InitNode(char *Ip, int TCP, char *Id, int fd) {
   sprintf(Node->Id, "%s", Id);
   sprintf(Node->IP, "%s", Ip);
   return Node;
+}
+
+void FreeNode(Node *Node) {
+  if (Node != NULL) {
+    free(Node->IP);
+    free(Node->Id);
+    close(Node->Fd);
+    free(Node);
+  }
+}
+
+void LiberateHost(Host *HostNode) {
+  Node *AuxNode = NULL;
+  Name *AuxName = NULL;
+  FreeNode(HostNode->Ext);
+  FreeNode(HostNode->Bck);
+
+  HostNode->Ext = HostNode->Bck = NULL;
+  free(HostNode->HostId), free(HostNode->Net);
+
+  HostNode->Net = NULL;
+  HostNode->HostId = NULL;
+
+  while (HostNode->NodeList != NULL) {
+    AuxNode = HostNode->NodeList;
+    HostNode->NodeList = HostNode->NodeList->next;
+    FreeNode(AuxNode);
+  }
+
+  while (HostNode->Name != NULL) {
+    AuxName = HostNode->Name;
+    HostNode->Name = HostNode->Name->next;
+    free(AuxName);
+  }
 }

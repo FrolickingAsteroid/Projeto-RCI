@@ -39,8 +39,7 @@ int TCPServer(UsrInvoc *usr) {
   return fd;
 }
 
-char *TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *BootId,
-                             char *BootTCP) {
+char *TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *BootTCP) {
 
   // Set Timeout for Server answer
   struct timeval tv;
