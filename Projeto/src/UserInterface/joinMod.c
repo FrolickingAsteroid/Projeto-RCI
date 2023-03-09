@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "exitMod.h"
 #include "joinMod.h"
 
 #define BUFSIZE 128
@@ -18,7 +19,6 @@
 void JoinNetworkServer(char buffer[], Host *HostNode) {
   char Net[BUFSIZE] = " ", Id[BUFSIZE] = " ", msg[BUFSIZE << 2] = "";
   char *UDPAnswer = NULL, *DjoinMsg = NULL;
-  int FlagJoin = 1; // Tells Djoin function wheter to check its arguments or not
 
   // Check if node is already in a network
   if (HostNode->Net != NULL) {
@@ -37,10 +37,9 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
   // Ask for NODELIST -> NODES Net
   sprintf(msg, "NODES %s", Net);
   UDPAnswer = UDPClient(HostNode, msg);
-  printf("server answer:\n %s\n", UDPAnswer);
 
   // Wait for NODELIST, if recvfrom() returns nothing, return
-  if (!CheckUDPAnswer(UDPAnswer)) {
+  if (UDPAnswer == NULL) {
     return;
   }
 
@@ -54,7 +53,7 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
           HostNode->InvocInfo->HostTCP);
 
   UDPAnswer = UDPClient(HostNode, msg);
-  if (!CheckUDPAnswer(UDPAnswer)) {
+  if (strcmp(UDPAnswer, "OKREG") != 0) {
     free(DjoinMsg); // free allocated Djoin message, can't communicate with
                     // server
     return;
@@ -69,7 +68,7 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
 
   // Free UDP server allocated answer and Djoin message before leaving function
   free(UDPAnswer);
-  DJoinNetworkServer(DjoinMsg, HostNode, FlagJoin);
+  DJoinNetworkServer(DjoinMsg, HostNode);
   free(DjoinMsg);
 }
 
@@ -111,12 +110,11 @@ char *ExternFetch(char *NODELIST, char *buffer) {
  * @param HostNode
  * @param FlagJoin
  */
-void DJoinNetworkServer(char buffer[], Host *HostNode, int FlagJoin) {
-  char msg[BUFSIZE << 2] = "", *TCPAnswer = NULL, *UDPAnswer = NULL;
+void DJoinNetworkServer(char buffer[], Host *HostNode) {
+  char msg[BUFSIZE << 2] = "", *TCPAnswer = NULL;
   char Net[BUFSIZE] = "", Id[BUFSIZE] = "";
   char BootIp[BUFSIZE] = "", BootId[BUFSIZE] = "", BootTCP[BUFSIZE] = "";
 
-  printf("%s\n", buffer);
   // Check if node is already in a network
   if (HostNode->Net != NULL) {
     CommandNotFound("Host is already registered in a network, leave before rejoining",
@@ -129,37 +127,24 @@ void DJoinNetworkServer(char buffer[], Host *HostNode, int FlagJoin) {
 
   // Check wether args come from JoinNetworkServer(), if not, check validity and register
   // in the network
-  if (!FlagJoin) {
+  if (HostNode->type == DJOIN) {
     if (!(CheckNumberOfArgs(buffer, 5) && BootArgsCheck(BootId, BootIp, BootTCP) &&
           CheckNetAndId(Net, Id))) {
       CommandNotFound("Invalid argument format", buffer);
       return;
     }
-
-    // register in the network
-    UDPAnswer = UDPClient(HostNode, msg);
-    if (!CheckUDPAnswer(UDPAnswer)) {
-      return;
-    }
-    free(UDPAnswer);
   }
+  // plug Net and Id directly
+  PlugHostNetId(Net, Id, HostNode);
 
   // check if node is alone in the network
   if (strcmp(Id, BootId) == 0) {
-
-    // bypass communication with extern and plug Net and Id directly
-    PlugHostNetId(Net, Id, HostNode);
     return;
   }
-
-  // create request to register in the network
-  sprintf(msg, "REG %s %s %s %d", Net, Id, HostNode->InvocInfo->HostIP,
-          HostNode->InvocInfo->HostTCP);
 
   // init extern node
   HostNode->Ext = InitNode(BootIp, atoi(BootTCP), BootId, -1);
 
-  memset(msg, 0, strlen(msg));
   // else connect with chosen extern and ask for bck
   sprintf(msg, "NEW %s %s %d\n", Id, HostNode->InvocInfo->HostIP,
           HostNode->InvocInfo->HostTCP);
@@ -168,11 +153,11 @@ void DJoinNetworkServer(char buffer[], Host *HostNode, int FlagJoin) {
   // if connection is not established return to userInterface and free initialized
   // extern node
   if (TCPAnswer == NULL) {
-    FreeNode(HostNode->Ext);
+    LeaveNetwork(HostNode);
     return;
   }
+
   // lastly, if all is well,parse bck and add it to Host, aswell as Net and HostId
   sscanf(TCPAnswer, "EXTERN %s %s %s", BootId, BootIp, BootTCP);
-  PlugHostNetId(Net, Id, HostNode);
   HostNode->Bck = InitNode(BootIp, atoi(BootTCP), BootId, -1);
 }

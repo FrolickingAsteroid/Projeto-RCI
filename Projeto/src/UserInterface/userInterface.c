@@ -12,17 +12,18 @@
  */
 void UserInterfaceParser(char buffer[], Host *HostNode) {
   char Command[6];
-  int FlagJoin = 0;
 
   // Parse Command from buffer
   sscanf(buffer, "%s", Command);
 
   // Chain of if/if-else for each command sent
   if (strcmp(Command, "join") == 0) {
+    HostNode->type = JOIN; // place flag before entering join function
     JoinNetworkServer(buffer, HostNode);
 
   } else if (strcmp(Command, "djoin") == 0) {
-    DJoinNetworkServer(buffer, HostNode, FlagJoin);
+    HostNode->type = DJOIN; // place flag before entering join function
+    DJoinNetworkServer(buffer, HostNode);
 
   } else if (strcmp(Command, "clear") == 0) {
     clear();

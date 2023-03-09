@@ -15,7 +15,7 @@ char *UDPClient(Host *HostNode, char *msg) {
 
   // Set Timeout for Server answer
   struct timeval tv;
-  tv.tv_sec = 5;
+  tv.tv_sec = 15;
   tv.tv_usec = 0;
 
   int Fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
@@ -57,12 +57,6 @@ char *UDPClient(Host *HostNode, char *msg) {
     return NULL;
   }
   close(Fd);
+  ServerAnswer(Buffer);
   return Buffer;
-}
-
-int CheckUDPAnswer(char *UDPAnswer) {
-  if (UDPAnswer == NULL) {
-    return 0;
-  }
-  return 1;
 }

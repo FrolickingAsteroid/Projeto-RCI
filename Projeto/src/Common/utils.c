@@ -61,3 +61,14 @@ void CommandNotFound(char *Command, char *msg) {
   fputs(": ", stderr);
   fputs(msg, stderr);
 }
+
+void ServerAnswer(char *UDPAnswer) {
+  int len = (int)strlen(UDPAnswer);
+  if (UDPAnswer[len - 1] == '\n') {
+    UDPAnswer[len - 1] = 0;
+  }
+  fputs(GRN "Server answer:" RESET, stdout);
+  fputs("\n", stdout);
+  fputs(UDPAnswer, stdout);
+  fputs(GRN "\n---\n" RESET, stdout);
+}

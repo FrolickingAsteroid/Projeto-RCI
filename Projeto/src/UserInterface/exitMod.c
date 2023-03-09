@@ -6,20 +6,22 @@
 #include "exitMod.h"
 
 void LeaveNetwork(Host *HostNode) {
-  char msg[128] = "";
+  char msg[16] = "";
   char *UDPAnswer = NULL;
 
-  // check if Host is registered in a network
-  if (HostNode->Net == NULL) {
-    printf("\x1B[31m🚩 WARNING >\x1B[0m ID %s is not registere in a network\n",
-           HostNode->HostId);
+  if (HostNode->type == DJOIN) {
+    LiberateHost(HostNode);
     return;
   }
 
-  // create UNREG message
-  sprintf(msg, "UNREG %s %s", HostNode->Net, HostNode->HostId);
+  // check if Host is registered in a network
+  if (HostNode->Net == NULL) {
+    printf("\x1B[31m🚩 WARNING >\x1B[0m Host is not registered in any a network\n");
+    return;
+  }
 
-  // send UNREG message to server and await answer
+  // create and send UNREG message to server
+  sprintf(msg, "UNREG %s %s", HostNode->Net, HostNode->HostId);
   UDPAnswer = UDPClient(HostNode, msg);
   if (strcmp(UDPAnswer, "OKUNREG") != 0) { // if answer is NULL return with perror
     free(UDPAnswer);

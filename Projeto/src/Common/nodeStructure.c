@@ -26,6 +26,7 @@ Host *InitHostStructure(int Fd, UsrInvoc *UsrInfo) {
   node->NodeList = NULL;
   node->InvocInfo = UsrInfo;
   node->Net = NULL;
+  node->type = IDLE;
   return node;
 }
 
@@ -60,7 +61,7 @@ void PlugHostNetId(char *Net, char *Id, Host *HostNode) {
  * @param fd
  * @return
  */
-Node *InitNode(char *Ip, int TCP, char *Id, int fd) {
+Node *InitNode(char *Ip, int TCP, char *Id, int Fd) {
   // Init Node struct
   Node *Node = (struct Node *)malloc(sizeof(struct Node));
   if (Node == NULL) {
@@ -76,7 +77,7 @@ Node *InitNode(char *Ip, int TCP, char *Id, int fd) {
   if (Node->IP == NULL) {
     DieWithSys("Function InitNode: malloc() failed");
   }
-  Node->Fd = fd;
+  Node->Fd = Fd;
   Node->TCPort = TCP;
   Node->next = NULL;
 
@@ -86,12 +87,13 @@ Node *InitNode(char *Ip, int TCP, char *Id, int fd) {
 }
 
 void FreeNode(Node *Node) {
-  if (Node != NULL) {
-    free(Node->IP);
-    free(Node->Id);
-    close(Node->Fd);
-    free(Node);
+  if (Node == NULL) {
+    return;
   }
+  free(Node->IP);
+  free(Node->Id);
+  close(Node->Fd);
+  free(Node);
 }
 
 void LiberateHost(Host *HostNode) {
@@ -103,6 +105,7 @@ void LiberateHost(Host *HostNode) {
   HostNode->Ext = HostNode->Bck = NULL;
   free(HostNode->HostId), free(HostNode->Net);
 
+  HostNode->type = IDLE;
   HostNode->Net = NULL;
   HostNode->HostId = NULL;
 
@@ -117,4 +120,11 @@ void LiberateHost(Host *HostNode) {
     HostNode->Name = HostNode->Name->next;
     free(AuxName);
   }
+}
+
+void PlugIntern(char *Ip, int TCP, char *Id, int Fd, Host *HostNode) {
+  Node *NewIntern = InitNode(Ip, TCP, Id, Fd);
+
+  NewIntern->next = HostNode->NodeList;
+  HostNode->NodeList = NewIntern;
 }

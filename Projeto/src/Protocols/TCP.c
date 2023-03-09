@@ -43,12 +43,15 @@ char *TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *Boot
 
   // Set Timeout for Server answer
   struct timeval tv;
-  tv.tv_sec = 5;
+  tv.tv_sec = 15;
   tv.tv_usec = 0;
 
   int Fd = socket(AF_INET, SOCK_STREAM, 0); // UDP socket
   if (Fd == -1)
     exit(EXIT_FAILURE);
+
+  // Plug file descriptor into new extern
+  HostNode->Ext->Fd = Fd;
 
   // Construct Extern Adress
   struct sockaddr_in ExternAddr;
@@ -58,7 +61,6 @@ char *TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *Boot
   if (inet_pton(AF_INET, BootIp, &(ExternAddr.sin_addr)) != 1) {
     errno = EFAULT; // set errno for inet_pton failure
     perror("Function TCPClientExternConnect >> inet_pton() failed");
-    close(Fd);
     return NULL;
   }
   ExternAddr.sin_port = htons((in_port_t)atoi(BootTCP));
@@ -66,34 +68,75 @@ char *TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *Boot
   // set socket connect Timeout
   if (setsockopt(Fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv)) < 0) {
     perror("Function TCPClientExternConnect >> " RED "☠  setsockopt() failed");
-    close(Fd);
     return NULL;
   }
+
   // connect to potential extern
   if (connect(Fd, (struct sockaddr *)&ExternAddr, sizeof(ExternAddr)) == -1) {
-    perror("Function TCPClientExternConnect >> " RED "☠  connect() failed");
-    close(Fd);
+    perror(RESET "☠  Function TCPClientExternConnect >> " RED "connect() failed");
     return NULL;
   }
 
   // send message to potential extern
   if (write(Fd, msg, (size_t)strlen(msg)) == -1) {
     perror("Function TCPClientExternConnect >> " RED "☠  write() failed");
-    close(Fd);
     return NULL;
   };
 
-  char *Buffer = calloc(MAXSIZE, sizeof(char));
-  // receive message from potential extern
-  if (read(Fd, Buffer, MAXSIZE) == -1) {
-    perror("Function UDPServer >> " RED "☠  read() failed");
-    free(Buffer);
-    close(Fd);
+  // Set timeout for server answer
+  if (setsockopt(Fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+    perror("Function TCPClientExternConnect >> " RED "☠  setsockopt() failed");
     return NULL;
   }
 
-  // Plug file descriptor into new extern
-  HostNode->Ext->Fd = Fd;
+  char *Buffer = calloc(MAXSIZE, sizeof(char));
+  // receive message from potential extern
+  if (recv(Fd, Buffer, MAXSIZE, 0) == -1) {
+    perror("Function TCPClientExternConnect >> " RED "☠  recv() failed");
+    free(Buffer);
+    return NULL;
+  }
   close(Fd);
+  ServerAnswer(Buffer);
   return Buffer;
+}
+
+void ReadListeningSock(Host *HostNode, char *Buffer, int NewFd) {
+  char msg[MAXSIZE] = "", NewId[MAXSIZE >> 2] = "", NewIp[MAXSIZE >> 2] = "",
+       NewTCP[MAXSIZE >> 2] = "";
+
+  // read info from new established socket
+  if (read(NewFd, Buffer, MAXSIZE) == -1) {
+    perror("Function TCPClientExternConnect >> " RED "☠  recv() failed");
+    return;
+  }
+  // fetch input args and check validity
+  sscanf(Buffer, "NEW %s %s %s", NewId, NewIp, NewTCP);
+  if (!(CheckNumberOfArgs(Buffer, 3) && BootArgsCheck(NewId, NewIp, NewTCP))) {
+    close(NewFd);
+    return;
+  }
+
+  // if host is alone in the network send back the received information: create an ancor
+  if (HostNode->Ext == NULL) {
+    sprintf(msg, "EXTERN %s %s %s", NewId, NewIp, NewTCP);
+    // send message back to intern
+    if (write(NewFd, msg, (size_t)strlen(msg)) == -1) {
+      perror("Function ReadListeningSock >> " RED "☠  write() failed");
+      return;
+      // plug extern into structure and set host as bck -> NULL
+      HostNode->Ext = InitNode(NewIp, atoi(NewTCP), NewId, NewFd);
+    }
+
+  } else {
+    sprintf(msg, "EXTERN %s %s %d", HostNode->Ext->Id, HostNode->Ext->IP,
+            HostNode->Ext->TCPort);
+    // send message to potential extern
+    if (write(NewFd, msg, (size_t)strlen(msg)) == -1) {
+      perror("Function ReadListeningSock >> " RED "☠  write() failed");
+      return;
+    }
+    // set new intern
+    PlugIntern(NewIp, atoi(NewTCP), NewId, NewFd, HostNode);
+  }
 }

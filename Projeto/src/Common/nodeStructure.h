@@ -4,6 +4,9 @@
 #include "checkInvocationInfo.h"
 #include "utils.h"
 
+// Type of Join Flag
+typedef enum Command { IDLE, DJOIN, JOIN } Command;
+
 typedef struct Name {
 
   char Name[100];
@@ -27,6 +30,7 @@ typedef struct Host {
   Name *Name;
 
   UsrInvoc *InvocInfo;
+  Command type;
 
   Node *Ext;
   Node *Bck;
@@ -35,7 +39,9 @@ typedef struct Host {
 
 Host *InitHostStructure(int Fd, UsrInvoc *UsrInfo);
 void PlugHostNetId(char *Net, char *Id, Host *HostNode);
-Node *InitNode(char *Ip, int TCP, char *Id, int fd);
+void PlugIntern(char *Ip, int TCP, char *Id, int Fd, Host *HostNode);
+Node *InitNode(char *Ip, int TCP, char *Id, int Fd);
 void FreeNode(Node *Node);
 void LiberateHost(Host *HostNode);
+
 #endif
