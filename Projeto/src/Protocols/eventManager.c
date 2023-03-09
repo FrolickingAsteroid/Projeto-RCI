@@ -7,7 +7,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "TCP.h"
 #include "eventManager.h"
 
 #define MAXSIZE 128
