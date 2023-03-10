@@ -35,11 +35,7 @@ void EventManager(Host *HostNode) {
     temp = temp->next;
   }
 
-  if (HostNode->NodeList != NULL) {
-    MaxDescriptor = max(HostNode->NodeList->Fd, HostNode->FdListen);
-  } else {
-    MaxDescriptor = HostNode->FdListen;
-  }
+  MaxDescriptor = UpdateMaxDes(HostNode);
   /// --------------------------- //
 
   // start select
@@ -71,16 +67,36 @@ void EventManager(Host *HostNode) {
       FD_CLR(HostNode->FdListen, &SockSet);
       continue;
     }
+    // Check external node socket
+    if (HostNode->Ext != NULL && FD_ISSET(HostNode->Ext->Fd, &SockSet)) {
+      // do something
+      FD_CLR(HostNode->Ext->Fd, &SockSet);
+      continue;
+    }
   }
   // Check internal nodes sockets
   while (current != NULL) {
     if (FD_ISSET(current->Fd, &SockSet)) {
       // do something
+      FD_CLR(current->Fd, &SockSet);
       break;
     }
     current = current->next;
   }
 }
 
+int UpdateMaxDes(Host *HostNode) {
+
+  // case where Host already has an extern and interns, choose between the most recent
+  if (HostNode->Ext != NULL && HostNode->NodeList != NULL) {
+    return max(HostNode->NodeList->Fd, HostNode->Ext->Fd);
+  }
+  // case where Host has no interns
+  else if (HostNode->Ext != NULL && HostNode->NodeList == NULL) {
+    return HostNode->Ext->Fd;
+  }
+  // case where Host is alone in the network
+  return HostNode->FdListen;
+}
 /*! TODO: Colocar clausula do externo e criar função para tratamento de chamadas do
  * vizinho*/

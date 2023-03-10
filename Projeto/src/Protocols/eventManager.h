@@ -7,4 +7,6 @@
 #include "../UserInterface/userInterface.h"
 
 void EventManager(Host *HostNode);
+int UpdateMaxDes(Host *HostNode);
+
 #endif

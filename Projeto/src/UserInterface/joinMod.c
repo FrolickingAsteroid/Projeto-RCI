@@ -159,5 +159,9 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
 
   // lastly, if all is well,parse bck and add it to Host, aswell as Net and HostId
   sscanf(TCPAnswer, "EXTERN %s %s %s", BootId, BootIp, BootTCP);
-  HostNode->Bck = InitNode(BootIp, atoi(BootTCP), BootId, -1);
+
+  // if node is not an ancor, plug new back into host
+  if (strcmp(BootId, HostNode->HostId) != 0) {
+    HostNode->Bck = InitNode(BootIp, atoi(BootTCP), BootId, -1);
+  }
 }

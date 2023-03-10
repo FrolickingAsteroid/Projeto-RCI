@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/time.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include "TCP.h"
@@ -25,7 +26,6 @@ int TCPServer(UsrInvoc *usr) {
   if (inet_pton(AF_INET, usr->HostIP, &(HostAddr.sin_addr)) != 1) {
     DieWithSys("Function TCPServer >>" RED "☠  inet_pton() failed");
   }
-
   HostAddr.sin_port = htons((in_port_t)usr->HostTCP);
 
   if (bind(fd, (struct sockaddr *)&HostAddr, sizeof(HostAddr)) < 0) {
@@ -46,7 +46,7 @@ char *TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *Boot
   tv.tv_sec = 15;
   tv.tv_usec = 0;
 
-  int Fd = socket(AF_INET, SOCK_STREAM, 0); // UDP socket
+  int Fd = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
   if (Fd == -1)
     exit(EXIT_FAILURE);
 
@@ -77,28 +77,7 @@ char *TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *Boot
     return NULL;
   }
 
-  // send message to potential extern
-  if (write(Fd, msg, (size_t)strlen(msg)) == -1) {
-    perror("Function TCPClientExternConnect >> " RED "☠  write() failed");
-    return NULL;
-  };
-
-  // Set timeout for server answer
-  if (setsockopt(Fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
-    perror("Function TCPClientExternConnect >> " RED "☠  setsockopt() failed");
-    return NULL;
-  }
-
-  char *Buffer = calloc(MAXSIZE, sizeof(char));
-  // receive message from potential extern
-  if (recv(Fd, Buffer, MAXSIZE, 0) == -1) {
-    perror("Function TCPClientExternConnect >> " RED "☠  recv() failed");
-    free(Buffer);
-    return NULL;
-  }
-  close(Fd);
-  ServerAnswer(Buffer);
-  return Buffer;
+  return SendTCPMessage(Fd, msg);
 }
 
 void ReadListeningSock(Host *HostNode, char *Buffer, int NewFd) {
@@ -139,4 +118,33 @@ void ReadListeningSock(Host *HostNode, char *Buffer, int NewFd) {
     // set new intern
     PlugIntern(NewIp, atoi(NewTCP), NewId, NewFd, HostNode);
   }
+}
+
+char *SendTCPMessage(int Fd, char *msg) {
+  // Set Timeout for Server answer
+  struct timeval tv;
+  tv.tv_sec = 15;
+  tv.tv_usec = 0;
+
+  // send message
+  if (write(Fd, msg, (size_t)strlen(msg)) == -1) {
+    perror("Function TCPClientExternConnect >> " RED "☠  write() failed");
+    return NULL;
+  };
+
+  // Set timeout for server answer
+  if (setsockopt(Fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+    perror("Function TCPClientExternConnect >> " RED "☠  setsockopt() failed");
+    return NULL;
+  }
+
+  char *Buffer = calloc(MAXSIZE, sizeof(char));
+  // receive message
+  if (recv(Fd, Buffer, MAXSIZE, 0) == -1) {
+    perror("Function TCPClientExternConnect >> " RED "☠  recv() failed");
+    free(Buffer);
+    return NULL;
+  }
+  ServerAnswer(Buffer);
+  return Buffer;
 }

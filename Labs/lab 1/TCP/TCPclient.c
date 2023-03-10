@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define PORT "1024:"
+#define PORT "58001"
 
 int main() {
   int fd, errcode;
@@ -26,13 +26,14 @@ int main() {
   hints.ai_family = AF_INET;       // IPv4
   hints.ai_socktype = SOCK_STREAM; // TCP socket
 
-  errcode = getaddrinfo("sqrt", PORT, &hints, &res);
+  errcode = getaddrinfo("192.168.1.80", PORT, &hints, &res);
   if (errcode != 0) /*error*/
     exit(1);
 
   n = connect(fd, res->ai_addr, res->ai_addrlen);
-  if (n == -1) /*error*/
-    exit(1);
+  if (n == -1) {
+    perror("");
+  }
 
   n = write(fd, "Hello 123 experiência!\n", 25);
   if (n == -1) /*error*/

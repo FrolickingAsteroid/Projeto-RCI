@@ -30,10 +30,7 @@ void LeaveNetwork(Host *HostNode) {
     return;
   }
 
-  /*! TODO: WITHDRAW
-   *
-   * @todo Send withdraw message to all internal and external nodes
-   */
+  // send withdraw message to all internal and external nodes
 
   // unplug connections from node structures
   fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Unregistered from network %s with success\n",

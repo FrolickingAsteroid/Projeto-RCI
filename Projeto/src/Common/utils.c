@@ -60,6 +60,24 @@ void CommandNotFound(char *Command, char *msg) {
   fputs(Command, stderr);
   fputs(": ", stderr);
   fputs(msg, stderr);
+  fputs(GRN
+        "\nYou can use one of the following commands:\n" RESET
+        "  join net id: \tAdds a node with the given identifier to the network. "
+        "If the identifier is already in use, the application will choose a unique "
+        "identifier and notify the user.\n"
+        "  djoin net id bootid bootIP bootTCP: \tAdds a node with the given identifier "
+        "to the network, using the provided boot node for initial connection.\n"
+        "  create name: \tCreates a content item with the given name.\n"
+        "  delete name: \tDeletes the content item with the given name.\n"
+        "  get dest name: \tSearches for the content item with the given name on the "
+        "specified destination node.\n"
+        "  show topology (st): \tDisplays the identifiers and contacts of the internal "
+        "neighbors, external neighbor, and recovery neighbor.\n"
+        "  show names (sn): \tDisplays the names of content items present on the node.\n"
+        "  show routing (sr): \tDisplays the node's forwarding table.\n"
+        "  leave: \tExits the node from the network.\n"
+        "  exit: \tCloses the application. \n",
+        stderr);
 }
 
 void ServerAnswer(char *UDPAnswer) {

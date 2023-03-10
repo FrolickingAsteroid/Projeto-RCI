@@ -1,6 +1,6 @@
 TARGET=cot
 CC=gcc
-CFLAGS=-std=c99 -Wpedantic -Wconversion -Wall -Werror
+CFLAGS=-std=gnu99 -Wpedantic -Wconversion -Wall -Werror
 LDFLAGS=-lm #permite linkar a biblioteca de matemática <math.h>
 SRCS=$(wildcard src/*.c) $(wildcard src/*/*.c)
 OBJS=$(addprefix bin/, $(notdir $(SRCS:.c=.o)))
