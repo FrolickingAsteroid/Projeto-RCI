@@ -92,7 +92,11 @@ void FreeNode(Node *Node) {
   }
   free(Node->IP);
   free(Node->Id);
-  close(Node->Fd);
+
+  if (Node->Fd != -1) {
+    close(Node->Fd);
+  }
+
   free(Node);
 }
 

@@ -18,7 +18,7 @@ void EventManager(Host *HostNode) {
   fd_set SockSet;
 
   struct sockaddr addr;
-  socklen_t addrlen;
+  socklen_t addrlen = sizeof(addr);
 
   Node *current = HostNode->NodeList;
 
@@ -61,7 +61,7 @@ void EventManager(Host *HostNode) {
     // Check Listening Socket
     if (FD_ISSET(HostNode->FdListen, &SockSet)) {
       if ((NewFd = accept(HostNode->FdListen, &addr, &addrlen)) == -1) {
-        exit(EXIT_FAILURE); // redo later
+        perror(""); // redo later
       }
       ReadListeningSock(HostNode, buffer, NewFd);
       FD_CLR(HostNode->FdListen, &SockSet);
@@ -73,15 +73,15 @@ void EventManager(Host *HostNode) {
       FD_CLR(HostNode->Ext->Fd, &SockSet);
       continue;
     }
-  }
-  // Check internal nodes sockets
-  while (current != NULL) {
-    if (FD_ISSET(current->Fd, &SockSet)) {
-      // do something
-      FD_CLR(current->Fd, &SockSet);
-      break;
+    // Check internal nodes sockets
+    while (current != NULL) {
+      if (FD_ISSET(current->Fd, &SockSet)) {
+        // do something
+        FD_CLR(current->Fd, &SockSet);
+        break;
+      }
+      current = current->next;
     }
-    current = current->next;
   }
 }
 

@@ -61,22 +61,26 @@ void CommandNotFound(char *Command, char *msg) {
   fputs(": ", stderr);
   fputs(msg, stderr);
   fputs(GRN
-        "\nYou can use one of the following commands:\n" RESET
-        "  join net id: \tAdds a node with the given identifier to the network. "
-        "If the identifier is already in use, the application will choose a unique "
-        "identifier and notify the user.\n"
-        "  djoin net id bootid bootIP bootTCP: \tAdds a node with the given identifier "
-        "to the network, using the provided boot node for initial connection.\n"
-        "  create name: \tCreates a content item with the given name.\n"
-        "  delete name: \tDeletes the content item with the given name.\n"
-        "  get dest name: \tSearches for the content item with the given name on the "
-        "specified destination node.\n"
-        "  show topology (st): \tDisplays the identifiers and contacts of the internal "
-        "neighbors, external neighbor, and recovery neighbor.\n"
-        "  show names (sn): \tDisplays the names of content items present on the node.\n"
-        "  show routing (sr): \tDisplays the node's forwarding table.\n"
-        "  leave: \tExits the node from the network.\n"
-        "  exit: \tCloses the application. \n",
+        "\nYou can use one of the following commands:\n" RESET GRN "  join net id:" RESET
+        "\t\tAdds a node with the given identifier to the network. "
+        "If the identifier is already \n "
+        "\t\t\tin use, the application will choose a unique "
+        "identifier and notify the user.\n" GRN
+        "  djoin net id bootid bootIP bootTCP:" RESET
+        "\tAdds a node with the given identifier "
+        "to the network, using the provided boot node for initial connection.\n" GRN
+        "  create name:" RESET " \t\tCreates a content item with the given name.\n" GRN
+        "  delete name: " RESET "\t\tDeletes the content item with the given name.\n" GRN
+        "  get dest name: " RESET
+        "\tSearches for the content item with the given name on the "
+        "specified destination node.\n" GRN "  show topology (st):" RESET
+        " \tDisplays the identifiers and contacts of the internal "
+        "neighbors, external neighbor, and recovery neighbor.\n" GRN
+        "  show names (sn): " RESET
+        "\tDisplays the names of content items present on the node.\n" GRN
+        "  show routing (sr): " RESET "\tDisplays the node's forwarding table.\n" GRN
+        "  leave:" RESET " \t\tExits the node from the network.\n" GRN "  exit:" RESET
+        " \t\tCloses the application. \n",
         stderr);
 }
 

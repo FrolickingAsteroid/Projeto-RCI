@@ -153,12 +153,14 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
   // if connection is not established return to userInterface and free initialized
   // extern node
   if (TCPAnswer == NULL) {
+    free(TCPAnswer);
     LeaveNetwork(HostNode);
     return;
   }
 
   // lastly, if all is well,parse bck and add it to Host, aswell as Net and HostId
   sscanf(TCPAnswer, "EXTERN %s %s %s", BootId, BootIp, BootTCP);
+  free(TCPAnswer);
 
   // if node is not an ancor, plug new back into host
   if (strcmp(BootId, HostNode->HostId) != 0) {
