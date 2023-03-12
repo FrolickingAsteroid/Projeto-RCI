@@ -3,10 +3,10 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "withdrawHandeling.h"
+#include "withdrawMod.h"
 #define BUFSIZE 128
 
-void WithdrawHandel(Host *HostNode, char *LeavingId) {
+void WithdrawHandle(Host *HostNode, char *LeavingId) {
   char Id[BUFSIZE] = "";
   char BootIp[BUFSIZE] = "", BootId[BUFSIZE] = "", BootTCP[BUFSIZE] = "";
 
@@ -14,16 +14,11 @@ void WithdrawHandel(Host *HostNode, char *LeavingId) {
   Node *Current = HostNode->NodeList;
   Node *Del = NULL;
 
-  // if bck withdraws remove it from host
-  if (strcmp(LeavingId, HostNode->Bck->Id) == 0) {
-    FreeNode(HostNode->Bck);
-    HostNode->Bck = NULL;
-    // SendTCPMessage()
-  }
   // if extern withdraws evaluate
-  else if (strcmp(LeavingId, HostNode->Ext->Id) == 0) {
+  if (strcmp(LeavingId, HostNode->Ext->Id) == 0) {
     // host has a bck
     if (HostNode->Bck != NULL) {
+      FreeNode(HostNode->Ext);
       HostNode->Ext = HostNode->Bck;
       HostNode->Bck = NULL;
 
@@ -43,11 +38,30 @@ void WithdrawHandel(Host *HostNode, char *LeavingId) {
         HostNode->Bck = InitNode(BootIp, atoi(BootTCP), BootId, -1);
       }
     } else {
+      FreeNode(HostNode->Ext);
       HostNode->Ext = HostNode->NodeList;
-      HostNode->NodeList = HostNode->NodeList->next;
+      // verify if there were only two nodes on the network
+      if (HostNode->NodeList != NULL) {
+        HostNode->NodeList = HostNode->NodeList->next;
+      }
+    }
+    // send EXTERN ext to all neighbours
+    memset(msg, 0, sizeof(msg));
+    sprintf(msg, "EXTERN %s %s %d", HostNode->Ext->Id, HostNode->Ext->IP,
+            HostNode->Ext->TCPort);
+
+    for (Node *temp = HostNode->NodeList; temp != NULL; temp = temp->next) {
+      // send message
+      if (write(temp->Fd, msg, (size_t)strlen(msg)) == -1) {
+        // if connection is not available continue
+        perror("Function WithdrawHandle >> " RED "☠  write() failed");
+        continue;
+      };
     }
 
+    free(TCPAnswer);
   }
+
   // if intern withdraws remove it from the list
   // first in the list
   else if (strcmp(LeavingId, HostNode->NodeList->Id) == 0) {
@@ -67,4 +81,20 @@ void WithdrawHandel(Host *HostNode, char *LeavingId) {
       Current = Current->next;
     }
   }
+}
+
+void ExternHandle(char *Buffer, Host *HostNode) {
+  char Id[BUFSIZE] = "", Ip[BUFSIZE] = "", TCP[BUFSIZE] = "";
+
+  // scan bck info
+  sscanf(Buffer, "EXTERN %s %s %s", Id, Ip, TCP);
+
+  // check format
+  if (!BootArgsCheck(Id, Ip, TCP)) {
+    // do something
+  }
+
+  // Update bck node
+  FreeNode(HostNode->Bck);
+  HostNode->Bck = InitNode(Ip, atoi(TCP), Id, -1);
 }

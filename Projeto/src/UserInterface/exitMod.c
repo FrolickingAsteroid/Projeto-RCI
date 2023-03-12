@@ -10,6 +10,7 @@ void LeaveNetwork(Host *HostNode) {
   char *UDPAnswer = NULL;
 
   if (HostNode->type == DJOIN) {
+    /*! TODO: send withdraw*/
     LiberateHost(HostNode);
     return;
   }
@@ -30,7 +31,27 @@ void LeaveNetwork(Host *HostNode) {
     return;
   }
 
-  // send withdraw message to all internal and external nodes
+  // send Withdraw to all neighbours
+  memset(msg, 0, sizeof(msg));
+  sprintf(msg, "WITHDRAW %s", HostNode->Ext->Id);
+
+  for (Node *temp = HostNode->NodeList; temp != NULL; temp = temp->next) {
+    // send message
+    if (write(temp->Fd, msg, (size_t)strlen(msg)) == -1) {
+      // if connection is not available continue
+      perror("Function WithdrawHandle >> " RED "☠  write() failed");
+      continue;
+    };
+  }
+
+  if (HostNode->Ext != NULL) {
+    // send Withdraw to extern
+    if (write(HostNode->Ext->Fd, msg, (size_t)strlen(msg)) == -1) {
+      // if connection is not available continue
+      perror("Function WithdrawHandle >> " RED "☠  write() failed");
+    };
+    printf("Extern Fd = %d\n", HostNode->Ext->Fd);
+  }
 
   // unplug connections from node structures
   fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Unregistered from network %s with success\n",

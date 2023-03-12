@@ -5,5 +5,6 @@
 #include "../Protocols/TCP.h"
 #include "../UserInterface/exitMod.h"
 
-void WithdrawHandel(Host *HostNode, char *LeavingId);
+void WithdrawHandle(Host *HostNode, char *LeavingId);
+void ExternHandle(char *Buffer, Host *HostNode);
 #endif

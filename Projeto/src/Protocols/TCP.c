@@ -103,9 +103,9 @@ void ReadListeningSock(Host *HostNode, char *Buffer, int NewFd) {
     if (write(NewFd, msg, (size_t)strlen(msg)) == -1) {
       perror("Function ReadListeningSock >> " RED "☠  write() failed");
       return;
-      // plug extern into structure and set host as bck -> NULL
-      HostNode->Ext = InitNode(NewIp, atoi(NewTCP), NewId, NewFd);
     }
+    // plug extern into structure and set host as bck -> NULL
+    HostNode->Ext = InitNode(NewIp, atoi(NewTCP), NewId, NewFd);
 
   } else {
     sprintf(msg, "EXTERN %s %s %d", HostNode->Ext->Id, HostNode->Ext->IP,

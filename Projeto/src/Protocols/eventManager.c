@@ -29,6 +29,9 @@ void EventManager(Host *HostNode) {
   FD_SET(STDIN_FILENO, &SockSet);
   FD_SET(HostNode->FdListen, &SockSet);
 
+  if (HostNode->Ext != NULL) {
+    FD_SET(HostNode->Ext->Fd, &SockSet);
+  }
   Node *temp = HostNode->NodeList;
   while (temp != NULL) {
     FD_SET(temp->Fd, &SockSet);
@@ -37,7 +40,7 @@ void EventManager(Host *HostNode) {
 
   MaxDescriptor = UpdateMaxDes(HostNode);
   /// --------------------------- //
-
+  printf("MaxDescriptor = %d\n", MaxDescriptor);
   // start select
   Counter = select(MaxDescriptor + 1, (&SockSet), (fd_set *)NULL, (fd_set *)NULL,
                    (struct timeval *)NULL);
@@ -45,8 +48,8 @@ void EventManager(Host *HostNode) {
   if (Counter <= 0) {
     DieWithSys("Function EventManager >>" RED "☠  select() failed");
   }
-
-  while (Counter-- > 0) {
+  printf("Counter = %d\n", Counter);
+  while (Counter--) {
     memset(&buffer, 0, MAXSIZE);
 
     // Check Keyboard
@@ -58,6 +61,7 @@ void EventManager(Host *HostNode) {
       FD_CLR(STDIN_FILENO, &SockSet);
       continue;
     }
+
     // Check Listening Socket
     if (FD_ISSET(HostNode->FdListen, &SockSet)) {
       if ((NewFd = accept(HostNode->FdListen, &addr, &addrlen)) == -1) {
@@ -67,16 +71,27 @@ void EventManager(Host *HostNode) {
       FD_CLR(HostNode->FdListen, &SockSet);
       continue;
     }
+
     // Check external node socket
-    if (HostNode->Ext != NULL && FD_ISSET(HostNode->Ext->Fd, &SockSet)) {
-      // do something
+    if (FD_ISSET(HostNode->Ext->Fd, &SockSet)) {
+      printf("AQUI\n");
+      // read info from established socket
+      if (read(HostNode->Ext->Fd, buffer, MAXSIZE) == -1) {
+        DieWithSys("Function TCPClientExternConnect >> " RED "☠  read() failed");
+      }
+      SocketInterfaceParser(buffer, HostNode);
       FD_CLR(HostNode->Ext->Fd, &SockSet);
       continue;
     }
+
     // Check internal nodes sockets
     while (current != NULL) {
       if (FD_ISSET(current->Fd, &SockSet)) {
-        // do something
+        // read info from established socket
+        if (read(HostNode->Ext->Fd, buffer, MAXSIZE) == -1) {
+          DieWithSys("Function TCPClientExternConnect >> " RED "☠  read() failed");
+        }
+        SocketInterfaceParser(buffer, HostNode);
         FD_CLR(current->Fd, &SockSet);
         break;
       }
@@ -98,5 +113,3 @@ int UpdateMaxDes(Host *HostNode) {
   // case where Host is alone in the network
   return HostNode->FdListen;
 }
-/*! TODO: Colocar clausula do externo e criar função para tratamento de chamadas do
- * vizinho*/
