@@ -1,7 +1,7 @@
 #ifndef USERINTERFACE_H
 #define USERINTERFACE_H
 
-#include "../Common/nodeStructure.h"
+#include "../HostStruct/nodeStructure.h"
 #include "../Common/utils.h"
 #include "../SocketProcessing/socketInterface.h"
 #include "exitMod.h"

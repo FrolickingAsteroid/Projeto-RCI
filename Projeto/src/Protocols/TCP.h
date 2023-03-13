@@ -3,7 +3,7 @@
 
 #include "../Common/checkInvocationInfo.h"
 #include "../Common/formatChecking.h"
-#include "../Common/nodeStructure.h"
+#include "../HostStruct/nodeStructure.h"
 #include "../Common/utils.h"
 
 int TCPServer(UsrInvoc *usr);

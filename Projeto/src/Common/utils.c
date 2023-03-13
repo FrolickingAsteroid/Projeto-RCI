@@ -6,7 +6,7 @@
 #include "utils.h"
 
 /**
-  Displays the usage of the program with the required and optional arguments.
+  @brief Displays the usage of the program with the required and optional arguments.
   @param name the name of the program executable
 */
 void Usage(char *name) {

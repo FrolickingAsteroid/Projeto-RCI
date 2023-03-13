@@ -4,7 +4,7 @@
 #include <signal.h>
 
 #include "Common/checkInvocationInfo.h"
-#include "Common/nodeStructure.h"
+#include "HostStruct/nodeStructure.h"
 #include "Common/utils.h"
 #include "Protocols/TCP.h"
 #include "Protocols/eventManager.h"

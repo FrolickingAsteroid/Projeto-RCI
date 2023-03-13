@@ -7,37 +7,72 @@
 
 #define PORT_RANGE 65535
 
-// Init UsrInvoc
+/**
+ *
+ * @brief Allocates memory for a new UsrInvoc struct and initializes its fields.
+ *
+ * This function allocates memory for a new UsrInvoc struct and initializes its
+ * fields. The IP and UDP port of the node server are hardcoded in this function as
+ * requested. If memory allocation fails, the function calls DieWithSys() to
+ * terminate the program.
+ * @return A pointer to the newly created UsrInvoc struct
+ */
 UsrInvoc *InitUsrInfo() {
-  UsrInvoc *UsrInfo = calloc(1, sizeof(UsrInvoc));
+  // Allocate memory for UsrInvoc struct
+  UsrInvoc *UsrInfo = malloc(sizeof(UsrInvoc));
+
+  // Check if allocation was successful
   if (UsrInfo == NULL) {
-    DieWithSys("Function InitUsrInfo >>" RED "☠  calloc() failed");
+    DieWithSys("Function InitUsrInfo >>" RED "☠  malloc() failed");
   }
+
+  // Initialize fields of UsrInvoc struct
   UsrInfo->RegIP = "193.136.138.142";
   UsrInfo->RegUDP = 59000;
+
+  // Return UsrInvoc struct
   return UsrInfo;
 }
 
-// Check Valid Adress
+/**
+ * @brief Checks if the provided IP address is valid and returns it.
+ *
+ * @param IP The IP address to be checked.
+ * @return The validated IP address.
+ */
 char *CheckValidAdress(char *IP) {
   struct sockaddr_in sa;
 
+  // Check if the provided IP is valid
   if (inet_pton(AF_INET, IP, &(sa.sin_addr)) != 1) {
+    // If the IP is not valid, print usage and exit with an error message
     Usage("./cot");
     DieWithUsr(IP, "Invalid IP format");
   }
+  // Return the validated IP address
   return IP;
 }
 
-// Check Valid PORT
+/**
+ *
+ * @brief Check if a given string is a valid TCP port number.
+ *
+ * This function checks if the input string represents a valid TCP port number
+ * within the range of possible values (0 to PORT_RANGE). If the input is not a valid
+ * number or the number is outside the valid range, it calls the Usage() and
+ * DieWithUsr() functions to print an error message and terminate the program.
+ *
+ * @param PORT: The string representing the TCP port number to check.
+ * @return An integer value representing the TCP port number, if valid.
+ */
 int CheckValidPort(char *PORT) {
 
-  if (IsNumber(PORT) == 0) {
+  if (!IsNumber(PORT)) {
     Usage("./cot");
     DieWithUsr(PORT, "Invalid TCP port format");
   }
-  int TCP = atoi(PORT);
 
+  int TCP = atoi(PORT);
   if (TCP > PORT_RANGE || TCP < 0) {
     Usage("./cot");
     DieWithUsr(PORT, "TCP port exceeds range of possible values");
@@ -45,19 +80,34 @@ int CheckValidPort(char *PORT) {
   return TCP;
 }
 
-// Usr invocation parcer
+/**
+ * @brief Parses user invocation arguments and returns a UsrInvoc structure containing
+ *relevant information.
+ *
+ *The function receives the number of arguments and a pointer to an
+ *array of argument strings. If the number of arguments is not correct, the function
+ *terminates the program. Otherwise, it creates a UsrInvoc struct and initializes it with
+ *default values. It then checks the validity of the IP and TCP port by calling the
+ *CheckValidAddress and CheckValidPort functions, respectively.
+ *
+ * @param argc Number of arguments passed.
+ * @param argv Array of string arguments passed.
+ * @return Pointer to UsrInvoc structure.
+ */
 UsrInvoc *InvocCheck(int argc, char *argv[]) {
-
+  // Check number of arguments
   if (argc != 3 && argc != 5) {
     Usage(argv[0]);
     DieWithUsr("Invalid Invocation", "Wrong number of arguments");
   }
-
+  // Initialize UsrInfo with default values
   UsrInvoc *UsrInfo = InitUsrInfo();
 
+  // Parse and check Host IP and TCP port
   UsrInfo->HostIP = CheckValidAdress(argv[1]);
   UsrInfo->HostTCP = CheckValidPort(argv[2]);
 
+  // Parse and check server IP and UDP port if provided
   if (argc == 5) {
     UsrInfo->RegIP = CheckValidAdress(argv[3]);
     UsrInfo->RegUDP = CheckValidPort(argv[4]);

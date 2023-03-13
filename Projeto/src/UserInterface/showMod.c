@@ -33,7 +33,12 @@ void ShowTopology(Host *hostNode) {
   printf(GRN "Backup Node\n" RESET);
   if (hostNode->Bck != NULL) {
     printf("%s %s %d\n", hostNode->Bck->Id, hostNode->Bck->IP, hostNode->Bck->TCPort);
-  } else {
+
+  } else if (hostNode->NodeList == NULL || hostNode->Ext == NULL) {
     printf("None\n");
+
+  } else {
+    printf("%s %s %d\n", hostNode->HostId, hostNode->InvocInfo->HostIP,
+           hostNode->InvocInfo->HostTCP);
   }
 }

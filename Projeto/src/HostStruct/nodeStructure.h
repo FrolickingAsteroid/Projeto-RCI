@@ -1,8 +1,8 @@
 #ifndef NODESTRUCTURE_H
 #define NODESTRUCTURE_H
 
-#include "checkInvocationInfo.h"
-#include "utils.h"
+#include "../Common/checkInvocationInfo.h"
+#include "../Common/utils.h"
 
 // Type of Join Flag
 typedef enum Command { JOIN, DJOIN, CLR, LEAVE, EXIT, ST, IDLE } Command;

@@ -111,7 +111,6 @@ void EventManager(Host *HostNode) {
       current = current->next;
     }
   }
-  sleep(5);
 }
 
 /**

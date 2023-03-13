@@ -1,7 +1,7 @@
 #ifndef SOCKETINTERFACE_H
 #define SOCKETINTERFACE_H
 
-#include "../Common/nodeStructure.h"
+#include "../HostStruct/nodeStructure.h"
 #include "../Protocols/TCP.h"
 #include "../Common/utils.h"
 #include "withdrawMod.h"
