@@ -16,5 +16,6 @@ int IsNumber(char *str);
 void Usage(char *name);
 void CommandNotFound(char *Command, char *msg);
 void ServerAnswer(char *UDPAnswer);
+void InterfaceUsage();
 
 #endif

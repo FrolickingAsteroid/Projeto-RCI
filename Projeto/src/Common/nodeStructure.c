@@ -18,6 +18,8 @@ Host *InitHostStructure(int Fd, UsrInvoc *UsrInfo) {
     DieWithSys("Function InitHostStructure: calloc() failed");
   }
 
+  memset(node->ForTable, -1, sizeof(node->ForTable));
+
   node->Name = NULL;
   node->HostId = NULL;
   node->Bck = NULL;
@@ -98,6 +100,7 @@ void FreeNode(Node *Node) {
   }
 
   free(Node);
+  Node = NULL;
 }
 
 void LiberateHost(Host *HostNode) {
@@ -108,6 +111,8 @@ void LiberateHost(Host *HostNode) {
 
   HostNode->Ext = HostNode->Bck = NULL;
   free(HostNode->HostId), free(HostNode->Net);
+
+  memset(HostNode->ForTable, -1, sizeof(HostNode->ForTable));
 
   HostNode->type = IDLE;
   HostNode->Net = NULL;

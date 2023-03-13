@@ -13,7 +13,7 @@ void SocketInterfaceParser(char *Buffer, Host *HostNode) {
 
   // Parse type of message from buffer
   sscanf(Buffer, "%s", Token);
-
+  
   // Chain of if/if-else for each node message sent
   if (strcmp(Token, "WITHDRAW") == 0) {
     sscanf(Buffer, "WITHDRAW %s", LeavingId);

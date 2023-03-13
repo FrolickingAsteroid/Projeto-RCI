@@ -8,4 +8,4 @@
 void ExitProgram(Host *HostNode);
 void LeaveNetwork(Host *HostNode);
 
-#endif // !DEBUG
+#endif

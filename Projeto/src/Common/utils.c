@@ -5,7 +5,10 @@
 
 #include "utils.h"
 
-// Usage Invocation
+/**
+  Displays the usage of the program with the required and optional arguments.
+  @param name the name of the program executable
+*/
 void Usage(char *name) {
   fprintf(stderr,
           BLU "Usage\t>"
@@ -60,28 +63,6 @@ void CommandNotFound(char *Command, char *msg) {
   fputs(Command, stderr);
   fputs(": ", stderr);
   fputs(msg, stderr);
-  fputs(GRN
-        "\nYou can use one of the following commands:\n" RESET GRN "  join net id:" RESET
-        "\t\tAdds a node with the given identifier to the network. "
-        "If the identifier is already \n "
-        "\t\t\tin use, the application will choose a unique "
-        "identifier and notify the user.\n" GRN
-        "  djoin net id bootid bootIP bootTCP:" RESET
-        "\tAdds a node with the given identifier "
-        "to the network, using the provided boot node for initial connection.\n" GRN
-        "  create name:" RESET " \t\tCreates a content item with the given name.\n" GRN
-        "  delete name: " RESET "\t\tDeletes the content item with the given name.\n" GRN
-        "  get dest name: " RESET
-        "\tSearches for the content item with the given name on the "
-        "specified destination node.\n" GRN "  show topology (st):" RESET
-        " \tDisplays the identifiers and contacts of the internal "
-        "neighbors, external neighbor, and recovery neighbor.\n" GRN
-        "  show names (sn): " RESET
-        "\tDisplays the names of content items present on the node.\n" GRN
-        "  show routing (sr): " RESET "\tDisplays the node's forwarding table.\n" GRN
-        "  leave:" RESET " \t\tExits the node from the network.\n" GRN "  exit:" RESET
-        " \t\tCloses the application. \n",
-        stderr);
 }
 
 void ServerAnswer(char *UDPAnswer) {
@@ -93,4 +74,27 @@ void ServerAnswer(char *UDPAnswer) {
   fputs("\n", stdout);
   fputs(UDPAnswer, stdout);
   fputs(GRN "\n---\n" RESET, stdout);
+}
+
+void InterfaceUsage() {
+  printf("%sYou can use one of the following commands:%s\n\n", GRN, RESET);
+  printf(
+      "  %-40sAdds a node with the given identifier to the network. If the identifier\n",
+      "join net id:");
+  printf("  %-40sAdds a node with the given identifier to the network, using the "
+         "provided boot node for initial connection.\n",
+         "djoin net id bootid bootIP bootTCP:");
+  printf("  %-40sCreates a content item with the given name.\n", "create name:");
+  printf("  %-40sDeletes the content item with the given name.\n", "delete name:");
+  printf("  %-40sSearches for the content item with the given name on the specified "
+         "destination node.\n",
+         "get dest name:");
+  printf("  %-40sDisplays the identifiers and contacts of the internal neighbors, "
+         "external neighbor, and recovery neighbor.\n",
+         "show topology (st):");
+  printf("  %-40sDisplays the names of content items present on the node.\n",
+         "show names (sn):");
+  printf("  %-40sDisplays the node's forwarding table.\n", "show routing (sr):");
+  printf("  %-40sExits the node from the network.\n", "leave:");
+  printf("  %-40sCloses the application.\n\n", "exit:");
 }

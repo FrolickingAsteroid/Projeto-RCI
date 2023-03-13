@@ -5,7 +5,7 @@
 #include "utils.h"
 
 // Type of Join Flag
-typedef enum Command { IDLE, DJOIN, JOIN } Command;
+typedef enum Command { JOIN, DJOIN, CLR, LEAVE, EXIT, ST, IDLE } Command;
 
 typedef struct Name {
 
@@ -27,7 +27,9 @@ typedef struct Host {
   int FdListen;
 
   char *Net;
+
   Name *Name;
+  int ForTable[100];
 
   UsrInvoc *InvocInfo;
   Command type;

@@ -3,15 +3,21 @@
 #include <string.h>
 
 #include "exitMod.h"
+#include "showMod.h"
 #include "userInterface.h"
 
 /**
- * @brief Parses User Input Command and calls processing functions
+ * @brief Parses user input command and calls processing functions.
  *
- * @param buffer -> user string written to STDIN_NO
+ * This function parses the user input command from the given buffer and executes the
+ * corresponding function based on the command. The supported commands are "join",
+ * "djoin", "clear", "leave", "exit", and "st" (...).
+ *
+ * @param buffer The buffer containing the user input command.
+ * @param HostNode A pointer to the host node struct.
  */
 void UserInterfaceParser(char buffer[], Host *HostNode) {
-  char Command[6];
+  char Command[64];
 
   // Parse Command from buffer
   sscanf(buffer, "%s", Command);
@@ -34,9 +40,11 @@ void UserInterfaceParser(char buffer[], Host *HostNode) {
 
   } else if (strcmp(Command, "exit") == 0) {
     ExitProgram(HostNode);
-  }
 
-  else {
+  } else if (strcmp(Command, "st") == 0) {
+    ShowTopology(HostNode);
+
+  } else {
     CommandNotFound("Command not found", buffer);
     return;
   }

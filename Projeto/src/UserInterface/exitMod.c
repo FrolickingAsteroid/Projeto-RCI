@@ -5,12 +5,20 @@
 
 #include "exitMod.h"
 
+/**
+ * @brief This function is responsible for removing a host from a network it is currently
+ * registered on, and sending a WITHDRAW message to its neighbors in the network. If the
+ * host is not registered in any network or if it is a DJOIN type host, it simply frees
+ * the host and returns.
+ * @param HostNode: pointer to the Host structure representing the host to be removed from
+ * the network
+ */
 void LeaveNetwork(Host *HostNode) {
-  char msg[16] = "";
+  char msg[128] = "";
   char *UDPAnswer = NULL;
 
+  // check need to contact server
   if (HostNode->type == DJOIN) {
-    /*! TODO: send withdraw*/
     LiberateHost(HostNode);
     return;
   }
@@ -25,32 +33,13 @@ void LeaveNetwork(Host *HostNode) {
   sprintf(msg, "UNREG %s %s", HostNode->Net, HostNode->HostId);
   UDPAnswer = UDPClient(HostNode, msg);
   if (strcmp(UDPAnswer, "OKUNREG") != 0) { // if answer is NULL return with perror
-    free(UDPAnswer);
+
+    if (UDPAnswer != NULL) {
+      free(UDPAnswer);
+    }
     printf("\x1B[31m🚩 WARNING >\x1B[0m Unable to unregister from network %s\n",
            HostNode->Net);
     return;
-  }
-
-  // send Withdraw to all neighbours
-  memset(msg, 0, sizeof(msg));
-  sprintf(msg, "WITHDRAW %s", HostNode->Ext->Id);
-
-  for (Node *temp = HostNode->NodeList; temp != NULL; temp = temp->next) {
-    // send message
-    if (write(temp->Fd, msg, (size_t)strlen(msg)) == -1) {
-      // if connection is not available continue
-      perror("Function WithdrawHandle >> " RED "☠  write() failed");
-      continue;
-    };
-  }
-
-  if (HostNode->Ext != NULL) {
-    // send Withdraw to extern
-    if (write(HostNode->Ext->Fd, msg, (size_t)strlen(msg)) == -1) {
-      // if connection is not available continue
-      perror("Function WithdrawHandle >> " RED "☠  write() failed");
-    };
-    printf("Extern Fd = %d\n", HostNode->Ext->Fd);
   }
 
   // unplug connections from node structures
@@ -60,6 +49,12 @@ void LeaveNetwork(Host *HostNode) {
   free(UDPAnswer);
 }
 
+/**
+ * @brief ExitProgram function that performs cleanup and exits the program
+ *
+ * @param HostNode: A pointer to the Host structure representing the host running the
+ * program
+ */
 void ExitProgram(Host *HostNode) {
   // check wether Host needs to leave the network
   if (HostNode->Net != NULL) {

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <signal.h>
 
 #include "Common/checkInvocationInfo.h"
 #include "Common/nodeStructure.h"
@@ -14,7 +15,15 @@ int main(int argc, char *argv[]) {
   UsrInvoc *UsrInfo = InvocCheck(argc, argv);
   int Fd = TCPServer(UsrInfo);
   Host *HostNode = InitHostStructure(Fd, UsrInfo);
+  /*
+    struct sigaction act = {
+        .sa_handler = SIG_IGN,
+    };
 
+    if (sigaction(SIGPIPE, &act, NULL) == -1) {
+      printf("failed to set SIGPIPE handler");
+    }
+  */
   srand((unsigned int)time(0)); // seed the rand function
 
   // Main loop

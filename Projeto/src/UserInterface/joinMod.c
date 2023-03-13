@@ -54,6 +54,7 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
 
   UDPAnswer = UDPClient(HostNode, msg);
   if (strcmp(UDPAnswer, "OKREG") != 0) {
+    free(UDPAnswer);
     free(DjoinMsg); // free allocated Djoin message, can't communicate with
                     // server
     return;

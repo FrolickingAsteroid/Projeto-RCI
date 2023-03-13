@@ -12,6 +12,19 @@
 #define MAXSIZE 128
 #define max(A, B) ((A) >= (B) ? (A) : (B))
 
+/**
+ * @brief Event manager function for handling incoming connections and messages.
+ *
+ * This function sets up the necessary file descriptors for the host node and then enters
+ * a loop to wait for incoming connections and messages. It checks the file descriptors
+ * using the `select()` system call and then handles any incoming data accordingly.
+ * Specifically, it checks for messages from the user interface, incoming connections on
+ * the listening socket, messages from the external node, and messages from internal
+ * nodes.
+ *
+ * @param HostNode: A pointer to the host node that will handle incoming connections and
+ * messages.
+ */
 void EventManager(Host *HostNode) {
   int MaxDescriptor = -1, Counter = 0, NewFd = -1;
   char buffer[MAXSIZE];
@@ -20,12 +33,13 @@ void EventManager(Host *HostNode) {
   struct sockaddr addr;
   socklen_t addrlen = sizeof(addr);
 
+  // passed by reference in order to keep changes
   Node *current = HostNode->NodeList;
 
   // reset file descriptors before next run
   FD_ZERO(&SockSet);
 
-  // --- Set fileDescriptors --- //
+  // Set file descriptors
   FD_SET(STDIN_FILENO, &SockSet);
   FD_SET(HostNode->FdListen, &SockSet);
 
@@ -39,26 +53,24 @@ void EventManager(Host *HostNode) {
   }
 
   MaxDescriptor = UpdateMaxDes(HostNode);
-  /// --------------------------- //
-  printf("MaxDescriptor = %d\n", MaxDescriptor);
-  // start select
+
+  // -------------- Wait for incoming connections and messages ------------------//
   Counter = select(MaxDescriptor + 1, (&SockSet), (fd_set *)NULL, (fd_set *)NULL,
                    (struct timeval *)NULL);
 
   if (Counter <= 0) {
     DieWithSys("Function EventManager >>" RED "☠  select() failed");
   }
-  printf("Counter = %d\n", Counter);
   while (Counter--) {
     memset(&buffer, 0, MAXSIZE);
 
     // Check Keyboard
     if (FD_ISSET(STDIN_FILENO, &SockSet)) {
+      FD_CLR(STDIN_FILENO, &SockSet);
       if (read(STDIN_FILENO, buffer, MAXSIZE) == -1) {
         DieWithSys("Function EventManager >>" RED "☠  read() failed");
       }
       UserInterfaceParser(buffer, HostNode);
-      FD_CLR(STDIN_FILENO, &SockSet);
       continue;
     }
 
@@ -74,42 +86,59 @@ void EventManager(Host *HostNode) {
 
     // Check external node socket
     if (FD_ISSET(HostNode->Ext->Fd, &SockSet)) {
-      printf("AQUI\n");
+      FD_CLR(HostNode->Ext->Fd, &SockSet);
       // read info from established socket
-      if (read(HostNode->Ext->Fd, buffer, MAXSIZE) == -1) {
-        DieWithSys("Function TCPClientExternConnect >> " RED "☠  read() failed");
+      if (read(HostNode->Ext->Fd, buffer, MAXSIZE) <= 0) {
+        WithdrawHandle(HostNode, HostNode->Ext->Id);
+        continue;
       }
       SocketInterfaceParser(buffer, HostNode);
-      FD_CLR(HostNode->Ext->Fd, &SockSet);
       continue;
     }
 
     // Check internal nodes sockets
     while (current != NULL) {
       if (FD_ISSET(current->Fd, &SockSet)) {
+        FD_CLR(current->Fd, &SockSet);
         // read info from established socket
-        if (read(HostNode->Ext->Fd, buffer, MAXSIZE) == -1) {
-          DieWithSys("Function TCPClientExternConnect >> " RED "☠  read() failed");
+        if (read(current->Fd, buffer, MAXSIZE) <= 0) {
+          WithdrawHandle(HostNode, current->Id);
+          continue;
         }
         SocketInterfaceParser(buffer, HostNode);
-        FD_CLR(current->Fd, &SockSet);
         break;
       }
       current = current->next;
     }
   }
+  sleep(5);
 }
 
+/**
+ * @brief Updates the maximum number of file descriptors.
+ *
+ * This function determines the maximum number of file descriptors, the function
+ * compares the listening FD to the maximum file descriptor found so far. The final
+ * maximum file descriptor is returned.
+ *
+ * @param HostNode A pointer to the host for which to update the maximum file descriptor.
+ *
+ * @return The maximum file descriptor for the given host.
+ */
 int UpdateMaxDes(Host *HostNode) {
+  // initialize maxFd to the listen file descriptor
+  int maxFd = HostNode->FdListen;
 
-  // case where Host already has an extern and interns, choose between the most recent
-  if (HostNode->Ext != NULL && HostNode->NodeList != NULL) {
-    return max(HostNode->NodeList->Fd, HostNode->Ext->Fd);
+  // check if host has an external nodes
+  if (HostNode->Ext != NULL) {
+    // update maxFd if external FD is greater
+    maxFd = max(maxFd, HostNode->Ext->Fd);
+
+    if (HostNode->NodeList != NULL) {
+      // update maxFd if internal FD is greater
+      maxFd = max(maxFd, HostNode->NodeList->Fd);
+    }
   }
-  // case where Host has no interns
-  else if (HostNode->Ext != NULL && HostNode->NodeList == NULL) {
-    return HostNode->Ext->Fd;
-  }
-  // case where Host is alone in the network
-  return HostNode->FdListen;
+
+  return maxFd;
 }
