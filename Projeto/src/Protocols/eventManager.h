@@ -3,7 +3,6 @@
 
 #include "../HostStruct/nodeStructure.h"
 #include "../Common/utils.h"
-#include "../Protocols/TCP.h"
 #include "../UserInterface/userInterface.h"
 #include "../SocketProcessing/socketInterface.h"
 #include "../SocketProcessing/withdrawMod.h"

@@ -2,7 +2,7 @@
 #define FORWARDING_TABLE_H
 
 #include "nodeStructure.h"
-#include "../SocketProcessing/withdrawMod.h"
+#include "../SocketProcessing/socketInterface.h"
 
 void UpdateForwardingTable(Host *HostNode, char *LeavingId);
 

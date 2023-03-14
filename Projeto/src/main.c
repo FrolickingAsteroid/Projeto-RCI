@@ -29,10 +29,12 @@ int main(int argc, char *argv[]) {
   // Main loop
   clear();
   printf(BLU "# User Interface Activated " GRN "🗹 \n" RESET);
+  // Init Keyboard prompt
 
   FOREVER {
     printf(KMAG ">>> " RESET);
     fflush(stdout);
+
     // Event Parser and Manage
     EventManager(HostNode);
   }

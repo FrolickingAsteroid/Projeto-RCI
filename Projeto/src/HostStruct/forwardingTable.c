@@ -29,5 +29,5 @@ void UpdateForwardingTable(Host *HostNode, char *LeavingId) {
       strcat(msg, withdraw);
     }
   }
-  SendWithdrawMsg(HostNode, msg);
+  SendProtocolMsg(HostNode, msg);
 }

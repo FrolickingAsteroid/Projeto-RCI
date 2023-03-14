@@ -34,7 +34,7 @@ void ShowTopology(Host *hostNode) {
   if (hostNode->Bck != NULL) {
     printf("%s %s %d\n", hostNode->Bck->Id, hostNode->Bck->IP, hostNode->Bck->TCPort);
 
-  } else if (hostNode->NodeList == NULL || hostNode->Ext == NULL) {
+  } else if (hostNode->Ext == NULL) {
     printf("None\n");
 
   } else {

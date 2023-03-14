@@ -17,10 +17,13 @@
  * @param HostNode A pointer to the host node struct.
  */
 void UserInterfaceParser(char buffer[], Host *HostNode) {
-  char Command[64];
+  char Command[128];
 
   // Parse Command from buffer
-  sscanf(buffer, "%s", Command);
+  if (sscanf(buffer, "%s", Command) < 1) {
+    CommandNotFound("Command not found", "");
+    return;
+  }
 
   // Chain of if/if-else for each command sent
   if (strcmp(Command, "join") == 0) {

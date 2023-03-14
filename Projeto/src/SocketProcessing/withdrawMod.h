@@ -2,11 +2,11 @@
 #define WITHDRAWHANDLE_H
 
 #include "../HostStruct/nodeStructure.h"
+#include "../HostStruct/forwardingTable.h"
 #include "../Protocols/TCP.h"
 #include "../UserInterface/exitMod.h"
-// FIX INCLUDE
+
 void WithdrawHandle(Host *HostNode, char *LeavingId);
 void ExternHandle(char *Buffer, Host *HostNode);
-void SendWithdrawMsg(Host *HostNode, char *msg);
-void UpdateForwardingTable(Host *HostNode, char *LeavingId);
+void SendExternMsg(Host *HostNode);
 #endif

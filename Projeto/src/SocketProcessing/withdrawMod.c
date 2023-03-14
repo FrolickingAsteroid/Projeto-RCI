@@ -5,12 +5,19 @@
 
 #include "withdrawMod.h"
 
-#define BUFSIZE 128
+#define BUFSIZE 256
 
+/**
+ * @brief Handles a withdrawal event by updating the host's neighbor list
+ * and notifying the appropriate neighbors.
+ *
+ * @param hostNode A pointer to the Host struct representing the current node.
+ * @param leavingId The ID of the node that is withdrawing.
+ */
 void WithdrawHandle(Host *HostNode, char *LeavingId) {
   char BootIp[BUFSIZE] = "", BootId[BUFSIZE] = "", BootTCP[BUFSIZE] = "";
 
-  char msg[256] = "", *TCPAnswer = NULL;
+  char msg[BUFSIZE << 1] = "", *TCPAnswer = NULL;
   Node *Current = HostNode->NodeList;
   Node *Del = NULL;
 
@@ -19,8 +26,7 @@ void WithdrawHandle(Host *HostNode, char *LeavingId) {
     // host has a bck
     if (HostNode->Bck != NULL) {
       FreeNode(HostNode->Ext);
-      HostNode->Ext = HostNode->Bck;
-      HostNode->Bck = NULL;
+      HostNode->Ext = HostNode->Bck, HostNode->Bck = NULL;
 
       // connect with new extern and ask for bck
       sprintf(msg, "NEW %s %s %d\n", HostNode->HostId, HostNode->InvocInfo->HostIP,
@@ -39,6 +45,8 @@ void WithdrawHandle(Host *HostNode, char *LeavingId) {
       if (strcmp(BootId, HostNode->HostId) != 0) {
         HostNode->Bck = InitNode(BootIp, atoi(BootTCP), BootId, -1);
       }
+
+      free(TCPAnswer);
     } else {
       FreeNode(HostNode->Ext);
       HostNode->Ext = HostNode->NodeList;
@@ -47,22 +55,7 @@ void WithdrawHandle(Host *HostNode, char *LeavingId) {
         HostNode->NodeList = HostNode->NodeList->next;
       }
     }
-    // send EXTERN ext to all intern neighbours only if host is not alone
-    if (HostNode->Ext != NULL) {
-      memset(msg, 0, sizeof(msg));
-      sprintf(msg, "EXTERN %s %s %d", HostNode->Ext->Id, HostNode->Ext->IP,
-              HostNode->Ext->TCPort);
-
-      for (Node *temp = HostNode->NodeList; temp != NULL; temp = temp->next) {
-        // send message
-        if (write(temp->Fd, msg, (size_t)strlen(msg)) == -1) {
-          // if connection is not available continue
-          perror("Function WithdrawHandle >> " RED "☠  write() failed");
-          continue;
-        };
-      }
-    }
-    free(TCPAnswer);
+    SendExternMsg(HostNode);
   }
 
   // if intern withdraws remove it from the list
@@ -86,10 +79,57 @@ void WithdrawHandle(Host *HostNode, char *LeavingId) {
     }
 
     // Update Forwarding table and send withdraw to all neighbours
-    UpdateForwardingTable(HostNode, LeavingId);
+    // UpdateForwardingTable(HostNode, LeavingId);
   }
 }
 
+/**
+ * @brief Sends an "EXTERN ext" message to all internal neighbors. Notifies the new
+ * external neighbor of a change in the backup, if the leaving node was an anchor.
+ *
+ * @param hostNode: A pointer to the Host struct.
+ *
+ * @note The function handles write errors by printing an error message to stderr.
+ * @note The message is sent to all internal neighbors and the new external neighbor,
+ *       if applicable.
+ */
+void SendExternMsg(Host *HostNode) {
+  char msg[256] = "";
+
+  if (HostNode->Ext == NULL) {
+    return;
+  }
+
+  sprintf(msg, "EXTERN %s %s %d", HostNode->Ext->Id, HostNode->Ext->IP,
+          HostNode->Ext->TCPort);
+
+  // send EXTERN ext to all intern neighbours only if host is not alone
+  for (Node *temp = HostNode->NodeList; temp != NULL; temp = temp->next) {
+    if (write(temp->Fd, msg, (size_t)strlen(msg)) == -1) {
+      perror("Function WithdrawHandle >> " RED "☠  write() failed");
+      continue;
+    };
+  }
+  // check if leaving node was an ancor, notify new extern of bck change
+  if (HostNode->Bck == NULL) {
+    if (write(HostNode->Ext->Fd, msg, (size_t)strlen(msg)) == -1) {
+      perror("Function WithdrawHandle >> " RED "☠  write() failed");
+    };
+  }
+}
+
+/**
+ * @brief Handles the reception of an EXTERN message from a neighboring node.
+ *
+ * This function parses the received message to extract the ID, IP, and TCP port number of
+ * the sender's new extern node. It then verifies the format of the received arguments
+ * using the BootArgsCheck() function.
+ * If the arguments are valid, this function updates the host's backup node by freeing the
+ * old one and initializing a new one with the received information.
+ *
+ * @param Buffer: The message buffer received from the neighboring host.
+ * @param HostNode: A pointer to the host node structure.
+ */
 void ExternHandle(char *Buffer, Host *HostNode) {
   char Id[BUFSIZE] = "", Ip[BUFSIZE] = "", TCP[BUFSIZE] = "";
 
@@ -98,40 +138,14 @@ void ExternHandle(char *Buffer, Host *HostNode) {
 
   // check format
   if (!BootArgsCheck(Id, Ip, TCP)) {
-    // do something
+    return;
   }
+
+  FreeNode(HostNode->Bck);
+  HostNode->Bck = NULL;
 
   // Update bck node
-  FreeNode(HostNode->Bck);
-  HostNode->Bck = InitNode(Ip, atoi(TCP), Id, -1);
-}
-
-/**
- * @brief Send a WITHDRAW message to all of the host's neighbors
- *
- * This function sends a WITHDRAW message to all of the host's neighbors.
- * The message contains the  LeavingId, which will be used to identify the node that
- * is leaving the network. If the connection to a neighbor or extern is not available,
- * an error message will be printed and the function will continue with the next neighbor.
- *
- * @param HostNode:
- * */
-void SendWithdrawMsg(Host *HostNode, char *msg) {
-
-  for (Node *temp = HostNode->NodeList; temp != NULL; temp = temp->next) {
-    // send message
-    if (write(temp->Fd, msg, (size_t)strlen(msg)) == -1) {
-      // if connection is not available continue
-      perror("Function LeaveNetwork >> " RED "☠  write() failed");
-      continue;
-    };
-  }
-
-  if (HostNode->Ext != NULL) {
-    // send Withdraw to extern node
-    if (write(HostNode->Ext->Fd, msg, (size_t)strlen(msg)) == -1) {
-      // if connection is not available continue
-      perror("Function LeaveNetwork >> " RED "☠  write() failed");
-    };
+  if (strcmp(HostNode->HostId, Id) == 0) {
+    HostNode->Bck = InitNode(Ip, atoi(TCP), Id, -1);
   }
 }

@@ -8,8 +8,9 @@
 #include <unistd.h>
 
 #include "eventManager.h"
+#include "../SocketProcessing/newMod.h"
 
-#define MAXSIZE 128
+#define MAXSIZE 4096
 #define max(A, B) ((A) >= (B) ? (A) : (B))
 
 /**
@@ -103,7 +104,7 @@ void EventManager(Host *HostNode) {
         // read info from established socket
         if (read(current->Fd, buffer, MAXSIZE) <= 0) {
           WithdrawHandle(HostNode, current->Id);
-          continue;
+          break;
         }
         SocketInterfaceParser(buffer, HostNode);
         break;
