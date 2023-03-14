@@ -9,6 +9,7 @@
 
 #include "eventManager.h"
 #include "../SocketProcessing/newMod.h"
+#include "../SocketProcessing/withdrawMod.h"
 
 #define MAXSIZE 4096
 #define max(A, B) ((A) >= (B) ? (A) : (B))
@@ -56,8 +57,8 @@ void EventManager(Host *HostNode) {
   MaxDescriptor = UpdateMaxDes(HostNode);
 
   // -------------- Wait for incoming connections and messages ------------------//
-  Counter = select(MaxDescriptor + 1, (&SockSet), (fd_set *)NULL, (fd_set *)NULL,
-                   (struct timeval *)NULL);
+  Counter =
+      select(MaxDescriptor + 1, (&SockSet), (fd_set *)NULL, (fd_set *)NULL, (struct timeval *)NULL);
 
   if (Counter <= 0) {
     DieWithSys("Function EventManager >>" RED "☠  select() failed");
@@ -90,10 +91,10 @@ void EventManager(Host *HostNode) {
       FD_CLR(HostNode->Ext->Fd, &SockSet);
       // read info from established socket
       if (read(HostNode->Ext->Fd, buffer, MAXSIZE) <= 0) {
-        WithdrawHandle(HostNode, HostNode->Ext->Id);
+        WithdrawHandle(HostNode, HostNode->Ext->Id, HostNode->Ext->Fd);
         continue;
       }
-      SocketInterfaceParser(buffer, HostNode);
+      SocketInterfaceParser(buffer, HostNode, HostNode->Ext->Fd);
       continue;
     }
 
@@ -103,10 +104,10 @@ void EventManager(Host *HostNode) {
         FD_CLR(current->Fd, &SockSet);
         // read info from established socket
         if (read(current->Fd, buffer, MAXSIZE) <= 0) {
-          WithdrawHandle(HostNode, current->Id);
+          WithdrawHandle(HostNode, current->Id, current->Fd);
           break;
         }
-        SocketInterfaceParser(buffer, HostNode);
+        SocketInterfaceParser(buffer, HostNode, current->Fd);
         break;
       }
       current = current->next;

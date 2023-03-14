@@ -42,3 +42,17 @@ void ShowTopology(Host *hostNode) {
            hostNode->InvocInfo->HostTCP);
   }
 }
+
+void ShowForwardingTable(Host *hostNode) {
+  // Print table headers
+  printf(GRN "+-----------+-------------+\n");
+  printf("| neighbour | destination |\n");
+  printf("+-----------+-------------+\n" RESET);
+
+  for (int i = 0; i < 100; i++) {
+    if (hostNode->ForTable[i] != -1) {
+      printf("|     %02d    |     %02d      |\n", hostNode->ForTable[i], i);
+      printf("+-----------+-------------+\n");
+    }
+  }
+}

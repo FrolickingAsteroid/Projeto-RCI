@@ -1,16 +1,12 @@
-/**
- * @file checkInvocationInfo.h
- * @brief Header file containing declarations for functions related to invocation input
- * validation and error handling.
- *
- * This header file declares the UsrInvoc struct aswell as various error checking
- * functions. It also includes "utils.h", which contains declarations for additional
- * utility functions.
- */
+//===-- checkinvocationinfo.h - User invocation info validation -----------===//
+//
+// This header file provides functions for validating user invocation parameters
+// such as IP addresses and port numbers, aswell as defining the UsrInvo struct
+//
+//===----------------------------------------------------------------------===//
 #ifndef CHECKINVOCATIONINFO_H
 #define CHECKINVOCATIONINFO_H
 
-#include "utils.h"
 /**
  * @brief Struct representing user invocation parameters
  */

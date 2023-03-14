@@ -5,7 +5,6 @@
 #include "exitMod.h"
 #include "showMod.h"
 #include "userInterface.h"
-
 /**
  * @brief Parses user input command and calls processing functions.
  *
@@ -47,6 +46,8 @@ void UserInterfaceParser(char buffer[], Host *HostNode) {
   } else if (strcmp(Command, "st") == 0) {
     ShowTopology(HostNode);
 
+  } else if (strcmp(Command, "sr") == 0) {
+    ShowForwardingTable(HostNode);
   } else {
     CommandNotFound("Command not found", buffer);
     return;

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "forwardingTable.h"
 #include "nodeStructure.h"
 
 /**
@@ -52,6 +53,8 @@ void PlugHostNetId(char *Net, char *Id, Host *HostNode) {
   }
   sprintf(HostNode->HostId, "%s", Id);
   sprintf(HostNode->Net, "%s", Net);
+
+  InsertInForwardingTable(HostNode, atoi(Id), atoi(Id));
 }
 
 /**

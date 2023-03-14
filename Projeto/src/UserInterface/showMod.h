@@ -3,6 +3,7 @@
 
 #include "../HostStruct/nodeStructure.h"
 
+void ShowForwardingTable(Host *hostNode);
 void ShowTopology(Host *HostNode);
 SHOWMOD_H
 #endif

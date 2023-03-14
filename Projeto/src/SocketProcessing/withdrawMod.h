@@ -6,7 +6,8 @@
 #include "../Protocols/TCP.h"
 #include "../UserInterface/exitMod.h"
 
-void WithdrawHandle(Host *HostNode, char *LeavingId);
-void ExternHandle(char *Buffer, Host *HostNode);
+void BuildWithdrawMessage(Host *HostNode, char *LeavingId, int SenderFd);
+void WithdrawHandle(Host *HostNode, char *LeavingId, int SenderFd);
+void ReceiveWithdrawMsg(Host *HostNode, char *Buffer, int SenderFd);
 void SendExternMsg(Host *HostNode);
 #endif
