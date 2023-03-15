@@ -5,6 +5,7 @@
 
 #include "socketInterface.h"
 #include "withdrawMod.h"
+#include "../UserInterface/joinMod.h"
 
 #define BUFSIZE 256
 
@@ -16,9 +17,8 @@
  * @param leavingId The ID of the node that is withdrawing.
  */
 void WithdrawHandle(Host *HostNode, char *LeavingId, int SenderFd) {
-  char BootIp[BUFSIZE] = "", BootId[BUFSIZE] = "", BootTCP[BUFSIZE] = "";
+  char BootTCP[BUFSIZE] = "";
 
-  char msg[BUFSIZE << 1] = "", *TCPAnswer = NULL;
   Node *Current = HostNode->NodeList;
   Node *Del = NULL;
 
@@ -32,27 +32,12 @@ void WithdrawHandle(Host *HostNode, char *LeavingId, int SenderFd) {
     if (HostNode->Bck != NULL) {
       FreeNode(HostNode->Ext);
       HostNode->Ext = HostNode->Bck, HostNode->Bck = NULL;
+      InsertInForwardingTable(HostNode, atoi(HostNode->Ext->Id), atoi(HostNode->Ext->Id));
 
-      // connect with new extern and ask for bck
-      sprintf(msg, "NEW %s %s %d\n", HostNode->HostId, HostNode->InvocInfo->HostIP,
-              HostNode->InvocInfo->HostTCP);
       // convert port in order to pass argument
       sprintf(BootTCP, "%d", HostNode->Ext->TCPort);
-      TCPAnswer = TCPClientExternConnect(HostNode, msg, HostNode->Ext->IP, BootTCP);
-
-      // if connection is not established
-      if (TCPAnswer == NULL) {
-        // do something -> ask
-      }
-      sscanf(TCPAnswer, "EXTERN %s %s %s", BootId, BootIp, BootTCP);
-
-      // if node is not an ancor, plug new bck into host
-      if (strcmp(BootId, HostNode->HostId) != 0) {
-        HostNode->Bck = InitNode(BootIp, atoi(BootTCP), BootId, -1);
-        InsertInForwardingTable(HostNode, atoi(HostNode->Ext->Id), atoi(HostNode->Bck->Id));
-      }
-
-      free(TCPAnswer);
+      // Connect to extern and ask for bck
+      SendNewMsg(HostNode, HostNode->HostId, HostNode->Ext->IP, BootTCP);
     } else {
       FreeNode(HostNode->Ext);
       HostNode->Ext = HostNode->NodeList;
@@ -65,19 +50,14 @@ void WithdrawHandle(Host *HostNode, char *LeavingId, int SenderFd) {
   }
 
   // if intern withdraws remove it from the list
-  // first in the list
   else if (strcmp(LeavingId, HostNode->NodeList->Id) == 0) {
-
     HostNode->NodeList = Current->next;
     FreeNode(Current);
 
-    // any other place
   } else {
-
     while (Current != NULL) {
       if (strcmp(LeavingId, Current->next->Id) == 0) {
-        Del = Current->next;
-        Current->next = Del->next;
+        Del = Current->next, Current->next = Del->next;
         FreeNode(Del);
         break;
       }

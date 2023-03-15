@@ -143,8 +143,6 @@ char *ExternFetch(char *NODELIST, char *Net, char *Id) {
  * @param HostNode: A pointer to the HostNode structure.
  */
 void DJoinNetworkServer(char buffer[], Host *HostNode) {
-  char msg[BUFSIZE << 2] = "";
-  char *TCPAnswer = NULL;
   char Net[BUFSIZE] = "", Id[BUFSIZE] = "";
   char BootIp[BUFSIZE] = "", BootId[BUFSIZE] = "", BootTCP[BUFSIZE] = "";
 
@@ -176,26 +174,33 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
 
   // init extern node
   HostNode->Ext = InitNode(BootIp, atoi(BootTCP), BootId, -1);
+  // Connect to Extern and ask for bck
+  SendNewMsg(HostNode, Id, BootIp, BootTCP);
+  InsertInForwardingTable(HostNode, atoi(HostNode->Ext->Id), atoi(HostNode->Ext->Id));
+}
 
+void SendNewMsg(Host *HostNode, char *HostId, char *BootIp, char *BootTCP) {
+  char msg[BUFSIZE << 2] = "";
+  char *TCPAnswer = NULL;
+  char Id[BUFSIZE] = "", Ip[BUFSIZE] = "", TCP[BUFSIZE] = "";
   // else connect with chosen extern and ask for bck
-  sprintf(msg, "NEW %s %s %d\n", Id, HostNode->InvocInfo->HostIP, HostNode->InvocInfo->HostTCP);
+  sprintf(msg, "NEW %s %s %d\n", HostId, HostNode->InvocInfo->HostIP, HostNode->InvocInfo->HostTCP);
   TCPAnswer = TCPClientExternConnect(HostNode, msg, BootIp, BootTCP);
 
   // if connection is not established return to userInterface and free initialized
   // extern node
   if (TCPAnswer == NULL) {
-    free(TCPAnswer), LeaveNetwork(HostNode);
+    free(TCPAnswer);
     return;
   }
 
   // lastly, if all is well,parse bck and add it to Host, aswell as Net and HostId
-  sscanf(TCPAnswer, "EXTERN %s %s %s", BootId, BootIp, BootTCP);
+  sscanf(TCPAnswer, "EXTERN %s %s %s", Id, Ip, TCP);
   free(TCPAnswer);
 
   // if node is not an ancor, plug new back into host
-  if (strcmp(BootId, HostNode->HostId) != 0) {
-    HostNode->Bck = InitNode(BootIp, atoi(BootTCP), BootId, -1);
+  if (strcmp(Id, HostNode->HostId) != 0) {
+    HostNode->Bck = InitNode(Ip, atoi(TCP), Id, -1);
     InsertInForwardingTable(HostNode, atoi(HostNode->Ext->Id), atoi(HostNode->Bck->Id));
   }
-  InsertInForwardingTable(HostNode, atoi(HostNode->Ext->Id), atoi(HostNode->Ext->Id));
 }

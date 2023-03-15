@@ -32,14 +32,13 @@ void LeaveNetwork(Host *HostNode) {
   // create and send UNREG message to server
   sprintf(msg, "UNREG %s %s", HostNode->Net, HostNode->HostId);
   UDPAnswer = UDPClient(HostNode, msg);
-  if (strcmp(UDPAnswer, "OKUNREG") != 0) { // if answer is NULL return with perror
+  if (UDPAnswer == NULL ||
+      strcmp(UDPAnswer, "OKUNREG") != 0) { // if answer is NULL return with perror
 
     if (UDPAnswer != NULL) {
       free(UDPAnswer);
     }
-    printf("\x1B[31m🚩 WARNING >\x1B[0m Unable to unregister from network %s\n",
-           HostNode->Net);
-    return;
+    printf("\x1B[31m🚩 WARNING >\x1B[0m Unable to unregister from network %s\n", HostNode->Net);
   }
 
   // unplug connections from node structures
