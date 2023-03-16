@@ -3,16 +3,25 @@
 #include <string.h>
 
 #include "showMod.h"
+#include "../Common/utils.h"
 
 /**
- * @brief  Prints the topology associated with the host
- * @note   ID and network of the host; IDs of external, internal, and backup neighbors
- * @param  *hostNode: pointer to the struct with host information
- * @retval None
+ * @brief Display the network topology information for the given host node.
+ *
+ * This function prints the external node, internal nodes, and backup node information
+ * for the given host node. It displays the node IDs, IP addresses, and TCP ports.
+ *
+ * @param hostNode: Pointer to the Host structure representing the local host node.
  */
+
 void ShowTopology(Host *hostNode) {
+
+  printf(BLU "\nHost Topology: ID %2s NET %3s\n", hostNode->HostId, hostNode->Net);
+
   // Print external node
-  printf(GRN "External Node\n" RESET);
+  printf(GRN "+-------------------------+\n");
+  printf("|       External Node     |\n");
+  printf("+-------------------------+\n" RESET);
   if (hostNode->Ext != NULL) {
     printf("%s %s %d\n", hostNode->Ext->Id, hostNode->Ext->IP, hostNode->Ext->TCPort);
   } else {
@@ -20,7 +29,9 @@ void ShowTopology(Host *hostNode) {
   }
 
   // Print internal nodes
-  printf(GRN "Internal Nodes\n" RESET);
+  printf(GRN "+-------------------------+\n");
+  printf("|     Internal Nodes      |\n");
+  printf("+-------------------------+\n" RESET);
   if (hostNode->NodeList == NULL) {
     printf("None\n");
   } else {
@@ -30,19 +41,30 @@ void ShowTopology(Host *hostNode) {
   }
 
   // Print backup node
-  printf(GRN "Backup Node\n" RESET);
+  printf(GRN "+-------------------------+\n");
+  printf("|      Backup Node        |\n");
+  printf("+-------------------------+\n" RESET);
   if (hostNode->Bck != NULL) {
-    printf("%s %s %d\n", hostNode->Bck->Id, hostNode->Bck->IP, hostNode->Bck->TCPort);
+    printf("%s %s %d\n\n", hostNode->Bck->Id, hostNode->Bck->IP, hostNode->Bck->TCPort);
 
   } else if (hostNode->Ext == NULL) {
-    printf("None\n");
+    printf("None\n\n");
 
   } else {
-    printf("%s %s %d\n", hostNode->HostId, hostNode->InvocInfo->HostIP,
+    printf("%s %s %d\n\n", hostNode->HostId, hostNode->InvocInfo->HostIP,
            hostNode->InvocInfo->HostTCP);
   }
 }
 
+/**
+ * @brief Display the forwarding table for the given host node.
+ *
+ * This function prints the forwarding table of the host node, showing the
+ * relationship between neighbors and destinations. The table is formatted
+ * with headers for better readability.
+ *
+ * @param hostNode Pointer to the Host structure representing the local host node.
+ */
 void ShowForwardingTable(Host *hostNode) {
   // Print table headers
   printf(GRN "+-----------+-------------+\n");
@@ -53,6 +75,29 @@ void ShowForwardingTable(Host *hostNode) {
     if (hostNode->ForTable[i] != -1) {
       printf("|     %02d    |     %02d      |\n", hostNode->ForTable[i], i);
       printf("+-----------+-------------+\n");
+    }
+  }
+}
+
+/**
+ * @brief Display the list of names and their content in the given host node.
+ *
+ * This function iterates through the NameList of the host node and prints the
+ * content of each name. The names are prefixed with a header for better readability.
+ *
+ * @param hostNode Pointer to the Host structure representing the local host node.
+ */
+void ShowNames(Host *HostNode) {
+  // Print header
+  printf(GRN "+----------------------+\n");
+  printf("|    Names: Content    |\n");
+  printf("+----------------------+\n" RESET);
+
+  // Check if NameList is not empty
+  if (HostNode->NameList != NULL) {
+    // Iterate through NameList and print the content of each name
+    for (Name *Current = HostNode->NameList; Current != NULL; Current = Current->next) {
+      printf("%s\n", Current->Content);
     }
   }
 }

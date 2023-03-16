@@ -1,4 +1,4 @@
-//===-- checkinvocationinfo.h - User invocation info validation -----------===//
+//===-- checkinvocationinfo.h ---------------------------------------------===//
 //
 // This header file provides functions for validating user invocation parameters
 // such as IP addresses and port numbers, aswell as defining the UsrInvo struct

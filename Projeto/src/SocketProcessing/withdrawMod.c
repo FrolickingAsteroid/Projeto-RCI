@@ -108,6 +108,10 @@ void BuildWithdrawMessage(Host *HostNode, char *LeavingId, int SenderFd) {
 
 void ReceiveWithdrawMsg(Host *HostNode, char *Buffer, int SenderFd) {
   char LeavingId[64] = "";
+
+  // debug
+  printf("\n%s\n", Buffer);
+
   if (sscanf(Buffer, "WITHDRAW %s", LeavingId) < 1) {
     return;
   }

@@ -21,7 +21,7 @@ Host *InitHostStructure(int Fd, UsrInvoc *UsrInfo) {
 
   memset(node->ForTable, -1, sizeof(node->ForTable));
 
-  node->Name = NULL;
+  node->NameList = NULL;
   node->HostId = NULL;
   node->Bck = NULL;
   node->Ext = NULL;
@@ -127,9 +127,10 @@ void LiberateHost(Host *HostNode) {
     FreeNode(AuxNode);
   }
 
-  while (HostNode->Name != NULL) {
-    AuxName = HostNode->Name;
-    HostNode->Name = HostNode->Name->next;
+  while (HostNode->NameList != NULL) {
+    AuxName = HostNode->NameList;
+    HostNode->NameList = HostNode->NameList->next;
+    free(AuxName->Content);
     free(AuxName);
   }
 }

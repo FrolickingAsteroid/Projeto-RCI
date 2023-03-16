@@ -1,12 +1,7 @@
 #ifndef JOIN_H
 #define JOIN_H
 
-#include "../Common/checkInvocationInfo.h"
-#include "../Common/formatChecking.h"
 #include "../HostStruct/nodeStructure.h"
-#include "../Common/utils.h"
-#include "../Protocols/TCP.h"
-#include "../Protocols/UDP.h"
 
 void JoinNetworkServer(char buffer[], Host *HostNode);
 char *ExternFetch(char *NODELIST, char *Net, char *Id);

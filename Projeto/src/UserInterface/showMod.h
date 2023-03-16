@@ -5,5 +5,6 @@
 
 void ShowForwardingTable(Host *hostNode);
 void ShowTopology(Host *HostNode);
+void ShowNames(Host *HostNode);
 SHOWMOD_H
 #endif

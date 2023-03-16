@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "joinMod.h"
 #include "exitMod.h"
 #include "showMod.h"
+#include "getMod.h"
 #include "userInterface.h"
 /**
  * @brief Parses user input command and calls processing functions.
@@ -15,7 +17,7 @@
  * @param buffer The buffer containing the user input command.
  * @param HostNode A pointer to the host node struct.
  */
-void UserInterfaceParser(char buffer[], Host *HostNode) {
+void UserInterfaceParser(char *buffer, Host *HostNode) {
   char Command[128];
 
   // Parse Command from buffer
@@ -48,8 +50,46 @@ void UserInterfaceParser(char buffer[], Host *HostNode) {
 
   } else if (strcmp(Command, "sr") == 0) {
     ShowForwardingTable(HostNode);
+
+  } else if (strcmp(Command, "show") == 0) {
+    ShowParser(HostNode, buffer);
+  } else if (strcmp(Command, "get") == 0) {
+    GetName(HostNode, buffer);
   } else {
     CommandNotFound("Command not found", buffer);
     return;
+  }
+}
+
+/**
+ * @brief Parse and execute the "show" command, displaying information about the network, routing
+ * table or name list.
+ *
+ * This function parses the "show" command with its sub-command and calls the appropriate function
+ * to display the requested information. It handles "show topology", "show routing" and "show names"
+ * sub-commands.
+ *
+ * @param HostNode: Pointer to the Host structure representing the local host node.
+ * @param Buffer: Pointer to a character array containing the command and its sub-command.
+ */
+void ShowParser(Host *HostNode, char *Buffer) {
+  char SubCommand[128] = "";
+  // Extract the sub-command from the buffer
+  if (sscanf(Buffer, "show %s", SubCommand) < 1) {
+    CommandNotFound("Command not found", "");
+    return;
+  }
+  // Call the appropriate function based on the sub-command
+  if (strcmp(SubCommand, "topology") == 0) {
+    ShowTopology(HostNode);
+
+  } else if (strcmp(SubCommand, "routing") == 0) {
+    ShowForwardingTable(HostNode);
+
+  } else if (strcmp(SubCommand, "names") == 0) {
+    ShowNames(HostNode);
+  } else {
+    // If the sub-command is not recognized, display an error message
+    CommandNotFound("Command not found", Buffer);
   }
 }

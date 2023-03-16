@@ -2,9 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "exitMod.h"
 #include "joinMod.h"
+
 #include "../HostStruct/forwardingTable.h"
+#include "../Protocols/TCP.h"
+#include "../Protocols/UDP.h"
+#include "../Common/formatChecking.h"
 
 #define BUFSIZE 128
 
@@ -171,7 +174,6 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
   if (strcmp(Id, BootId) == 0) {
     return;
   }
-
   // init extern node
   HostNode->Ext = InitNode(BootIp, atoi(BootTCP), BootId, -1);
   // Connect to Extern and ask for bck
@@ -179,26 +181,42 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
   InsertInForwardingTable(HostNode, atoi(HostNode->Ext->Id), atoi(HostNode->Ext->Id));
 }
 
+/**
+ * @brief Send a NEW message to a remote host, update host information, and insert into the
+ * forwarding table if necessary.
+ *
+ * This function sends a NEW message to a remote host with the specified HostId and BootIP/BootTCP
+ * information. It establishes a TCP connection with the remote host and receives a response. If the
+ * connection is successful and the response is parsed correctly, the function updates the host
+ * information and inserts an entry into the forwarding table.
+ *
+ * @param HostNode: Pointer to the Host structure representing the local host node.
+ * @param HostId: Pointer to a character array containing the Host ID.
+ * @param BootIp: Pointer to a character array containing the boot IP address.
+ * @param BootTCP: Pointer to a character array containing the boot TCP port.
+ */
 void SendNewMsg(Host *HostNode, char *HostId, char *BootIp, char *BootTCP) {
   char msg[BUFSIZE << 2] = "";
   char *TCPAnswer = NULL;
   char Id[BUFSIZE] = "", Ip[BUFSIZE] = "", TCP[BUFSIZE] = "";
-  // else connect with chosen extern and ask for bck
+
+  // Compose the NEW message to be sent to the remote host
   sprintf(msg, "NEW %s %s %d\n", HostId, HostNode->InvocInfo->HostIP, HostNode->InvocInfo->HostTCP);
+  // Connect to the remote host and send the NEW message
   TCPAnswer = TCPClientExternConnect(HostNode, msg, BootIp, BootTCP);
 
-  // if connection is not established return to userInterface and free initialized
-  // extern node
+  // If the connection is not established, free the memory and return
   if (TCPAnswer == NULL) {
     free(TCPAnswer);
     return;
   }
 
-  // lastly, if all is well,parse bck and add it to Host, aswell as Net and HostId
+  // Parse the received response and extract the external host information
   sscanf(TCPAnswer, "EXTERN %s %s %s", Id, Ip, TCP);
   free(TCPAnswer);
 
-  // if node is not an ancor, plug new back into host
+  // If the received node is not an anchor, update the host information and insert into the
+  // forwarding table
   if (strcmp(Id, HostNode->HostId) != 0) {
     HostNode->Bck = InitNode(Ip, atoi(TCP), Id, -1);
     InsertInForwardingTable(HostNode, atoi(HostNode->Ext->Id), atoi(HostNode->Bck->Id));
