@@ -32,3 +32,21 @@ void UpdateForwardingTable(Host *HostNode, char *LeavingId) {
 void InsertInForwardingTable(Host *HostNode, int neigh, int dest) {
   HostNode->ForTable[dest] = neigh;
 }
+
+Node *CheckForwardingTable(Host *HostNode, char *dest) {
+  int neigh = HostNode->ForTable[atoi(dest)];
+  if (neigh != -1) {
+
+    if (neigh == atoi(HostNode->Ext->Id)) {
+      return HostNode->Ext;
+
+    } else {
+      for (Node *Current = HostNode->NodeList; Current != NULL; Current = Current->next) {
+        if (neigh == atoi(Current->Id)) {
+          return Current;
+        }
+      }
+    }
+  }
+  return NULL;
+}

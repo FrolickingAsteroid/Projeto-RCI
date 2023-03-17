@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "queryMod.h"
 #include "socketInterface.h"
 #include "withdrawMod.h"
 #include "newMod.h"
@@ -28,7 +29,18 @@ void SocketInterfaceParser(char *Buffer, Host *HostNode, Node *SenderNode) {
   }
   if (strcmp(Token, "WITHDRAW") == 0) {
     ReceiveWithdrawMsg(HostNode, Buffer, SenderNode->Fd);
-  } else {
+  }
+  if (strcmp(Token, "QUERY") == 0) {
+    QueryHandle(HostNode, Buffer, SenderNode);
+  }
+  if (strcmp(Token, "CONTENT") == 0) {
+    ContentHandle(HostNode, Buffer, 1, SenderNode->Fd);
+  }
+  if (strcmp(Token, "NOCONTENT") == 0) {
+    ContentHandle(HostNode, Buffer, 0, SenderNode->Fd);
+  }
+
+  else {
     return;
   }
 }

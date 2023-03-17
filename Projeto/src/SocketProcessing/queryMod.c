@@ -46,10 +46,20 @@ void QueryHandle(Host *HostNode, char *Buffer, Node *SenderNode) {
       return;
     }
   }
-
-  // Forward the QUERY message to the all nodes
+  // Write QUERY message
   sprintf(Query, "QUERY %s %s %s\n", Dest, HostNode->HostId, Name);
-  SendProtocolMsg(HostNode, Query, SenderNode->Fd);
+
+  // Check if path to destiny is known
+  Node *Neigh = CheckForwardingTable(HostNode, Dest);
+  if (Neigh != NULL) {
+    if (write(Neigh->Fd, Query, 1024) == -1) {
+      // DO SOMETHING
+    }
+
+  } else {
+    // Forward the QUERY message to the all nodes
+    SendProtocolMsg(HostNode, Query, SenderNode->Fd);
+  }
 }
 
 /**
@@ -87,5 +97,41 @@ void SendNoContent(int neighFd, char *Dest, char *Orig, char *Name) {
   // Write the NOCONTENT message to the neighboring node
   if (write(neighFd, msg, 512) == -1) {
     // DO SOMETHING
+  }
+}
+
+void ContentHandle(Host *HostNode, char *Buffer, int ContentFlag, int SenderFd) {
+  char Dest[TOKENSIZE] = "";
+  char Orig[TOKENSIZE] = "";
+  char Name[TOKENSIZE] = "";
+
+  // Received CONTENT message
+  if (ContentFlag) {
+    sscanf(Buffer, "CONTENT %s %s %s", Dest, Orig, Name);
+
+    // Chek if msg reached destiny
+    if (strcmp(HostNode->HostId, Dest) == 0) {
+      fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message was found in %s\n", Orig);
+      return;
+    }
+  } else {
+    sscanf(Buffer, "NOCONTENT %s %s %s", Dest, Orig, Name);
+
+    if (strcmp(HostNode->HostId, Dest) == 0) {
+      fprintf(stdout, RED "☒ FAILURE > " RESET "Message was not found in %s\n", Orig);
+      return;
+    }
+  }
+
+  // Check if path to destiny is known
+  Node *Neigh = CheckForwardingTable(HostNode, Dest);
+  if (Neigh != NULL) {
+    if (write(Neigh->Fd, Buffer, 1024) == -1) {
+      // DO SOMETHING
+    }
+
+  } else {
+    // Forward the CONTENT/NOCONTENT message to the all nodes
+    SendProtocolMsg(HostNode, Buffer, SenderFd);
   }
 }
