@@ -25,6 +25,7 @@ extern int errno;
 void DieWithUsr(const char *msg, const char *detail);
 void DieWithSys(const char *msg);
 int IsNumber(char *str);
+int IsAlphanumeric(char *str);
 void Usage(char *name);
 void CommandNotFound(char *Command, char *msg);
 void ServerAnswer(char *UDPAnswer);

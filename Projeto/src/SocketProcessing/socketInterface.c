@@ -16,7 +16,7 @@
  * @param buffer: The buffer containing the received protocol
  * @param hostNode: The pointer to the host node receiving the protocol
  */
-void SocketInterfaceParser(char *Buffer, Host *HostNode, int SenderFd) {
+void SocketInterfaceParser(char *Buffer, Host *HostNode, Node *SenderNode) {
   char Token[64] = "";
 
   // Parse type of message from buffer
@@ -27,7 +27,7 @@ void SocketInterfaceParser(char *Buffer, Host *HostNode, int SenderFd) {
     ExternHandle(Buffer, HostNode);
   }
   if (strcmp(Token, "WITHDRAW") == 0) {
-    ReceiveWithdrawMsg(HostNode, Buffer, SenderFd);
+    ReceiveWithdrawMsg(HostNode, Buffer, SenderNode->Fd);
   } else {
     return;
   }
@@ -51,6 +51,8 @@ void SendProtocolMsg(Host *HostNode, char *msg, int SenderFd) {
     if (SenderFd == temp->Fd) {
       continue;
     }
+
+    printf("sent to neighbour: %s\n", temp->Id);
     if (write(temp->Fd, msg, MsgLen) == -1) {
       // if connection is not available continue
       perror("Function LeaveNetwork >> " RED "☠  write() failed");
@@ -59,7 +61,7 @@ void SendProtocolMsg(Host *HostNode, char *msg, int SenderFd) {
   }
 
   // send protocol to extern
-  if (SenderFd != HostNode->Ext->Fd && HostNode->Ext != NULL) {
+  if (HostNode->Ext != NULL && SenderFd != HostNode->Ext->Fd) {
     if (write(HostNode->Ext->Fd, msg, MsgLen) == -1) {
       perror("Function LeaveNetwork >> " RED "☠  write() failed");
     }

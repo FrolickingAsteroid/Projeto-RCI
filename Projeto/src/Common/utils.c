@@ -26,7 +26,7 @@ void Usage(char *name) {
                       "\t  to 193.136.138.142 and 59000 respectively.\n\n");
 }
 
-// Error Message and close -- might need tweeking
+// Error Message and close -- might need tweaking
 void DieWithUsr(const char *msg, const char *detail) {
   fputs(RED, stderr);
   fputs("[☠ ] ", stderr);
@@ -57,6 +57,26 @@ int IsNumber(char *str) {
   for (int i = 0; i < (int)strlen(str); i++) {
     if (isdigit(str[i]) == 0)
       return 0;
+  }
+  return 1;
+}
+
+/**
+ * @brief Check if a string contains only alphanumeric characters.
+ *
+ * This function iterates through each character in the given string
+ * and checks if all characters are alphanumeric. If a non-alphanumeric
+ * character is found, it returns 0 (false). If all characters are
+ * alphanumeric, it returns 1 (true).
+ *
+ * @param str: The input string to check for alphanumeric characters.
+ * @return 1 if all characters in the string are alphanumeric, 0 otherwise.
+ */
+int IsAlphanumeric(char *str) {
+  for (size_t i = 0; str[i] != '\0'; i++) {
+    if (!isalnum(str[i])) {
+      return 0;
+    }
   }
   return 1;
 }

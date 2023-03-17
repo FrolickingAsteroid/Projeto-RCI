@@ -5,6 +5,6 @@
 #include "../Protocols/TCP.h"
 #include "../Common/utils.h"
 
-void SocketInterfaceParser(char *Buffer, Host *HostNode, int SenderFd);
+void SocketInterfaceParser(char *Buffer, Host *HostNode, Node *SenderNode);
 void SendProtocolMsg(Host *HostNode, char *msg, int SenderFd);
 #endif

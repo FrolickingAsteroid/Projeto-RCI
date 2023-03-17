@@ -95,9 +95,12 @@ void ShowNames(Host *HostNode) {
 
   // Check if NameList is not empty
   if (HostNode->NameList != NULL) {
-    // Iterate through NameList and print the content of each name
+    int itemNumber = 1; // Initialize item number counter
+
+    // Iterate through NameList and print the content of each name with item number
     for (Name *Current = HostNode->NameList; Current != NULL; Current = Current->next) {
-      printf("%s\n", Current->Content);
+      printf(GRN "%d." RESET " %s\n", itemNumber, Current->Content);
+      itemNumber++; // Increment item number counter
     }
   }
 }

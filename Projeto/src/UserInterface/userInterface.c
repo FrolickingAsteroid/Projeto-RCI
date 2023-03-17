@@ -51,10 +51,21 @@ void UserInterfaceParser(char *buffer, Host *HostNode) {
   } else if (strcmp(Command, "sr") == 0) {
     ShowForwardingTable(HostNode);
 
+  } else if (strcmp(Command, "sn") == 0) {
+    ShowNames(HostNode);
+
   } else if (strcmp(Command, "show") == 0) {
     ShowParser(HostNode, buffer);
+
   } else if (strcmp(Command, "get") == 0) {
     GetName(HostNode, buffer);
+
+  } else if (strcmp(Command, "create") == 0) {
+    CreateName(HostNode, buffer);
+
+  } else if (strcmp(Command, "delete") == 0) {
+    DeleteName(HostNode, buffer);
+
   } else {
     CommandNotFound("Command not found", buffer);
     return;

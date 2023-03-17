@@ -130,7 +130,6 @@ void LiberateHost(Host *HostNode) {
   while (HostNode->NameList != NULL) {
     AuxName = HostNode->NameList;
     HostNode->NameList = HostNode->NameList->next;
-    free(AuxName->Content);
     free(AuxName);
   }
 }

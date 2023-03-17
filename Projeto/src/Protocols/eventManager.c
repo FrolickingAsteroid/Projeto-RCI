@@ -94,7 +94,7 @@ void EventManager(Host *HostNode) {
         WithdrawHandle(HostNode, HostNode->Ext->Id, HostNode->Ext->Fd);
         continue;
       }
-      SocketInterfaceParser(buffer, HostNode, HostNode->Ext->Fd);
+      SocketInterfaceParser(buffer, HostNode, HostNode->Ext);
       continue;
     }
 
@@ -107,7 +107,7 @@ void EventManager(Host *HostNode) {
           WithdrawHandle(HostNode, current->Id, current->Fd);
           break;
         }
-        SocketInterfaceParser(buffer, HostNode, current->Fd);
+        SocketInterfaceParser(buffer, HostNode, current);
         break;
       }
       current = current->next;
