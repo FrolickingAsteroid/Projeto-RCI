@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <ctype.h>
 
 #include "getMod.h"
 #include "../Common/utils.h"
 #include "../HostStruct/Name.h"
+#include "../HostStruct/forwardingTable.h"
 #include "../SocketProcessing/socketInterface.h"
 #include "joinMod.h"
 
@@ -21,10 +23,21 @@ void GetName(Host *HostNode, char *Buffer) {
   }
   if (strcmp(Dest, HostNode->HostId) == 0) {
     if (NameExists(HostNode, Name)) {
-      fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been found\n");
+      fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been found in %s\n", HostNode->HostId);
     }
   }
+
   sprintf(Query, "QUERY %s %s %s\n", Dest, HostNode->HostId, Name);
+
+  // Check if path to destiny is known
+  Node *Neigh = CheckForwardingTable(HostNode, Dest);
+  if (Neigh != NULL) {
+    if (write(Neigh->Fd, Query, 1024) == -1) {
+      // DO SOMETHING
+    }
+    return;
+  }
+
   SendProtocolMsg(HostNode, Query, -1);
 }
 

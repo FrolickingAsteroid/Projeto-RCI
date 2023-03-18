@@ -49,7 +49,7 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
   }
 
   // check if Id is already in use
-  CheckSingularityId(UDPAnswer, &Id);
+  CheckSingularityId(HostNode, UDPAnswer, &Id);
 
   // Return Djoin command, NULL if list is empty
   DjoinMsg = ExternFetch(UDPAnswer, Net, Id);
@@ -61,7 +61,7 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
           HostNode->InvocInfo->HostTCP);
 
   UDPAnswer = UDPClient(HostNode, msg);
-  if (strcmp(UDPAnswer, "OKREG") != 0) {
+  if (UDPAnswer == NULL || strcmp(UDPAnswer, "OKREG") != 0) {
     free(UDPAnswer), free(DjoinMsg); // free allocated Djoin message, can't communicate
                                      // with server
     return;
@@ -90,12 +90,23 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
  * @param nodelist: The list of registered nodes.
  * @param Id: A pointer to the ID to be checked/updated.
  */
-void CheckSingularityId(char *Nodelist, char (*Id)[BUFSIZE]) {
-  char DelId[BUFSIZE] = "";
+void CheckSingularityId(Host *HostNode, char *Nodelist, char (*Id)[BUFSIZE]) {
+  char DelId[BUFSIZE] = "", Ip[16] = "";
+  int Port;
 
   sprintf(DelId, "\n%s ", (*Id));
+  char *NodePt = strstr(Nodelist, DelId);
 
-  if (strstr(Nodelist, DelId) == NULL) {
+  // check if Id is on the list
+  if (NodePt == NULL) {
+    return;
+  }
+  // if id is on the list check if port and ip are the same
+  if (sscanf(NodePt, "%*s %s %d", Ip, &Port) < 2) {
+    DieWithSys("sscanf failed");
+  }
+  // if true, return
+  if (strcmp(Ip, HostNode->InvocInfo->HostIP) == 0 && Port == HostNode->InvocInfo->HostTCP) {
     return;
   }
   while (strstr(Nodelist, DelId) != NULL) {

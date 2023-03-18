@@ -9,7 +9,7 @@ void DJoinNetworkServer(char buffer[], Host *HostNode);
 int CheckNetAndId(char *Net, char *Id);
 int CheckNumberOfArgs(char *Buffer, int ArgNumber);
 int BootArgsCheck(char *BootId, char *BootIp, char *BootTCP);
-void CheckSingularityId(char *Nodelist, char (*Id)[128]);
+void CheckSingularityId(Host *HostNode, char *Nodelist, char (*Id)[128]);
 void SendNewMsg(Host *HostNode, char *HostId, char *BootIp, char *BootTCP);
 
 #endif

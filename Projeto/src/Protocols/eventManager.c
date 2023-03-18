@@ -94,7 +94,11 @@ void EventManager(Host *HostNode) {
         WithdrawHandle(HostNode, HostNode->Ext->Id, HostNode->Ext->Fd);
         continue;
       }
-      SocketInterfaceParser(buffer, HostNode, HostNode->Ext);
+
+      // iterate through buffer with more than one msg
+      for (char *msg = strtok(buffer, "\n"); msg != NULL; msg = strtok(NULL, "\n")) {
+        SocketInterfaceParser(msg, HostNode, HostNode->Ext);
+      }
       continue;
     }
 
@@ -107,7 +111,11 @@ void EventManager(Host *HostNode) {
           WithdrawHandle(HostNode, current->Id, current->Fd);
           break;
         }
-        SocketInterfaceParser(buffer, HostNode, current);
+
+        // iterate through buffer with more than one msg
+        for (char *msg = strtok(buffer, "\n"); msg != NULL; msg = strtok(NULL, "\n")) {
+          SocketInterfaceParser(msg, HostNode, current);
+        }
         break;
       }
       current = current->next;

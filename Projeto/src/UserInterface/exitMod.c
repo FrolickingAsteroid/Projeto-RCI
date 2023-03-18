@@ -42,7 +42,7 @@ void LeaveNetwork(Host *HostNode) {
   }
 
   // unplug connections from node structures
-  fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Left network %s with success\n", HostNode->Net);
+  fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Left network %s\n", HostNode->Net);
   LiberateHost(HostNode);
   free(UDPAnswer);
 }

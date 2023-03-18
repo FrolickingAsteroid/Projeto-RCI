@@ -110,7 +110,7 @@ void ReceiveWithdrawMsg(Host *HostNode, char *Buffer, int SenderFd) {
   char LeavingId[64] = "";
 
   // debug
-  printf("\n%s\n", Buffer);
+  printf("received '%s'", Buffer);
 
   if (sscanf(Buffer, "WITHDRAW %s", LeavingId) < 1) {
     return;
