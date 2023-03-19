@@ -21,7 +21,6 @@ void QueryHandle(Host *HostNode, char *Buffer, Node *SenderNode) {
   char Dest[TOKENSIZE] = "";
   char Orig[TOKENSIZE] = "";
   char Name[TOKENSIZE] = "";
-  char Query[TOKENSIZE << 2] = "";
 
   // Parse the QUERY message
   if (sscanf(Buffer, "QUERY %s %s %s", Dest, Orig, Name) < 3) {
@@ -46,19 +45,17 @@ void QueryHandle(Host *HostNode, char *Buffer, Node *SenderNode) {
       return;
     }
   }
-  // Write QUERY message
-  sprintf(Query, "QUERY %s %s %s\n", Dest, HostNode->HostId, Name);
 
   // Check if path to destiny is known
   Node *Neigh = CheckForwardingTable(HostNode, Dest);
   if (Neigh != NULL) {
-    if (write(Neigh->Fd, Query, 1024) == -1) {
+    if (write(Neigh->Fd, Buffer, 1024) == -1) {
       // DO SOMETHING
     }
 
   } else {
     // Forward the QUERY message to the all nodes
-    SendProtocolMsg(HostNode, Query, SenderNode->Fd);
+    SendProtocolMsg(HostNode, Buffer, SenderNode->Fd);
   }
 }
 
@@ -100,38 +97,41 @@ void SendNoContent(int neighFd, char *Dest, char *Orig, char *Name) {
   }
 }
 
-void ContentHandle(Host *HostNode, char *Buffer, int ContentFlag, int SenderFd) {
+void ContentHandle(Host *HostNode, char *Buffer, int ContentFlag, Node *SenderNode) {
   char Dest[TOKENSIZE] = "";
   char Orig[TOKENSIZE] = "";
   char Name[TOKENSIZE] = "";
 
-  // Received CONTENT message
+  printf("content handle: %s\n", Buffer);
+
+  // Parse the message based on the ContentFlag
   if (ContentFlag) {
     sscanf(Buffer, "CONTENT %s %s %s", Dest, Orig, Name);
-
-    // Chek if msg reached destiny
-    if (strcmp(HostNode->HostId, Dest) == 0) {
-      fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message was found in %s\n", Orig);
-      return;
-    }
   } else {
     sscanf(Buffer, "NOCONTENT %s %s %s", Dest, Orig, Name);
-
-    if (strcmp(HostNode->HostId, Dest) == 0) {
-      fprintf(stdout, RED "☒ FAILURE > " RESET "Message was not found in %s\n", Orig);
-      return;
-    }
   }
 
-  // Check if path to destiny is known
+  // Insert into forwarding table the new path
+  InsertInForwardingTable(HostNode, atoi(SenderNode->Id), atoi(Orig));
+
+  // Check if the message reached its destination
+  if (strcmp(HostNode->HostId, Dest) == 0) {
+    if (ContentFlag) {
+      fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message was found in %s\n", Orig);
+    } else {
+      fprintf(stdout, RED "☒ FAILURE > " RESET "Message was not found in %s\n", Orig);
+    }
+    return;
+  }
+
+  // Check if the path to the destination is known
   Node *Neigh = CheckForwardingTable(HostNode, Dest);
   if (Neigh != NULL) {
     if (write(Neigh->Fd, Buffer, 1024) == -1) {
       // DO SOMETHING
     }
-
   } else {
-    // Forward the CONTENT/NOCONTENT message to the all nodes
-    SendProtocolMsg(HostNode, Buffer, SenderFd);
+    // Forward the CONTENT/NOCONTENT message to all nodes
+    SendProtocolMsg(HostNode, Buffer, SenderNode->Fd);
   }
 }

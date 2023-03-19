@@ -34,10 +34,10 @@ void SocketInterfaceParser(char *Buffer, Host *HostNode, Node *SenderNode) {
     QueryHandle(HostNode, Buffer, SenderNode);
   }
   if (strcmp(Token, "CONTENT") == 0) {
-    ContentHandle(HostNode, Buffer, 1, SenderNode->Fd);
+    ContentHandle(HostNode, Buffer, 1, SenderNode);
   }
   if (strcmp(Token, "NOCONTENT") == 0) {
-    ContentHandle(HostNode, Buffer, 0, SenderNode->Fd);
+    ContentHandle(HostNode, Buffer, 0, SenderNode);
   }
 
   else {

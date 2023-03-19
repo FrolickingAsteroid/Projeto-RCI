@@ -10,11 +10,12 @@
 #define UTILS_H
 
 // ANSI color codes for printing colored output to the console
-#define KMAG "\x1B[35m"
 #define RESET "\x1B[0m"
 #define RED "\x1B[31m"
-#define BLU "\x1B[34m"
 #define GRN "\x1B[32m"
+#define YEL "\x1B[33m"
+#define BLU "\x1B[34m"
+#define KMAG "\x1B[35m"
 
 // Clear the console screen
 #define clear() printf("\033[H\033[J")

@@ -5,5 +5,5 @@
 void QueryHandle(Host *HostNode, char *Buffer, Node *SenderNode);
 void SendContent(int neighFd, char *Dest, char *Orig, char *Name);
 void SendNoContent(int neighFd, char *Dest, char *Orig, char *Name);
-void ContentHandle(Host *HostNode, char *Buffer, int ContentFlag, int SenderFd);
+void ContentHandle(Host *HostNode, char *Buffer, int ContentFlag, Node *SenderNode);
 #endif
