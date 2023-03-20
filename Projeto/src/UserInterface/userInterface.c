@@ -2,17 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "userInterface.h"
 #include "joinMod.h"
 #include "exitMod.h"
 #include "showMod.h"
 #include "getMod.h"
-#include "userInterface.h"
+
+#include "../Common/utils.h"
+
 /**
  * @brief Parses user input command and calls processing functions.
  *
  * This function parses the user input command from the given buffer and executes the
  * corresponding function based on the command. The supported commands are "join",
- * "djoin", "clear", "leave", "exit", and "st" (...).
+ * "djoin", "clear", "leave", "exit","show", "st", "sr", "sn", "create", "delete", "get" and "help".
  *
  * @param buffer The buffer containing the user input command.
  * @param HostNode A pointer to the host node struct.
@@ -65,6 +68,9 @@ void UserInterfaceParser(char *buffer, Host *HostNode) {
 
   } else if (strcmp(Command, "delete") == 0) {
     DeleteName(HostNode, buffer);
+
+  } else if (strcmp(Command, "help") == 0) {
+    InterfaceUsage();
 
   } else {
     CommandNotFound("Command not found", buffer);

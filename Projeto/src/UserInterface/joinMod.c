@@ -12,6 +12,46 @@
 #define BUFSIZE 128
 
 /**
+ * @brief Frees allocated memory for UDPAnswer and DjoinMsg if they are not NULL.
+ *
+ * This helper function frees the memory allocated for UDPAnswer and DjoinMsg if they
+ * are not NULL. It is used to clean up resources when they are no longer needed.
+ *
+ * @param UDPAnswer: Pointer to the memory allocated for the UDP answer.
+ * @param DjoinMsg: Pointer to the memory allocated for the Djoin message.
+ */
+static void CleanupResources(char *UDPAnswer, char *DjoinMsg) {
+  if (UDPAnswer) {
+    free(UDPAnswer);
+  }
+  if (DjoinMsg) {
+    free(DjoinMsg);
+  }
+}
+
+/**
+ * @brief Validates a server response against an expected prefix.
+ *
+ * This helper function checks if the given server response is not NULL and if it
+ * contains the expected prefix. If the response is valid, it returns 1, otherwise it
+ * returns 0 and displays an error message.
+ *
+ * @param response: Pointer to the server response string.
+ * @param ExpectedPrefix: Pointer to the expected prefix string.
+ * @return 1 if the server response is valid, 0 otherwise.
+ */
+static int ValidateServerResponse(char *response, char *ExpectedPrefix) {
+  if (response == NULL) {
+    return 0;
+  }
+  if (strstr(response, ExpectedPrefix) != NULL) {
+    return 1;
+  }
+  CommandNotFound("Server Answer", response);
+  return 0;
+}
+
+/**
  * @brief Joins a network server with the specified network and ID.
  *
  * This function retrieves command arguments and checks their validity. It then sends a
@@ -26,34 +66,31 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
   char Net[BUFSIZE] = " ", Id[BUFSIZE] = " ", msg[BUFSIZE << 2] = "";
   char *UDPAnswer = NULL, *DjoinMsg = NULL;
 
+  // Retrieve command args and check their validity
+  sscanf(buffer, "join %s %s", Net, Id);
+  if (!(CheckNetAndId(Net, Id) && CheckNumberOfArgs(buffer, 2))) {
+    CommandNotFound("Invalid argument invocation", buffer);
+    return;
+  }
   // Check if node is already in a network
   if (HostNode->Net != NULL) {
     CommandNotFound("Host is already registered in a network, leave before rejoining", buffer);
     return;
   }
 
-  // Retrieve command args and check their validity
-  sscanf(buffer, "join %s %s", Net, Id);
-  if (!(CheckNetAndId(Net, Id) && CheckNumberOfArgs(buffer, 2))) {
-    CommandNotFound("Invalid argument format", buffer);
-    return;
-  }
-
-  // Ask for NODELIST -> NODES Net
   sprintf(msg, "NODES %s", Net);
   UDPAnswer = UDPClient(HostNode, msg);
 
-  // Wait for NODELIST, if recvfrom() returns nothing, return
-  if (UDPAnswer == NULL) {
+  // if recvfrom() returns nothing or an error message, return
+  if (!ValidateServerResponse(UDPAnswer, "NODESLIST")) {
     return;
   }
 
-  // check if Id is already in use
   CheckSingularityId(HostNode, UDPAnswer, &Id);
 
-  // Return Djoin command, NULL if list is empty
+  // Return Djoin command for TCP connection
   DjoinMsg = ExternFetch(UDPAnswer, Net, Id);
-  free(UDPAnswer);
+  CleanupResources(UDPAnswer, NULL);
 
   // Resets msg buffer and registers in the network
   memset(msg, 0, strlen(msg));
@@ -61,22 +98,20 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
           HostNode->InvocInfo->HostTCP);
 
   UDPAnswer = UDPClient(HostNode, msg);
-  if (UDPAnswer == NULL || strcmp(UDPAnswer, "OKREG") != 0) {
-    free(UDPAnswer), free(DjoinMsg); // free allocated Djoin message, can't communicate
-                                     // with server
-    return;
-  }
 
+  if (!ValidateServerResponse(UDPAnswer, "OKREG")) {
+    CleanupResources(UDPAnswer, DjoinMsg);
+  }
   // Check if there are no nodes in the network, bypasses djoin function
   if (DjoinMsg == NULL) {
-    free(UDPAnswer), PlugHostNetId(Net, Id, HostNode);
+    CleanupResources(UDPAnswer, NULL);
+    PlugHostNetId(Net, Id, HostNode);
     return;
   }
 
   // Free UDP server allocated answer and Djoin message before leaving function
-  free(UDPAnswer);
   DJoinNetworkServer(DjoinMsg, HostNode);
-  free(DjoinMsg);
+  CleanupResources(UDPAnswer, DjoinMsg);
 }
 
 /**

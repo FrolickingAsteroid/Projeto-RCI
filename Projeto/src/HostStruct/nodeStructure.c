@@ -5,6 +5,7 @@
 
 #include "forwardingTable.h"
 #include "nodeStructure.h"
+#include "Name.h"
 
 /**
  * @brief
@@ -107,8 +108,6 @@ void FreeNode(Node *Node) {
 }
 
 void LiberateHost(Host *HostNode) {
-  Node *AuxNode = NULL;
-  Name *AuxName = NULL;
   FreeNode(HostNode->Ext);
   FreeNode(HostNode->Bck);
 
@@ -121,16 +120,15 @@ void LiberateHost(Host *HostNode) {
   HostNode->Net = NULL;
   HostNode->HostId = NULL;
 
-  while (HostNode->NodeList != NULL) {
-    AuxNode = HostNode->NodeList;
-    HostNode->NodeList = HostNode->NodeList->next;
-    FreeNode(AuxNode);
-  }
+  FreeNodeList(HostNode->NodeList);
+  FreeNameList(HostNode->NameList);
+}
 
-  while (HostNode->NameList != NULL) {
-    AuxName = HostNode->NameList;
-    HostNode->NameList = HostNode->NameList->next;
-    free(AuxName);
+void FreeNodeList(Node *NodeList) {
+  Node *AuxNode = NULL;
+  while (NodeList != NULL) {
+    AuxNode = NodeList, NodeList = NodeList->next;
+    FreeNode(AuxNode);
   }
 }
 

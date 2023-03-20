@@ -71,7 +71,7 @@ void CreateName(Host *HostNode, char *Buffer) {
   Name *NewName = CreateNewName(Content);
   AddNameToHost(HostNode, NewName);
 
-  fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been added with success\n");
+  fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been added\n");
 }
 
 /**

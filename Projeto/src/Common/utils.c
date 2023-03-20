@@ -82,23 +82,23 @@ int IsAlphanumeric(char *str) {
 }
 
 /**
- * @brief Prints a warning message to stderr indicating that a command was not found.
+ * @brief Prints a warning message to stderr indicating that a command was incorrect.
  *
  * The function prints a warning message to the standard error output stream (stderr)
- * indicating that the specified command was not found. The message includes the name
+ * indicating that the specified command was incorrect. The message includes the name
  * of the command and an additional appropriate message.
  *
- * @param Command: A string containing the name of the command that was not found.
+ * @param Command: A string containing the name of the command.
  * @param msg: A string containing an appropriate message to include in the output.
  */
-void CommandNotFound(char *Command, char *msg) {
+void CommandNotFound(char *msg, char *Command) {
 
   fputs(RED, stderr);
   fputs("🚩 WARNING > ", stderr);
   fputs(RESET, stderr);
-  fputs(Command, stderr);
-  fputs(": ", stderr);
   fputs(msg, stderr);
+  fputs(": ", stderr);
+  fputs(Command, stderr);
 }
 
 // ----------debug-----------------//
@@ -121,22 +121,41 @@ void ServerAnswer(char *UDPAnswer) {
  * descriptions to the console.
  */
 void InterfaceUsage() {
-  printf("%sYou can use one of the following commands:%s\n\n", GRN, RESET);
-  printf("  %-40sAdds a node with the given identifier to the network. If the identifier\n",
-         "join net id:");
-  printf("  %-40sAdds a node with the given identifier to the network, using the "
-         "provided boot node for initial connection.\n",
-         "djoin net id bootid bootIP bootTCP:");
-  printf("  %-40sCreates a content item with the given name.\n", "create name:");
-  printf("  %-40sDeletes the content item with the given name.\n", "delete name:");
-  printf("  %-40sSearches for the content item with the given name on the specified "
-         "destination node.\n",
-         "get dest name:");
-  printf("  %-40sDisplays the identifiers and contacts of the internal neighbors, "
-         "external neighbor, and recovery neighbor.\n",
-         "show topology (st):");
-  printf("  %-40sDisplays the names of content items present on the node.\n", "show names (sn):");
-  printf("  %-40sDisplays the node's forwarding table.\n", "show routing (sr):");
-  printf("  %-40sExits the node from the network.\n", "leave:");
-  printf("  %-40sCloses the application.\n\n", "exit:");
+
+  printf(GRN "+---------------------------------------------------------------+\n");
+  printf("|                       Usage Guide                             |\n");
+  printf("+---------------------------+-----------------------------------+\n" RESET);
+  printf("| join net id:              | Registers a node with the given   |\n");
+  printf("|                           | identifier to the network.        |\n");
+  printf("+---------------------------+-----------------------------------+\n");
+  printf("| djoin net id bootid bootIP| Adds a node with the given        |\n");
+  printf("| bootTCP:                  | identifier to the network, using  |\n");
+  printf("|                           | the provided boot node for        |\n");
+  printf("|                           | initial connection.               |\n");
+  printf("+---------------------------+-----------------------------------+\n");
+  printf("| create name:              | Creates a content item with the   |\n");
+  printf("|                           | given name.                       |\n");
+  printf("+---------------------------+-----------------------------------+\n");
+  printf("| delete name:              | Deletes the content item with     |\n");
+  printf("|                           | the given name.                   |\n");
+  printf("+---------------------------+-----------------------------------+\n");
+  printf("| get dest name:            | Searches for the content item     |\n");
+  printf("|                           | with the given name on the        |\n");
+  printf("|                           | specified destination node.       |\n");
+  printf("+---------------------------+-----------------------------------+\n");
+  printf("| show topology (st):       | Displays the identifiers and      |\n");
+  printf("|                           | contacts of the internal          |\n");
+  printf("|                           | neighbors, external neighbor,     |\n");
+  printf("|                           | and recovery neighbor.            |\n");
+  printf("+---------------------------+-----------------------------------+\n");
+  printf("| show names (sn):          | Displays the names of content     |\n");
+  printf("|                           | items present on the node.        |\n");
+  printf("+---------------------------+-----------------------------------+\n");
+  printf("| show routing (sr):        | Displays the node's forwarding    |\n");
+  printf("|                           | table.                            |\n");
+  printf("+---------------------------+-----------------------------------+\n");
+  printf("| leave:                    | Exits the node from the network.  |\n");
+  printf("+---------------------------+-----------------------------------+\n");
+  printf("| exit:                     | Closes the application.           |\n");
+  printf("+---------------------------+-----------------------------------+\n");
 }

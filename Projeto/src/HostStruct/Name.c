@@ -46,3 +46,12 @@ int NameExists(Host *HostNode, char *Name) {
   }
   return 0;
 }
+
+void FreeNameList(Name *NameList) {
+  Name *AuxName = NULL;
+  while (NameList != NULL) {
+    AuxName = NameList;
+    NameList = NameList->next;
+    free(AuxName);
+  }
+}

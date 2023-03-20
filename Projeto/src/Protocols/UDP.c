@@ -10,7 +10,7 @@
 #include "UDP.h"
 #include "../Common/retry.h"
 
-#define MAXSIZE 1024
+#define MAXSIZE 4096
 
 char *UDPClient(Host *HostNode, char *msg) {
 
@@ -34,8 +34,8 @@ char *UDPClient(Host *HostNode, char *msg) {
   ServerAddr.sin_port = htons((in_port_t)HostNode->InvocInfo->RegUDP);
 
   // Send message to server
-  if (SendtoRetry(Fd, msg, strlen(msg), 0, (struct sockaddr *)&ServerAddr, sizeof(ServerAddr),
-                  "sendto()") == -1) {
+  if (SendtoRetry(Fd, msg, strlen(msg), 0, (struct sockaddr *)&ServerAddr, sizeof(ServerAddr)) ==
+      -1) {
     perror("Function UDPServer >> " RED "☠  sendto() failed");
     close(Fd);
     return NULL;
