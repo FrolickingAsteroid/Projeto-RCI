@@ -72,6 +72,12 @@ void UserInterfaceParser(char *buffer, Host *HostNode) {
   } else if (strcmp(Command, "help") == 0) {
     InterfaceUsage();
 
+  } else if (strcmp(Command, "verbose") == 0) {
+    Verbose = 1;
+
+  } else if (strcmp(Command, "quiet") == 0) {
+    Verbose = 0;
+
   } else {
     CommandNotFound("Command not found", buffer);
     return;

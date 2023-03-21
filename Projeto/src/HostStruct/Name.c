@@ -4,6 +4,7 @@
 
 #include "Name.h"
 #include "../Common/utils.h"
+#include "nodeStructure.h"
 
 /**
  * Create a new Name struct from the given buffer.
@@ -47,11 +48,12 @@ int NameExists(Host *HostNode, char *Name) {
   return 0;
 }
 
-void FreeNameList(Name *NameList) {
+void FreeNameList(Host *HostNode) {
   Name *AuxName = NULL;
-  while (NameList != NULL) {
-    AuxName = NameList;
-    NameList = NameList->next;
+  while (HostNode->NameList != NULL) {
+    AuxName = HostNode->NameList;
+    HostNode->NameList = HostNode->NameList->next;
     free(AuxName);
   }
+  HostNode->NameList = NULL;
 }

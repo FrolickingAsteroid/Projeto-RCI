@@ -8,7 +8,7 @@
 #include "../Protocols/TCP.h"
 #include "../Protocols/UDP.h"
 #include "../Common/formatChecking.h"
-
+#include "../Common/utils.h"
 #define BUFSIZE 128
 
 /**
@@ -69,7 +69,7 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
   // Retrieve command args and check their validity
   sscanf(buffer, "join %s %s", Net, Id);
   if (!(CheckNetAndId(Net, Id) && CheckNumberOfArgs(buffer, 2))) {
-    CommandNotFound("Invalid argument invocation", buffer);
+    CommandNotFound("Invalid argument invocation, type 'help' for usage", buffer);
     return;
   }
   // Check if node is already in a network
@@ -101,6 +101,7 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
 
   if (!ValidateServerResponse(UDPAnswer, "OKREG")) {
     CleanupResources(UDPAnswer, DjoinMsg);
+    return;
   }
   // Check if there are no nodes in the network, bypasses djoin function
   if (DjoinMsg == NULL) {
@@ -149,7 +150,8 @@ void CheckSingularityId(Host *HostNode, char *Nodelist, char (*Id)[BUFSIZE]) {
     sprintf(DelId, "\n%s ", (*Id));
   }
 
-  printf("\x1B[31m🚩 WARNING >\x1B[0m Id already registered in the network, using Id %s\n", (*Id));
+  fprintf(stderr, RED "🚩 WARNING >" RESET " Id already registered in the network, using Id %s\n",
+          (*Id));
 }
 
 /**
@@ -209,7 +211,7 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
   if (HostNode->type == DJOIN) {
     if (!(CheckNumberOfArgs(buffer, 5) && BootArgsCheck(BootId, BootIp, BootTCP) &&
           CheckNetAndId(Net, Id))) {
-      CommandNotFound("Invalid argument format", buffer);
+      CommandNotFound("Invalid argument invocation, type 'help' for usage", buffer);
       return;
     }
   }
@@ -256,6 +258,7 @@ void SendNewMsg(Host *HostNode, char *HostId, char *BootIp, char *BootTCP) {
     free(TCPAnswer);
     return;
   }
+  /*! TODO: Parser for EXTERN*/
 
   // Parse the received response and extract the external host information
   sscanf(TCPAnswer, "EXTERN %s %s %s", Id, Ip, TCP);

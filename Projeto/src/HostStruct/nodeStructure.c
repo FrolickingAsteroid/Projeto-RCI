@@ -120,16 +120,17 @@ void LiberateHost(Host *HostNode) {
   HostNode->Net = NULL;
   HostNode->HostId = NULL;
 
-  FreeNodeList(HostNode->NodeList);
-  FreeNameList(HostNode->NameList);
+  FreeNodeList(HostNode);
+  FreeNameList(HostNode);
 }
 
-void FreeNodeList(Node *NodeList) {
+void FreeNodeList(Host *HostNode) {
   Node *AuxNode = NULL;
-  while (NodeList != NULL) {
-    AuxNode = NodeList, NodeList = NodeList->next;
+  while (HostNode->NodeList != NULL) {
+    AuxNode = HostNode->NodeList, HostNode->NodeList = HostNode->NodeList->next;
     FreeNode(AuxNode);
   }
+  HostNode->NodeList = NULL;
 }
 
 void PlugIntern(char *Ip, int TCP, char *Id, int Fd, Host *HostNode) {

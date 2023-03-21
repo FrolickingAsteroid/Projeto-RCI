@@ -59,7 +59,6 @@ char *TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *Boot
 
   ExternAddr.sin_family = AF_INET;
   if (inet_pton(AF_INET, BootIp, &(ExternAddr.sin_addr)) != 1) {
-    errno = EFAULT; // set errno for inet_pton failure
     perror("Function TCPClientExternConnect >> inet_pton() failed");
     return NULL;
   }
@@ -105,6 +104,6 @@ char *SendTCPMessage(int Fd, char *msg) {
     free(Buffer);
     return NULL;
   }
-  ServerAnswer(Buffer);
+  ServerAnswer(Buffer, "TCP connection");
   return Buffer;
 }

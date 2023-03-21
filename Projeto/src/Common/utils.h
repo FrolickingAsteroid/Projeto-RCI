@@ -20,8 +20,7 @@
 // Clear the console screen
 #define clear() printf("\033[H\033[J")
 
-// Standard library error number
-extern int errno;
+extern int Verbose;
 
 void DieWithUsr(const char *msg, const char *detail);
 void DieWithSys(const char *msg);
@@ -29,7 +28,7 @@ int IsNumber(char *str);
 int IsAlphanumeric(char *str);
 void Usage(char *name);
 void CommandNotFound(char *Command, char *msg);
-void ServerAnswer(char *UDPAnswer);
+void ServerAnswer(char *Answer, char *place);
 void InterfaceUsage();
 
 #endif

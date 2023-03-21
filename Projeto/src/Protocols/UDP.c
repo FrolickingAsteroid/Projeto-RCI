@@ -8,16 +8,25 @@
 #include <unistd.h>
 
 #include "UDP.h"
+
+#include "../Common/utils.h"
 #include "../Common/retry.h"
 
+// Maximum buffer size for receiving server responses
 #define MAXSIZE 4096
 
+/**
+ * @brief Sends a message to a server via UDP and receives the server's response.
+ *
+ * @param HostNode: A pointer to the Host structure containing server connection information.
+ * @param msg: A pointer to the message string to be sent to the server.
+ *
+ * @return A pointer to the received server response string or NULL if an error occurred.
+ */
 char *UDPClient(Host *HostNode, char *msg) {
 
   // Set Timeout for Server answer
-  struct timeval tv;
-  tv.tv_sec = 15;
-  tv.tv_usec = 0;
+  struct timeval tv = {.tv_sec = 15, .tv_usec = 0};
 
   int Fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
   if (Fd == -1)
@@ -49,6 +58,7 @@ char *UDPClient(Host *HostNode, char *msg) {
   }
 
   char *Buffer = calloc(MAXSIZE, sizeof(char));
+
   // Receive server answer:
   socklen_t addrlen = sizeof(ServerAddr);
   if (retry(recvfrom, Fd, Buffer, MAXSIZE, 0, (struct sockaddr *)&ServerAddr, &addrlen) == -1) {
@@ -58,6 +68,6 @@ char *UDPClient(Host *HostNode, char *msg) {
     return NULL;
   }
   close(Fd);
-  ServerAnswer(Buffer);
+  ServerAnswer(Buffer, "UDP server");
   return Buffer;
 }

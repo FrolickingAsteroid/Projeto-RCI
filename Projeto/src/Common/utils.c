@@ -5,6 +5,8 @@
 
 #include "utils.h"
 
+int Verbose = 0;
+
 /**
   @brief Displays the usage of the program with the required and optional arguments.
   @param name the name of the program executable
@@ -102,15 +104,18 @@ void CommandNotFound(char *msg, char *Command) {
 }
 
 // ----------debug-----------------//
-void ServerAnswer(char *UDPAnswer) {
-  int len = (int)strlen(UDPAnswer);
-  if (UDPAnswer[len - 1] == '\n') {
-    UDPAnswer[len - 1] = 0;
+void ServerAnswer(char *Answer, char *place) {
+  int len = (int)strlen(Answer);
+  if (Verbose) {
+    if (Answer[len - 1] == '\n') {
+      Answer[len - 1] = 0;
+    }
+    fprintf(stdout, GRN "%s" RESET, place);
+    fputs(GRN " answer:" RESET, stdout);
+    fputs("\n", stdout);
+    fputs(Answer, stdout);
+    fputs(GRN "\n---\n" RESET, stdout);
   }
-  fputs(GRN "Server answer:" RESET, stdout);
-  fputs("\n", stdout);
-  fputs(UDPAnswer, stdout);
-  fputs(GRN "\n---\n" RESET, stdout);
 }
 // ------------------------------ //
 

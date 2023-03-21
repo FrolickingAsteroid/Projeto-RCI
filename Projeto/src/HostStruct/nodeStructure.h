@@ -72,6 +72,6 @@ void FreeNode(Node *Node);
 // Free the memory allocated for a Host structure and its associated data
 void LiberateHost(Host *HostNode);
 
-void FreeNodeList(Node *NodeList);
+void FreeNodeList(Host *HostNode);
 
 #endif // NODESTRUCTURE_H

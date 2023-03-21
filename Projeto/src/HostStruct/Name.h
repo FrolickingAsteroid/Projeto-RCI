@@ -18,6 +18,6 @@ void AddNameToHost(Host *HostNode, Name *NewName);
 
 int NameExists(Host *HostNode, char *Name);
 
-void FreeNameList(Name *NameList);
+void FreeNameList(Host *HostNode);
 
 #endif // NAME_H
