@@ -21,7 +21,7 @@ void GetName(Host *HostNode, char *Buffer) {
   if (sscanf(Buffer, "get %s %s", Dest, Name) < 2) {
     CommandNotFound("Command not found", Buffer);
   }
-  if (strcmp(Dest, HostNode->HostId) == 0) {
+  if (HostNode->HostId != NULL && strcmp(Dest, HostNode->HostId) == 0) {
     if (NameExists(HostNode, Name)) {
       fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been found in %s\n", HostNode->HostId);
     }

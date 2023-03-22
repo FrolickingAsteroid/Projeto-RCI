@@ -4,12 +4,14 @@
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include "eventManager.h"
 #include "../SocketProcessing/newMod.h"
 #include "../SocketProcessing/withdrawMod.h"
+#include "../Common/utils.h"
+#include "../UserInterface/userInterface.h"
+#include "../SocketProcessing/socketInterface.h"
 
 #define MAXSIZE 4096
 #define max(A, B) ((A) >= (B) ? (A) : (B))
@@ -31,7 +33,7 @@ void EventManager(Host *HostNode) {
   int MaxDescriptor = -1, Counter = 0, NewFd = -1;
   char buffer[MAXSIZE];
   fd_set SockSet;
-
+  ssize_t n;
   struct sockaddr addr;
   socklen_t addrlen = sizeof(addr);
 
@@ -69,8 +71,8 @@ void EventManager(Host *HostNode) {
     // Check Keyboard
     if (FD_ISSET(STDIN_FILENO, &SockSet)) {
       FD_CLR(STDIN_FILENO, &SockSet);
-      if (read(STDIN_FILENO, buffer, MAXSIZE) == -1) {
-        DieWithSys("Function EventManager >>" RED "☠  read() failed");
+      if (CustomRead(STDIN_FILENO, buffer, MAXSIZE) == -1) {
+        perror("Function EventManager >> " RED "☠  read() failed");
       }
       UserInterfaceParser(buffer, HostNode);
       continue;
@@ -90,15 +92,15 @@ void EventManager(Host *HostNode) {
     if (FD_ISSET(HostNode->Ext->Fd, &SockSet)) {
       FD_CLR(HostNode->Ext->Fd, &SockSet);
       // read info from established socket
-      if (read(HostNode->Ext->Fd, buffer, MAXSIZE) <= 0) {
+      n = CustomRead(HostNode->Ext->Fd, buffer, MAXSIZE);
+      if (n == 0) {
         WithdrawHandle(HostNode, HostNode->Ext->Id, HostNode->Ext->Fd);
         continue;
-      }
 
-      // iterate through buffer with more than one msg
-      for (char *msg = strtok(buffer, "\n"); msg != NULL; msg = strtok(NULL, "\n")) {
-        SocketInterfaceParser(msg, HostNode, HostNode->Ext);
+      } else if (n == -1) {
+        perror("Function EventManager >> " RED "☠  read() failed");
       }
+      SocketInterfaceParser(buffer, HostNode, HostNode->Ext);
       continue;
     }
 
@@ -107,15 +109,16 @@ void EventManager(Host *HostNode) {
       if (FD_ISSET(current->Fd, &SockSet)) {
         FD_CLR(current->Fd, &SockSet);
         // read info from established socket
-        if (read(current->Fd, buffer, MAXSIZE) <= 0) {
+        n = CustomRead(current->Fd, buffer, MAXSIZE);
+        if (n == 0) {
           WithdrawHandle(HostNode, current->Id, current->Fd);
           break;
+
+        } else if (n == -1) {
+          perror("Function EventManager >>" RED "☠  read() failed");
         }
 
-        // iterate through buffer with more than one msg
-        for (char *msg = strtok(buffer, "\n"); msg != NULL; msg = strtok(NULL, "\n")) {
-          SocketInterfaceParser(msg, HostNode, current);
-        }
+        SocketInterfaceParser(buffer, HostNode, current);
         break;
       }
       current = current->next;
@@ -150,4 +153,42 @@ int UpdateMaxDes(Host *HostNode) {
   }
 
   return maxFd;
+}
+
+/**
+ * @brief Reads data from a file descriptor into a buffer until a newline character is encountered,
+ * up to a specified size.
+ *
+ * This function reads data one byte at a time from a file descriptor and stores it in a provided
+ * buffer. The reading process stops when a newline character is encountered, the specified buffer
+ * size is reached, or the sender closes the connection.
+ *
+ * @param Fd: The file descriptor to read data from.
+ * @param Buffer: A pointer to the buffer where the read data will be stored.
+ * @param BufferSize: The maximum size of the buffer (number of bytes to read).
+ *
+ * @return The number of bytes read, or -1 if an error occurs during the read operation.
+ */
+ssize_t CustomRead(int Fd, char *Buffer, size_t BufferSize) {
+  size_t BytesReceived = 0;
+  ssize_t BytesRead = 0;
+
+  while (BytesReceived < BufferSize) {
+    BytesRead = read(Fd, (char *)Buffer + BytesReceived, 1); // Read one byte at a time
+    if (BytesRead < 0) {
+      return -1;
+    } else if (BytesRead == 0) {
+      // The sender has closed the connection or no more data is available
+      break;
+    }
+    // Add Bytes to stack
+    BytesReceived += (size_t)BytesRead;
+
+    if (Buffer[BytesReceived - 1] == '\n') {
+      // Newline character encountered, stop reading
+      break;
+    }
+  }
+
+  return (ssize_t)BytesReceived;
 }

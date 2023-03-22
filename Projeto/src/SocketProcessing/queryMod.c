@@ -29,6 +29,8 @@ void QueryHandle(Host *HostNode, char *Buffer, Node *SenderNode) {
 
   /*! TODO: Parse QUERY*/
 
+  ServerAnswer(Buffer, "Neighbouring TCP connection request");
+
   // Update the forwarding table with QUERY info
   InsertInForwardingTable(HostNode, atoi(SenderNode->Id), atoi(Orig));
 
@@ -102,14 +104,14 @@ void ContentHandle(Host *HostNode, char *Buffer, int ContentFlag, Node *SenderNo
   char Orig[TOKENSIZE] = "";
   char Name[TOKENSIZE] = "";
 
-  printf("content handle: %s\n", Buffer);
-
   // Parse the message based on the ContentFlag
   if (ContentFlag) {
     sscanf(Buffer, "CONTENT %s %s %s", Dest, Orig, Name);
   } else {
     sscanf(Buffer, "NOCONTENT %s %s %s", Dest, Orig, Name);
   }
+
+  ServerAnswer(Buffer, "Neighbouring TCP connection answer");
 
   // Insert into forwarding table the new path
   InsertInForwardingTable(HostNode, atoi(SenderNode->Id), atoi(Orig));

@@ -103,21 +103,19 @@ void CommandNotFound(char *msg, char *Command) {
   fputs(Command, stderr);
 }
 
-// ----------debug-----------------//
 void ServerAnswer(char *Answer, char *place) {
   int len = (int)strlen(Answer);
   if (Verbose) {
     if (Answer[len - 1] == '\n') {
       Answer[len - 1] = 0;
     }
-    fprintf(stdout, GRN "%s" RESET, place);
-    fputs(GRN " answer:" RESET, stdout);
+    fprintf(stdout, GRN "\n%s" RESET, place);
+    fputs(GRN ":" RESET, stdout);
     fputs("\n", stdout);
     fputs(Answer, stdout);
     fputs(GRN "\n---\n" RESET, stdout);
   }
 }
-// ------------------------------ //
 
 /**
  * @brief Displays usage information for the user interface.
@@ -130,6 +128,11 @@ void InterfaceUsage() {
   printf(GRN "+---------------------------------------------------------------+\n");
   printf("|                       Usage Guide                             |\n");
   printf("+---------------------------+-----------------------------------+\n" RESET);
+  printf("+---------------------------+-----------------------------------+\n");
+  printf("| help:                     | Displays the usage guide, showing |\n");
+  printf("|                           | available commands and their      |\n");
+  printf("|                           | descriptions.                     |\n");
+  printf("+---------------------------+-----------------------------------+\n");
   printf("| join net id:              | Registers a node with the given   |\n");
   printf("|                           | identifier to the network.        |\n");
   printf("+---------------------------+-----------------------------------+\n");
@@ -162,5 +165,14 @@ void InterfaceUsage() {
   printf("| leave:                    | Exits the node from the network.  |\n");
   printf("+---------------------------+-----------------------------------+\n");
   printf("| exit:                     | Closes the application.           |\n");
+  printf("+---------------------------+-----------------------------------+\n");
+  printf("| verbose:                  | Enables verbose mode, displaying  |\n");
+  printf("|                           | additional information during     |\n");
+  printf("|                           | program execution.                |\n");
+  printf("+---------------------------+-----------------------------------+\n");
+  printf("| quiet:                    | Enables quiet mode, suppressing   |\n");
+  printf("|                           | non-critical output.              |\n");
+  printf("+---------------------------+-----------------------------------+\n");
+  printf("| clear:                    | Clears the terminal screen.       |\n");
   printf("+---------------------------+-----------------------------------+\n");
 }

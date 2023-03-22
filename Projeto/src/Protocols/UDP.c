@@ -68,6 +68,6 @@ char *UDPClient(Host *HostNode, char *msg) {
     return NULL;
   }
   close(Fd);
-  ServerAnswer(Buffer, "UDP server");
+  ServerAnswer(Buffer, "UDP server answer");
   return Buffer;
 }

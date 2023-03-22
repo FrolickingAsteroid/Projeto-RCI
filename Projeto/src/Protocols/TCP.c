@@ -104,6 +104,6 @@ char *SendTCPMessage(int Fd, char *msg) {
     free(Buffer);
     return NULL;
   }
-  ServerAnswer(Buffer, "TCP connection");
+  ServerAnswer(Buffer, "TCP connection Answer");
   return Buffer;
 }

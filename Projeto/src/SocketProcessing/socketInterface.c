@@ -64,7 +64,6 @@ void SendProtocolMsg(Host *HostNode, char *msg, int SenderFd) {
       continue;
     }
 
-    printf("sent %s to neighbour: %s\n", msg, temp->Id);
     if (write(temp->Fd, msg, MsgLen) == -1) {
       // if connection is not available continue
       perror("Function LeaveNetwork >> " RED "☠  write() failed");
@@ -74,7 +73,6 @@ void SendProtocolMsg(Host *HostNode, char *msg, int SenderFd) {
 
   // send protocol to extern
   if (HostNode->Ext != NULL && SenderFd != HostNode->Ext->Fd) {
-    printf("sent '%s' to neighbour: %s\n", msg, HostNode->Ext->Id);
     if (write(HostNode->Ext->Fd, msg, MsgLen) == -1) {
       perror("Function LeaveNetwork >> " RED "☠  write() failed");
     }

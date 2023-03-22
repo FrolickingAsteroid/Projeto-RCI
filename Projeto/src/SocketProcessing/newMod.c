@@ -6,6 +6,7 @@
 #include "newMod.h"
 #include "../Common/formatChecking.h"
 #include "../HostStruct/forwardingTable.h"
+#include "../Protocols/eventManager.h"
 
 #define MAXSIZE 256
 
@@ -31,16 +32,22 @@ void ReadListeningSock(Host *HostNode, char *Buffer, int NewFd) {
   char NewId[MAXSIZE] = "", NewIp[MAXSIZE] = "", NewTCP[MAXSIZE] = "";
 
   // read info from new established socket
-  if (read(NewFd, Buffer, MAXSIZE) == -1) {
-    perror("Function TCPClientExternConnect >> " RED "☠  recv() failed");
+  if (CustomRead(NewFd, Buffer, MAXSIZE) == -1) {
+    perror("Function ReadListeningSock >> " RED "☠  read() failed");
     return;
   }
   // fetch input args and check validity
-  int nArgs = sscanf(Buffer, "NEW %s %s %s", NewId, NewIp, NewTCP);
-  if (!(CheckNumberOfArgs(Buffer, nArgs) && BootArgsCheck(NewId, NewIp, NewTCP))) {
+  if (sscanf(Buffer, "NEW %s %s %s", NewId, NewIp, NewTCP) == 0) {
     close(NewFd);
     return;
   }
+
+  if (!(CheckNumberOfArgs(Buffer, 3) && BootArgsCheck(NewId, NewIp, NewTCP))) {
+    close(NewFd);
+    return;
+  }
+
+  ServerAnswer(Buffer, "New TCP connection request");
 
   // if host is alone in the network send back the received information: create an ancor
   if (HostNode->Ext == NULL) {
@@ -90,6 +97,8 @@ void ExternHandle(char *Buffer, Host *HostNode) {
   if (!BootArgsCheck(Id, Ip, PortTCP)) {
     return;
   }
+
+  ServerAnswer(Buffer, "Neighbouring TCP connection answer");
 
   FreeNode(HostNode->Bck);
   HostNode->Bck = NULL;
