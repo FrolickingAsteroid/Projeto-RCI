@@ -63,6 +63,8 @@ void PlugHostNetId(char *Net, char *Id, Host *HostNode);
 // Add an internal node to the Host structure
 void PlugIntern(char *Ip, int TCP, char *Id, int Fd, Host *HostNode);
 
+void RemoveIntern(Host *HostNode, char *LeavingId);
+
 // Initialize a Node structure with provided info
 Node *InitNode(char *Ip, int TCP, char *Id, int Fd);
 

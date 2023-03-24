@@ -1,13 +1,14 @@
-#include <stddef.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <stdlib.h>
 #include <string.h>
 
-#include "queryMod.h"
 #include "socketInterface.h"
-#include "withdrawMod.h"
+
 #include "newMod.h"
+#include "queryMod.h"
+#include "withdrawMod.h"
+
+#include "../Common/utils.h"
 
 #define MAXSIZE 128
 
@@ -57,24 +58,56 @@ void SocketInterfaceParser(char *Buffer, Host *HostNode, Node *SenderNode) {
  *
  */
 void SendProtocolMsg(Host *HostNode, char *msg, int SenderFd) {
-  size_t MsgLen = strlen(msg);
+  size_t MsgLen = strlen(msg) + 1; // NULL terminator
   // send protocol to interns
   for (Node *temp = HostNode->NodeList; temp != NULL; temp = temp->next) {
     if (SenderFd == temp->Fd) {
       continue;
     }
 
-    if (write(temp->Fd, msg, MsgLen) == -1) {
+    if (CustomWrite(temp->Fd, msg, MsgLen) == -1) {
       // if connection is not available continue
-      perror("Function LeaveNetwork >> " RED "☠  write() failed");
+      perror("Function SendProtocolMsg >> " RED "☠  write() failed");
       continue;
     }
   }
 
   // send protocol to extern
   if (HostNode->Ext != NULL && SenderFd != HostNode->Ext->Fd) {
-    if (write(HostNode->Ext->Fd, msg, MsgLen) == -1) {
-      perror("Function LeaveNetwork >> " RED "☠  write() failed");
+    if (CustomWrite(HostNode->Ext->Fd, msg, MsgLen) == -1) {
+      perror("Function SendProtocolMsg >> " RED "☠  write() failed");
     }
   }
+}
+
+/**
+ * @brief Writes a message to a specified file descriptor.
+ *
+ * This function attempts to write a specified number of bytes from a message
+ * to a given file descriptor. It handles partial writes by continuing to write
+ * until the entire message has been sent or an error occurs.
+ *
+ * @param Fd: The file descriptor to write the message to.
+ * @param Msg: A pointer to the message buffer to be written.
+ * @param MsgSize: The size of the message in bytes.
+ * @return The total number of bytes written or -1 in case of an error.
+ */
+ssize_t CustomWrite(int Fd, char *Msg, size_t MsgSize) {
+  ssize_t TotalBytes = 0, BytesSent = 0;
+  const char *Buffer = Msg;
+
+  // Loop until the entire message has been written or an error occurs
+  while (TotalBytes < (ssize_t)MsgSize) {
+    BytesSent = write(Fd, Buffer + TotalBytes, MsgSize - (size_t)TotalBytes);
+
+    // Check if an error occurred during the write operation
+    if (BytesSent == -1) {
+      return -1;
+    }
+    // Add bytes to stack
+    TotalBytes += BytesSent;
+  }
+
+  // Return the total number of bytes written
+  return TotalBytes;
 }

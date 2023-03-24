@@ -105,7 +105,7 @@ void CommandNotFound(char *msg, char *Command) {
 
 void ServerAnswer(char *Answer, char *place) {
   int len = (int)strlen(Answer);
-  if (Verbose) {
+  if (Verbose && Answer != NULL) {
     if (Answer[len - 1] == '\n') {
       Answer[len - 1] = 0;
     }

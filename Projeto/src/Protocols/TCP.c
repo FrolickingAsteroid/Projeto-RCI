@@ -1,14 +1,16 @@
 #include <arpa/inet.h>
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include "TCP.h"
+
+#include "../Common/utils.h"
+
+#include "../SocketProcessing/socketInterface.h"
 
 #define MAXPENDING 100
 #define MAXSIZE 256
@@ -42,9 +44,7 @@ int TCPServer(UsrInvoc *usr) {
 char *TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *BootTCP) {
 
   // Set Timeout for Server answer
-  struct timeval tv;
-  tv.tv_sec = 15;
-  tv.tv_usec = 0;
+  struct timeval tv = {.tv_sec = 15, .tv_usec = 0};
 
   int Fd = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
   if (Fd == -1)
@@ -81,12 +81,10 @@ char *TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *Boot
 
 char *SendTCPMessage(int Fd, char *msg) {
   // Set Timeout for Server answer
-  struct timeval tv;
-  tv.tv_sec = 15;
-  tv.tv_usec = 0;
+  struct timeval tv = {.tv_sec = 90, .tv_usec = 0};
 
   // send message
-  if (write(Fd, msg, (size_t)strlen(msg)) == -1) {
+  if (CustomWrite(Fd, msg, strlen(msg) + 1) == -1) {
     perror("Function TCPClientExternConnect >> " RED "☠  write() failed");
     return NULL;
   };
@@ -100,7 +98,7 @@ char *SendTCPMessage(int Fd, char *msg) {
   char *Buffer = calloc(MAXSIZE, sizeof(char));
   // receive message
   if (recv(Fd, Buffer, MAXSIZE, 0) == -1) {
-    perror("Function TCPClientExternConnect >> " RED "☠  recv() failed");
+    perror("Function SendTCPMessage >> " RED "☠  recv() failed");
     free(Buffer);
     return NULL;
   }

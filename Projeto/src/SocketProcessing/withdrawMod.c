@@ -3,8 +3,15 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "socketInterface.h"
 #include "withdrawMod.h"
+
+#include "socketInterface.h"
+
+#include "../Common/utils.h"
+#include "../Common/formatChecking.h"
+
+#include "../HostStruct/forwardingTable.h"
+
 #include "../UserInterface/joinMod.h"
 
 #define BUFSIZE 256
@@ -18,9 +25,6 @@
  */
 void WithdrawHandle(Host *HostNode, char *LeavingId, int SenderFd) {
   char BootTCP[BUFSIZE] = "";
-
-  Node *Current = HostNode->NodeList;
-  Node *Del = NULL;
 
   // Update Forwarding table and send withdraw to all neighbours
   UpdateForwardingTable(HostNode, LeavingId);
@@ -46,23 +50,14 @@ void WithdrawHandle(Host *HostNode, char *LeavingId, int SenderFd) {
         HostNode->NodeList = HostNode->NodeList->next;
       }
     }
-    SendExternMsg(HostNode);
+    if (HostNode->Ext != NULL) {
+      SendExternMsg(HostNode);
+    }
   }
 
   // if intern withdraws remove it from the list
-  else if (strcmp(LeavingId, HostNode->NodeList->Id) == 0) {
-    HostNode->NodeList = Current->next;
-    FreeNode(Current);
-
-  } else {
-    while (Current != NULL) {
-      if (strcmp(LeavingId, Current->next->Id) == 0) {
-        Del = Current->next, Current->next = Del->next;
-        FreeNode(Del);
-        break;
-      }
-      Current = Current->next;
-    }
+  else {
+    RemoveIntern(HostNode, LeavingId);
   }
 }
 
@@ -82,23 +77,33 @@ void SendExternMsg(Host *HostNode) {
   if (HostNode->Ext == NULL) {
     return;
   }
-  sprintf(msg, "EXTERN %s %s %d", HostNode->Ext->Id, HostNode->Ext->IP, HostNode->Ext->TCPort);
+  sprintf(msg, "EXTERN %s %s %d\n", HostNode->Ext->Id, HostNode->Ext->IP, HostNode->Ext->TCPort);
 
   // send EXTERN ext to all intern neighbours only if host is not alone
   for (Node *current = HostNode->NodeList; current != NULL; current = current->next) {
-    if (write(current->Fd, msg, (size_t)strlen(msg)) == -1) {
-      perror("Function WithdrawHandle >> " RED "☠  write() failed");
+    if (CustomWrite(current->Fd, msg, (size_t)strlen(msg) + 1) == -1) {
+      perror("Function SendExternMsg >> " RED "☠  write() failed");
       continue;
     };
   }
   // check if leaving node was an ancor, notify new extern of bck change
   if (HostNode->Bck == NULL) {
-    if (write(HostNode->Ext->Fd, msg, (size_t)strlen(msg)) == -1) {
-      perror("Function WithdrawHandle >> " RED "☠  write() failed");
+    if (CustomWrite(HostNode->Ext->Fd, msg, (size_t)strlen(msg) + 1) == -1) {
+      perror("Function SendExternMsg >> " RED "☠  write() failed");
     };
   }
 }
 
+/**
+ * @brief Builds a withdraw message and sends it to the specified sender.
+ *
+ * This function constructs a withdraw message containing the leaving node ID and brodcasts it using
+ * the SendProtocolMsg function.
+ *
+ * @param HostNode: A pointer to the host node.
+ * @param LeavingId: A pointer to a string representing the ID of the leaving node.
+ * @param SenderFd: The file descriptor of the sender to whom the message shall not be sent.
+ */
 void BuildWithdrawMessage(Host *HostNode, char *LeavingId, int SenderFd) {
   char msg[256] = "";
 
@@ -106,17 +111,29 @@ void BuildWithdrawMessage(Host *HostNode, char *LeavingId, int SenderFd) {
   SendProtocolMsg(HostNode, msg, SenderFd);
 }
 
+/**
+ * @brief Processes a received withdraw message and updates the forwarding table.
+ *
+ * This function parses a received withdraw message containing the ID of a leaving node.
+ * If the message is valid, it updates the forwarding table and forwards the message
+ * to the other connected nodes using the SendProtocolMsg function.
+ *
+ * @param HostNode A pointer to the host node.
+ * @param Buffer A pointer to the buffer containing the received message.
+ * @param SenderFd The file descriptor of the sender who sent the withdraw message.
+ */
 void ReceiveWithdrawMsg(Host *HostNode, char *Buffer, int SenderFd) {
   char LeavingId[64] = "";
 
-  ServerAnswer(Buffer, "Neighbouring TCP connection");
-  if (sscanf(Buffer, "WITHDRAW %s", LeavingId) < 1) {
+  if (CheckNumberOfArgs(Buffer, 1) == 0 || sscanf(Buffer, "WITHDRAW %s", LeavingId) < 1) {
     return;
   }
 
   if (strlen(LeavingId) != 2 || !IsNumber(LeavingId)) {
     return;
   }
+
+  ServerAnswer(Buffer, "Neighbouring TCP connection");
   UpdateForwardingTable(HostNode, LeavingId);
   SendProtocolMsg(HostNode, Buffer, SenderFd);
 }

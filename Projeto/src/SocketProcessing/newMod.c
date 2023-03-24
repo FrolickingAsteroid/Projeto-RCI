@@ -5,11 +5,12 @@
 
 #include "newMod.h"
 #include "../Common/formatChecking.h"
+#include "../Common/utils.h"
 #include "../HostStruct/forwardingTable.h"
 #include "../Protocols/eventManager.h"
+#include "../SocketProcessing/socketInterface.h"
 
 #define MAXSIZE 256
-
 /**
  * @brief Reads input from a newly established socket and performs the following tasks:
  *
@@ -74,7 +75,6 @@ void ReadListeningSock(Host *HostNode, char *Buffer, int NewFd) {
   // insert in forwarding table
   InsertInForwardingTable(HostNode, atoi(NewId), atoi(NewId));
 }
-
 /**
  * @brief Handles the reception of an EXTERN message from a neighboring node.
  *

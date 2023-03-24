@@ -5,11 +5,14 @@
 #include <ctype.h>
 
 #include "getMod.h"
+
 #include "../Common/utils.h"
+#include "../Common/formatChecking.h"
+
 #include "../HostStruct/Name.h"
 #include "../HostStruct/forwardingTable.h"
+
 #include "../SocketProcessing/socketInterface.h"
-#include "joinMod.h"
 
 #define TOKENSIZE 256
 
@@ -32,7 +35,7 @@ void GetName(Host *HostNode, char *Buffer) {
   // Check if path to destiny is known
   Node *Neigh = CheckForwardingTable(HostNode, Dest);
   if (Neigh != NULL) {
-    if (write(Neigh->Fd, Query, 1024) == -1) {
+    if (CustomWrite(Neigh->Fd, Query, strlen(Query) + 1) == -1) {
       // DO SOMETHING
     }
     return;

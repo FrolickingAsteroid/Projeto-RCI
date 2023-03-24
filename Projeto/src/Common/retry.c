@@ -1,4 +1,5 @@
 
+#include <asm-generic/errno.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <math.h>
@@ -64,7 +65,7 @@ ssize_t SendtoRetry(int sockfd, char *buffer, size_t buflen, int flags,
     }
 
     // See if function has reached timeout
-    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+    if (errno == EAGAIN || errno == EWOULDBLOCK || errno == ENETDOWN) {
 
       printf(YEL "retrying ...\n" RESET);
       double delay = pow(10, attempts) * 200.0;

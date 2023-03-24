@@ -204,7 +204,7 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
   }
 
   // Retrieve command args
-  sscanf(buffer, "djoin %s %s %s %s %s", Net, Id, BootId, BootIp, BootTCP);
+  sscanf(buffer, "djoin %s %s %s %s %s\n", Net, Id, BootId, BootIp, BootTCP);
 
   // Check wether args come from JoinNetworkServer(), if not, check validity and register
   // in the network
@@ -226,7 +226,10 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
   HostNode->Ext = InitNode(BootIp, atoi(BootTCP), BootId, -1);
   // Connect to Extern and ask for bck
   SendNewMsg(HostNode, Id, BootIp, BootTCP);
-  InsertInForwardingTable(HostNode, atoi(HostNode->Ext->Id), atoi(HostNode->Ext->Id));
+
+  if (HostNode->Ext != NULL) {
+    InsertInForwardingTable(HostNode, atoi(HostNode->Ext->Id), atoi(HostNode->Ext->Id));
+  }
 }
 
 /**
@@ -255,6 +258,8 @@ void SendNewMsg(Host *HostNode, char *HostId, char *BootIp, char *BootTCP) {
 
   // If the connection is not established, free the memory and return
   if (TCPAnswer == NULL) {
+    FreeNode(HostNode->Ext);
+    HostNode->Ext = NULL;
     free(TCPAnswer);
     return;
   }

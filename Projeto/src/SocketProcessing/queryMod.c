@@ -51,7 +51,7 @@ void QueryHandle(Host *HostNode, char *Buffer, Node *SenderNode) {
   // Check if path to destiny is known
   Node *Neigh = CheckForwardingTable(HostNode, Dest);
   if (Neigh != NULL) {
-    if (write(Neigh->Fd, Buffer, 1024) == -1) {
+    if (CustomWrite(Neigh->Fd, Buffer, strlen(Buffer) + 1) == -1) {
       // DO SOMETHING
     }
 
@@ -75,7 +75,7 @@ void SendContent(int neighFd, char *Dest, char *Orig, char *Name) {
   sprintf(msg, "CONTENT %s %s %s\n", Dest, Orig, Name);
 
   // Write the CONTENT message to the neighboring node
-  if (write(neighFd, msg, 512) == -1) {
+  if (CustomWrite(neighFd, msg, strlen(msg) + 1) == -1) {
     // DO SOMETHING
   }
 }
@@ -94,7 +94,7 @@ void SendNoContent(int neighFd, char *Dest, char *Orig, char *Name) {
   sprintf(msg, "NOCONTENT %s %s %s\n", Dest, Orig, Name);
 
   // Write the NOCONTENT message to the neighboring node
-  if (write(neighFd, msg, 512) == -1) {
+  if (CustomWrite(neighFd, msg, strlen(msg) + 1) == -1) {
     // DO SOMETHING
   }
 }
@@ -129,7 +129,7 @@ void ContentHandle(Host *HostNode, char *Buffer, int ContentFlag, Node *SenderNo
   // Check if the path to the destination is known
   Node *Neigh = CheckForwardingTable(HostNode, Dest);
   if (Neigh != NULL) {
-    if (write(Neigh->Fd, Buffer, 1024) == -1) {
+    if (CustomWrite(Neigh->Fd, Buffer, strlen(Buffer) + 1) == -1) {
       // DO SOMETHING
     }
   } else {

@@ -3,16 +3,19 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "forwardingTable.h"
 #include "nodeStructure.h"
+
+#include "../Common/utils.h"
+#include "forwardingTable.h"
 #include "Name.h"
 
 /**
- * @brief
+ * @brief Initializes a Host structure with the given parameters.
  *
- * @param Fd
- * @param UsrInfo
- * @return
+ * @param Fd: File descriptor for the listening socket.
+ * @param UsrInfo: A pointer to a user invocation structure.
+ *
+ * @return A pointer to the initialized Host structure.
  */
 Host *InitHostStructure(int Fd, UsrInvoc *UsrInfo) {
   Host *node = calloc(1, sizeof(Host));
@@ -35,11 +38,11 @@ Host *InitHostStructure(int Fd, UsrInvoc *UsrInfo) {
 }
 
 /**
- * @brief
+ * @brief Assigns the network ID and host ID to the given Host structure.
  *
- * @param Net
- * @param Id
- * @param HostNode
+ * @param Net: A pointer to a string representing the network ID.
+ * @param Id: A pointer to a string representing the host ID.
+ * @param HostNode: A pointer to the Host structure to be updated.
  */
 void PlugHostNetId(char *Net, char *Id, Host *HostNode) {
 
@@ -59,13 +62,14 @@ void PlugHostNetId(char *Net, char *Id, Host *HostNode) {
 }
 
 /**
- * @brief
+ * @brief Initializes a Node structure with the given parameters.
  *
- * @param Ip
- * @param TCP
- * @param Id
- * @param fd
- * @return
+ * @param Ip: A pointer to a string representing the IP address.
+ * @param TCP: The TCP port number.
+ * @param Id: A pointer to a string representing the node ID.
+ * @param Fd: The file descriptor for the node's socket.
+ *
+ * @return A pointer to the initialized Node structure.
  */
 Node *InitNode(char *Ip, int TCP, char *Id, int Fd) {
   // Init Node struct
@@ -92,6 +96,11 @@ Node *InitNode(char *Ip, int TCP, char *Id, int Fd) {
   return Node;
 }
 
+/**
+ * @brief Frees the memory associated with a Node structure.
+ *
+ * @param Node: A pointer to the Node structure to be freed.
+ */
 void FreeNode(Node *Node) {
   if (Node == NULL) {
     return;
@@ -107,6 +116,11 @@ void FreeNode(Node *Node) {
   Node = NULL;
 }
 
+/**
+ * @brief Frees the memory associated with a Host structure and resets its state.
+ *
+ * @param HostNode: A pointer to the Host structure to be freed.
+ */
 void LiberateHost(Host *HostNode) {
   FreeNode(HostNode->Ext);
   FreeNode(HostNode->Bck);
@@ -124,6 +138,11 @@ void LiberateHost(Host *HostNode) {
   FreeNameList(HostNode);
 }
 
+/**
+ * @brief Frees the memory associated with a list of Node structures in a Host.
+ *
+ * @param HostNode: A pointer to the Host structure containing the list to be freed.
+ */
 void FreeNodeList(Host *HostNode) {
   Node *AuxNode = NULL;
   while (HostNode->NodeList != NULL) {
@@ -133,9 +152,45 @@ void FreeNodeList(Host *HostNode) {
   HostNode->NodeList = NULL;
 }
 
+/**
+ * @brief Adds a new internal node to the host's list of nodes.
+ *
+ * @param Ip: A pointer to a string representing the IP address.
+ * @param TCP: The TCP port number.
+ * @param Id: A pointer to a string representing the node ID.
+ * @param Fd: The file descriptor for the node's socket.
+ * @param HostNode: A pointer to the Host structure.
+ */
 void PlugIntern(char *Ip, int TCP, char *Id, int Fd, Host *HostNode) {
   Node *NewIntern = InitNode(Ip, TCP, Id, Fd);
 
   NewIntern->next = HostNode->NodeList;
   HostNode->NodeList = NewIntern;
+}
+
+/**
+ * @brief Removes an internal node from the host's list of nodes based on the leaving node ID.
+ *
+ * @param HostNode: A pointer to the Host structure.
+ * @param LeavingId: A pointer to a string representing the ID of the leaving node.
+ */
+void RemoveIntern(Host *HostNode, char *LeavingId) {
+
+  Node *Current = HostNode->NodeList;
+  Node *Del = NULL;
+  // if intern withdraws remove it from the list
+  if (strcmp(LeavingId, HostNode->NodeList->Id) == 0) {
+    HostNode->NodeList = Current->next;
+    FreeNode(Current);
+
+  } else {
+    while (Current != NULL) {
+      if (strcmp(LeavingId, Current->next->Id) == 0) {
+        Del = Current->next, Current->next = Del->next;
+        FreeNode(Del);
+        break;
+      }
+      Current = Current->next;
+    }
+  }
 }
