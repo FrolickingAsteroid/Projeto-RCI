@@ -58,7 +58,7 @@ void SocketInterfaceParser(char *Buffer, Host *HostNode, Node *SenderNode) {
  *
  */
 void SendProtocolMsg(Host *HostNode, char *msg, int SenderFd) {
-  size_t MsgLen = strlen(msg) + 1; // NULL terminator
+  size_t MsgLen = strlen(msg); // NULL terminator
   // send protocol to interns
   for (Node *temp = HostNode->NodeList; temp != NULL; temp = temp->next) {
     if (SenderFd == temp->Fd) {

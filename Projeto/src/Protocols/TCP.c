@@ -84,7 +84,7 @@ char *SendTCPMessage(int Fd, char *msg) {
   struct timeval tv = {.tv_sec = 90, .tv_usec = 0};
 
   // send message
-  if (CustomWrite(Fd, msg, strlen(msg) + 1) == -1) {
+  if (CustomWrite(Fd, msg, strlen(msg)) == -1) {
     perror("Function TCPClientExternConnect >> " RED "☠  write() failed");
     return NULL;
   };

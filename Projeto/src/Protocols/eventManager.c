@@ -16,7 +16,7 @@
 
 #include "../UserInterface/userInterface.h"
 
-#define MAXSIZE 4096
+#define MAXSIZE 256
 #define max(A, B) ((A) >= (B) ? (A) : (B))
 /**
  * @brief Set up the file descriptor set for use with select().
@@ -85,8 +85,9 @@ static int WaitOnFileDescriptors(fd_set *SockSet, int MaxDescriptor) {
  * @note This function assumes that `buffer` is large enough to hold the input data.
  */
 static void HandleKeyboardInput(Host *HostNode, char *buffer) {
-  if (CustomRead(STDIN_FILENO, buffer, MAXSIZE) == -1) {
+  if (read(STDIN_FILENO, buffer, MAXSIZE) == -1) {
     perror("Function HandleKeyboardInput >> " RED "☠  read() failed");
+    return;
   }
   UserInterfaceParser(buffer, HostNode);
 }
@@ -111,9 +112,12 @@ static void HandleKeyboardInput(Host *HostNode, char *buffer) {
 static void HandleListeningSocket(Host *HostNode, char *buffer, int *NewFd, struct sockaddr *addr,
                                   socklen_t *addrlen) {
   *NewFd = accept(HostNode->FdListen, addr, addrlen);
+
   if (*NewFd == -1) {
-    perror(""); // redo later
+    perror("Function HandleListeningSocket >> " RED "☠  accept() failed");
+    return;
   }
+
   ReadListeningSock(HostNode, buffer, *NewFd);
 }
 
@@ -134,13 +138,16 @@ static void HandleListeningSocket(Host *HostNode, char *buffer, int *NewFd, stru
  * receive data.
  */
 static void HandleExternalNodeSocket(Host *HostNode, char *buffer, ssize_t n) {
+  char *Token = NULL;
   n = CustomRead(HostNode->Ext->Fd, buffer, MAXSIZE);
   if (n == 0) {
     WithdrawHandle(HostNode, HostNode->Ext->Id, HostNode->Ext->Fd);
   } else if (n == -1) {
     perror("Function HandleExternalNodeSocket >> " RED "☠  read() failed");
   }
-  SocketInterfaceParser(buffer, HostNode, HostNode->Ext);
+  for (Token = strtok(buffer, "\n"); Token != NULL; Token = strtok(NULL, "\n")) {
+    SocketInterfaceParser(buffer, HostNode, HostNode->Ext);
+  }
 }
 
 /**
@@ -161,13 +168,17 @@ static void HandleExternalNodeSocket(Host *HostNode, char *buffer, ssize_t n) {
  * receive data.
  */
 static void HandleInternalNodeSocket(Host *HostNode, char *buffer, Node *current, ssize_t n) {
+  char *Token = NULL;
   n = CustomRead(current->Fd, buffer, MAXSIZE);
   if (n == 0) {
     WithdrawHandle(HostNode, current->Id, current->Fd);
   } else if (n == -1) {
     perror("Function HandleInternalNodeSocket >> " RED "☠  read() failed");
   }
-  SocketInterfaceParser(buffer, HostNode, current);
+  // Handle multiple requests at the same time
+  for (Token = strtok(buffer, "\n"); Token != NULL; Token = strtok(NULL, "\n")) {
+    SocketInterfaceParser(buffer, HostNode, current);
+  }
 }
 
 /**
@@ -273,25 +284,37 @@ int UpdateMaxDes(Host *HostNode) {
  * @return The number of bytes read, or -1 if an error occurs during the read operation.
  */
 ssize_t CustomRead(int Fd, char *Buffer, size_t BufferSize) {
+  fd_set SockSet;
+  struct timeval timeout;
+  int retval;
+
   size_t BytesReceived = 0;
   ssize_t BytesRead = 0;
 
-  // putchar('\n');
   while (BytesReceived < BufferSize) {
+    // Wait for data to be available using select()
+    FD_ZERO(&SockSet);
+    FD_SET(Fd, &SockSet);
+    timeout.tv_sec = 5;
+    timeout.tv_usec = 0;
+
+    retval = select(Fd + 1, &SockSet, NULL, NULL, &timeout);
+    if (retval == -1) {
+      return -1; // Error occurred
+    } else if (retval == 0) {
+      return (ssize_t)BytesReceived; // Timeout occurred
+    }
+
+    // Call read() to read the available data
     BytesRead = read(Fd, Buffer + BytesReceived, 1); // Read one byte at a time
-    // printf("%c | %lu\n", *(Buffer + BytesReceived), BytesReceived);
-    //  sleep(1);
     if (BytesRead < 0) {
-      return -1;
+      return -1; // Error occurred
+    } else if (BytesRead == 0) {
+      return (ssize_t)BytesReceived; // End of file reached
     }
-    // Add Bytes to stack
+    // printf("%lu\n", BytesReceived);
+    //  Add bytes to the stack
     BytesReceived += (size_t)BytesRead;
-
-    if (Buffer[BytesReceived - 1] == '\n' || Buffer[BytesReceived - 1] == '\0') {
-      break;
-    }
   }
-
-  Buffer[BytesReceived] = '\0';
   return (ssize_t)BytesReceived;
 }

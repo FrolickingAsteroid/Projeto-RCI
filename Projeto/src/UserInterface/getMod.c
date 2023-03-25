@@ -35,7 +35,7 @@ void GetName(Host *HostNode, char *Buffer) {
   // Check if path to destiny is known
   Node *Neigh = CheckForwardingTable(HostNode, Dest);
   if (Neigh != NULL) {
-    if (CustomWrite(Neigh->Fd, Query, strlen(Query) + 1) == -1) {
+    if (CustomWrite(Neigh->Fd, Query, strlen(Query)) == -1) {
       // DO SOMETHING
     }
     return;

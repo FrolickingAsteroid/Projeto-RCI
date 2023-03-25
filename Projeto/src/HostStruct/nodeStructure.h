@@ -9,10 +9,33 @@
 #define NODESTRUCTURE_H
 
 #include "../Common/checkInvocationInfo.h"
+#include <stddef.h>
+
+#define BUFFER_SIZE 1024
+//===----------------------------------------------------------------------===//
+// Structure representing a circular buffer.
+//===----------------------------------------------------------------------===//
+typedef struct {
+  char data[BUFFER_SIZE]; // The buffer data.
+  int ReadPos;            // The read position in the buffer.
+  int WritePos;           // The write position in the buffer.
+  size_t Count;           // The number of elements in the buffer.
+} CircularBuffer;
+
+//===----------------------------------------------------------------------===//
+// Structure representing a new connection Queue
+//===----------------------------------------------------------------------===//
+typedef struct NewConQueue {
+  int NewFd; // New file descriptor to be processed
+  CircularBuffer *Cb;
+
+  struct NewConQueue *next; // pointer to nest item in  the list
+} NewConQueue;
+
 //===----------------------------------------------------------------------===//
 // Enumeration of command types.
 //===----------------------------------------------------------------------===//
-typedef enum Command { JOIN, DJOIN, CLR, LEAVE, EXIT, ST, IDLE } Command;
+typedef enum Command { JOIN, DJOIN, IDLE } Command;
 
 //===----------------------------------------------------------------------===//
 // Structure representing content.
@@ -30,6 +53,8 @@ typedef struct Node {
   int Fd;     // The file descriptor of the Node
   char *IP;   // The IP address of the Node
   int TCPort; // The TCP port of the Node
+
+  CircularBuffer *Cb;
 
   struct Node *next; // Pointer to the next Node in the list
 } Node;
@@ -52,6 +77,9 @@ typedef struct Host {
   Node *Ext;      // Pointer to the external Node
   Node *Bck;      // Pointer to the backup Node
   Node *NodeList; // Pointer to the list of internal Nodes
+
+  NewConQueue *NClist; //
+
 } Host;
 
 // Initialize the Host structure with basic info

@@ -4,10 +4,12 @@
 #include <unistd.h>
 
 #include "nodeStructure.h"
+#include "forwardingTable.h"
+#include "CirBuffer.h"
+#include "ncQueue.h"
+#include "Name.h"
 
 #include "../Common/utils.h"
-#include "forwardingTable.h"
-#include "Name.h"
 
 /**
  * @brief Initializes a Host structure with the given parameters.
@@ -25,12 +27,13 @@ Host *InitHostStructure(int Fd, UsrInvoc *UsrInfo) {
 
   memset(node->ForTable, -1, sizeof(node->ForTable));
 
-  node->NameList = NULL;
   node->HostId = NULL;
   node->Bck = NULL;
   node->Ext = NULL;
   node->FdListen = Fd;
+  node->NameList = NULL;
   node->NodeList = NULL;
+  node->NClist = NULL;
   node->InvocInfo = UsrInfo;
   node->Net = NULL;
   node->type = IDLE;
@@ -78,7 +81,7 @@ Node *InitNode(char *Ip, int TCP, char *Id, int Fd) {
     DieWithSys("Function InitNode: malloc() failed");
   }
 
-  // Init char dependent variables for string copy and plug
+  // Init char dependent variables for string copy and plug aswell as CircularBuffer
   Node->Id = (char *)malloc((strlen(Id) + 1) * sizeof(char));
   if (Node->Id == NULL) {
     DieWithSys("Function InitNode: malloc() failed");
@@ -87,6 +90,12 @@ Node *InitNode(char *Ip, int TCP, char *Id, int Fd) {
   if (Node->IP == NULL) {
     DieWithSys("Function InitNode: malloc() failed");
   }
+  Node->Cb = (CircularBuffer *)malloc(sizeof(CircularBuffer));
+  if (Node->Cb == NULL) {
+    DieWithSys("Function InitNode: malloc() failed");
+  }
+
+  CbInit(Node->Cb);
   Node->Fd = Fd;
   Node->TCPort = TCP;
   Node->next = NULL;
@@ -105,8 +114,10 @@ void FreeNode(Node *Node) {
   if (Node == NULL) {
     return;
   }
+
   free(Node->IP);
   free(Node->Id);
+  free(Node->Cb);
 
   if (Node->Fd != -1) {
     close(Node->Fd);
@@ -136,6 +147,7 @@ void LiberateHost(Host *HostNode) {
 
   FreeNodeList(HostNode);
   FreeNameList(HostNode);
+  FreeNCList(HostNode);
 }
 
 /**
