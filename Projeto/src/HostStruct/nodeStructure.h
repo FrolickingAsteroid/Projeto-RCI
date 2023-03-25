@@ -10,6 +10,7 @@
 
 #include "../Common/checkInvocationInfo.h"
 #include <stddef.h>
+#include <time.h>
 
 #define BUFFER_SIZE 1024
 //===----------------------------------------------------------------------===//
@@ -28,6 +29,7 @@ typedef struct {
 typedef struct NewConQueue {
   int NewFd; // New file descriptor to be processed
   CircularBuffer *Cb;
+  time_t LastActivity; // Time of the last activity
 
   struct NewConQueue *next; // pointer to nest item in  the list
 } NewConQueue;

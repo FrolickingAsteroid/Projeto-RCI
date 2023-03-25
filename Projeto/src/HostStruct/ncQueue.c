@@ -22,6 +22,7 @@ NewConQueue *InitNCQueue(int NewFd) {
   CbInit(NewCon->Cb);
   NewCon->NewFd = NewFd;
   NewCon->next = NULL;
+  NewCon->LastActivity = time(NULL);
 
   return NewCon;
 }
