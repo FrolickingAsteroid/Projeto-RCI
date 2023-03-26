@@ -47,9 +47,9 @@ NewConQueue *InitNCQueue(int NewFd) {
 void PlugNC(int Fd, Host *HostNode, char *Buffer) {
   NewConQueue *NewCon = InitNCQueue(Fd);
 
-  if (CbWrite(NewCon->Cb, Buffer, strlen(Buffer))) {
-    free(NewCon->Cb), free(NewCon);
-    exit(EXIT_FAILURE);
+  if (CbWrite(NewCon->Cb, Buffer, strlen(Buffer)) != strlen(Buffer)) {
+    close(NewCon->NewFd), free(NewCon->Cb), free(NewCon);
+    // DieWithSys
   }
   NewCon->next = HostNode->NClist;
   HostNode->NClist = NewCon;
@@ -69,7 +69,6 @@ void RemoveNC(Host *HostNode, int Newfd) {
   if (Newfd == HostNode->NClist->NewFd) {
     HostNode->NClist = Current->next;
     free(Current->Cb);
-    close(Current->NewFd);
     free(Current);
 
   } else {
@@ -77,7 +76,6 @@ void RemoveNC(Host *HostNode, int Newfd) {
       if (Newfd == Current->next->NewFd) {
         Del = Current->next, Current->next = Del->next;
         free(Del->Cb);
-        close(Del->NewFd);
         free(Del);
         break;
       }
@@ -95,6 +93,7 @@ void FreeNCList(Host *HostNode) {
   NewConQueue *AuxNC = NULL;
   while (HostNode->NClist != NULL) {
     AuxNC = HostNode->NClist, HostNode->NClist = HostNode->NClist->next;
+    close(AuxNC->NewFd);
     free(AuxNC->Cb);
     free(AuxNC);
   }

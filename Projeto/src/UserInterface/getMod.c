@@ -21,13 +21,22 @@ void GetName(Host *HostNode, char *Buffer) {
   char Name[TOKENSIZE] = "";
   char Query[TOKENSIZE << 2] = "";
 
-  if (sscanf(Buffer, "get %s %s", Dest, Name) < 2) {
+  if (HostNode->HostId == NULL) {
+    CommandNotFound("Host does not have an ID, first register in a network", Buffer);
+    return;
+  }
+
+  if (sscanf(Buffer, "get %s %s\n", Dest, Name) < 2) {
     CommandNotFound("Command not found", Buffer);
   }
-  if (HostNode->HostId != NULL && strcmp(Dest, HostNode->HostId) == 0) {
+
+  if (strcmp(Dest, HostNode->HostId) == 0) {
     if (NameExists(HostNode, Name)) {
       fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been found in %s\n", HostNode->HostId);
+    } else {
+      fprintf(stdout, RED "☒ FAILURE > " RESET "Message was not found in %s\n", HostNode->HostId);
     }
+    return;
   }
 
   sprintf(Query, "QUERY %s %s %s\n", Dest, HostNode->HostId, Name);

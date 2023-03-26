@@ -13,6 +13,7 @@
 #include "../SocketProcessing/socketInterface.h"
 
 #include "../HostStruct/ncQueue.h"
+#include "../HostStruct/CirBuffer.h"
 
 #include "../Common/utils.h"
 
@@ -131,6 +132,43 @@ static void HandleListeningSocket(Host *HostNode, char *buffer, int *NewFd, stru
 }
 
 /**
+ * @brief Handles the new connection queue of a host node.
+ *
+ * @param HostNode: The host node containing the new connection queue.
+ * @param SockSet: The file descriptor set to check for activity.
+ * @param Buffer: The buffer to store the read data.
+ *
+ * @return Returns 1 if a new connection is handled, 0 otherwise.
+ */
+static int HandleNewConQueue(Host *HostNode, fd_set *SockSet, char *Buffer) {
+  NewConQueue *Current = HostNode->NClist;
+
+  // Iterate through the new connection queue
+  while (Current != NULL) {
+    if (FD_ISSET(Current->NewFd, SockSet)) {
+      FD_CLR(Current->NewFd, SockSet);
+
+      // Read data from the file descriptor
+      if (read(Current->NewFd, Buffer, MAXSIZE) <= 0) {
+        perror("Function HandleNewConQueue >> " RED "☠  read() failed");
+        close(Current->NewFd), RemoveNC(HostNode, Current->NewFd);
+        return 1;
+      }
+      // Write the data to the circular buffer
+      if (CbWrite(Current->Cb, Buffer, strlen(Buffer)) != strlen(Buffer)) {
+        close(Current->NewFd), RemoveNC(HostNode, Current->NewFd);
+        // DieWithSys
+      }
+
+      // Handle the new connection
+      HandleNewCon(HostNode, Current);
+      return 1;
+    }
+    Current = Current->next;
+  }
+  return 0;
+}
+/**
  * @brief Handle incoming data on the external node socket.
  *
  * This function reads data from the external node socket using the `CustomRead()` function, and
@@ -147,15 +185,29 @@ static void HandleListeningSocket(Host *HostNode, char *buffer, int *NewFd, stru
  * receive data.
  */
 static void HandleExternalNodeSocket(Host *HostNode, char *buffer, ssize_t n) {
-  char *Token = NULL;
-  n = CustomRead(HostNode->Ext->Fd, buffer, MAXSIZE);
+  char SecBuffer[MAXSIZE] = "";
+
+  n = read(HostNode->Ext->Fd, buffer, MAXSIZE);
   if (n == 0) {
     WithdrawHandle(HostNode, HostNode->Ext->Id, HostNode->Ext->Fd);
+    return;
   } else if (n == -1) {
     perror("Function HandleExternalNodeSocket >> " RED "☠  read() failed");
+    return;
   }
-  for (Token = strtok(buffer, "\n"); Token != NULL; Token = strtok(NULL, "\n")) {
-    SocketInterfaceParser(buffer, HostNode, HostNode->Ext);
+
+  // Check if Cb is not full, if so, flush contents
+  if (CbAvail(HostNode->Ext->Cb) == 0) {
+    LiberateCircularBuffer(HostNode->Ext->Cb);
+  }
+
+  // write into circular buffer
+  if (CbWrite(HostNode->Ext->Cb, buffer, strlen(buffer)) != strlen(buffer)) {
+    return;
+  }
+  // while Cb contains complete messages process them
+  while (CbRead(HostNode->Ext->Cb, SecBuffer, sizeof(SecBuffer) - 1)) {
+    SocketInterfaceParser(SecBuffer, HostNode, HostNode->Ext);
   }
 }
 
@@ -177,16 +229,28 @@ static void HandleExternalNodeSocket(Host *HostNode, char *buffer, ssize_t n) {
  * receive data.
  */
 static void HandleInternalNodeSocket(Host *HostNode, char *buffer, Node *current, ssize_t n) {
-  char *Token = NULL;
-  n = CustomRead(current->Fd, buffer, MAXSIZE);
+  char SecBuffer[MAXSIZE] = "";
+
+  n = read(current->Fd, buffer, MAXSIZE);
   if (n == 0) {
     WithdrawHandle(HostNode, current->Id, current->Fd);
+    return;
   } else if (n == -1) {
     perror("Function HandleInternalNodeSocket >> " RED "☠  read() failed");
+    return;
   }
-  // Handle multiple requests at the same time
-  for (Token = strtok(buffer, "\n"); Token != NULL; Token = strtok(NULL, "\n")) {
-    SocketInterfaceParser(buffer, HostNode, current);
+  // Check if Cb is not full, if so, flush contents
+  if (CbAvail(HostNode->Ext->Cb) == 0) {
+    LiberateCircularBuffer(current->Cb);
+  }
+
+  // write into circular buffer
+  if (CbWrite(current->Cb, buffer, strlen(buffer))) {
+    return;
+  }
+  // while Cb contains complete messages process them
+  while (CbRead(current->Cb, SecBuffer, sizeof(SecBuffer) - 1)) {
+    SocketInterfaceParser(SecBuffer, HostNode, current);
   }
 }
 
@@ -231,6 +295,12 @@ void EventManager(Host *HostNode) {
       HandleListeningSocket(HostNode, buffer, &NewFd, &addr, &addrlen);
       continue;
     }
+
+    // Queued connections
+    if (HandleNewConQueue(HostNode, &SockSet, buffer)) {
+      continue;
+    }
+
     // External Node
     if (HostNode->Ext != NULL && FD_ISSET(HostNode->Ext->Fd, &SockSet)) {
       FD_CLR(HostNode->Ext->Fd, &SockSet);
@@ -261,69 +331,24 @@ void EventManager(Host *HostNode) {
  * @return The maximum file descriptor for the given host.
  */
 int UpdateMaxDes(Host *HostNode) {
+
   // initialize maxFd to the listen file descriptor
   int maxFd = HostNode->FdListen;
 
-  // check if host has an external nodes
+  if (HostNode->NClist != NULL) {
+    // update maxFd if New con FD is greater
+    maxFd = max(maxFd, HostNode->NClist->NewFd);
+  }
+
   if (HostNode->Ext != NULL) {
     // update maxFd if external FD is greater
     maxFd = max(maxFd, HostNode->Ext->Fd);
+  }
 
-    if (HostNode->NodeList != NULL) {
-      // update maxFd if internal FD is greater
-      maxFd = max(maxFd, HostNode->NodeList->Fd);
-    }
+  if (HostNode->NodeList != NULL) {
+    // update maxFd if internal FD is greater
+    maxFd = max(maxFd, HostNode->NodeList->Fd);
   }
 
   return maxFd;
-}
-
-/**
- * @brief Reads data from a file descriptor into a buffer until a newline character is encountered,
- * up to a specified size.
- *
- * This function reads data one byte at a time from a file descriptor and stores it in a provided
- * buffer. The reading process stops when a newline character is encountered, the specified buffer
- * size is reached, or the sender closes the connection.
- *
- * @param Fd: The file descriptor to read data from.
- * @param Buffer: A pointer to the buffer where the read data will be stored.
- * @param BufferSize: The maximum size of the buffer (number of bytes to read).
- *
- * @return The number of bytes read, or -1 if an error occurs during the read operation.
- */
-ssize_t CustomRead(int Fd, char *Buffer, size_t BufferSize) {
-  fd_set SockSet;
-  struct timeval timeout;
-  int retval;
-
-  size_t BytesReceived = 0;
-  ssize_t BytesRead = 0;
-
-  while (BytesReceived < BufferSize) {
-    // Wait for data to be available using select()
-    FD_ZERO(&SockSet);
-    FD_SET(Fd, &SockSet);
-    timeout.tv_sec = 5;
-    timeout.tv_usec = 0;
-
-    retval = select(Fd + 1, &SockSet, NULL, NULL, &timeout);
-    if (retval == -1) {
-      return -1; // Error occurred
-    } else if (retval == 0) {
-      return (ssize_t)BytesReceived; // Timeout occurred
-    }
-
-    // Call read() to read the available data
-    BytesRead = read(Fd, Buffer + BytesReceived, 1); // Read one byte at a time
-    if (BytesRead < 0) {
-      return -1; // Error occurred
-    } else if (BytesRead == 0) {
-      return (ssize_t)BytesReceived; // End of file reached
-    }
-    // printf("%lu\n", BytesReceived);
-    //  Add bytes to the stack
-    BytesReceived += (size_t)BytesRead;
-  }
-  return (ssize_t)BytesReceived;
 }

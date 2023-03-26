@@ -3,7 +3,7 @@
 IP=127.0.0.1
 start_port=55000
 end_port=55009
-net=777
+net=064
 
 # Compile the program
 if ! make --silent; then

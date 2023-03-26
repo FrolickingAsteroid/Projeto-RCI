@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,10 +42,7 @@ int TCPServer(UsrInvoc *usr) {
   return fd;
 }
 
-char *TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *BootTCP) {
-
-  // Set Timeout for Server answer
-  struct timeval tv = {.tv_sec = 15, .tv_usec = 0};
+ssize_t TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *BootTCP) {
 
   int Fd = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
   if (Fd == -1)
@@ -60,48 +58,15 @@ char *TCPClientExternConnect(Host *HostNode, char *msg, char *BootIp, char *Boot
   ExternAddr.sin_family = AF_INET;
   if (inet_pton(AF_INET, BootIp, &(ExternAddr.sin_addr)) != 1) {
     perror("Function TCPClientExternConnect >> inet_pton() failed");
-    return NULL;
+    return -1;
   }
   ExternAddr.sin_port = htons((in_port_t)atoi(BootTCP));
-
-  // set socket connect Timeout
-  if (setsockopt(Fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv)) < 0) {
-    perror("Function TCPClientExternConnect >> " RED "☠  setsockopt() failed");
-    return NULL;
-  }
 
   // connect to potential extern
   if (connect(Fd, (struct sockaddr *)&ExternAddr, sizeof(ExternAddr)) == -1) {
     perror(RESET "☠  Function TCPClientExternConnect >> " RED "connect() failed");
-    return NULL;
+    return -1;
   }
 
-  return SendTCPMessage(Fd, msg);
-}
-
-char *SendTCPMessage(int Fd, char *msg) {
-  // Set Timeout for Server answer
-  struct timeval tv = {.tv_sec = 90, .tv_usec = 0};
-
-  // send message
-  if (CustomWrite(Fd, msg, strlen(msg)) == -1) {
-    perror("Function TCPClientExternConnect >> " RED "☠  write() failed");
-    return NULL;
-  };
-
-  // Set timeout for server answer
-  if (setsockopt(Fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
-    perror("Function TCPClientExternConnect >> " RED "☠  setsockopt() failed");
-    return NULL;
-  }
-
-  char *Buffer = calloc(MAXSIZE, sizeof(char));
-  // receive message
-  if (recv(Fd, Buffer, MAXSIZE, 0) == -1) {
-    perror("Function SendTCPMessage >> " RED "☠  recv() failed");
-    free(Buffer);
-    return NULL;
-  }
-  ServerAnswer(Buffer, "TCP connection Answer");
-  return Buffer;
+  return CustomWrite(Fd, msg, strlen(msg));
 }

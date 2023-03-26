@@ -225,11 +225,14 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
   // init extern node
   HostNode->Ext = InitNode(BootIp, atoi(BootTCP), BootId, -1);
   // Connect to Extern and ask for bck
-  SendNewMsg(HostNode, Id, BootIp, BootTCP);
-
-  if (HostNode->Ext != NULL) {
-    InsertInForwardingTable(HostNode, atoi(HostNode->Ext->Id), atoi(HostNode->Ext->Id));
+  if (!SendNewMsg(HostNode, Id, BootIp, BootTCP)) {
+    /*! TODO: connect() failed
+     *
+     * @todo randomize new extern
+     */
   }
+
+  InsertInForwardingTable(HostNode, atoi(HostNode->Ext->Id), atoi(HostNode->Ext->Id));
 }
 
 /**
@@ -246,33 +249,16 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
  * @param BootIp: Pointer to a character array containing the boot IP address.
  * @param BootTCP: Pointer to a character array containing the boot TCP port.
  */
-void SendNewMsg(Host *HostNode, char *HostId, char *BootIp, char *BootTCP) {
+int SendNewMsg(Host *HostNode, char *HostId, char *BootIp, char *BootTCP) {
   char msg[BUFSIZE << 2] = "";
-  char *TCPAnswer = NULL;
-  char Id[BUFSIZE] = "", Ip[BUFSIZE] = "", TCP[BUFSIZE] = "";
 
   // Compose the NEW message to be sent to the remote host
   sprintf(msg, "NEW %s %s %d\n", HostId, HostNode->InvocInfo->HostIP, HostNode->InvocInfo->HostTCP);
+
   // Connect to the remote host and send the NEW message
-  TCPAnswer = TCPClientExternConnect(HostNode, msg, BootIp, BootTCP);
-
-  // If the connection is not established, free the memory and return
-  if (TCPAnswer == NULL) {
-    FreeNode(HostNode->Ext);
-    HostNode->Ext = NULL;
-    free(TCPAnswer);
-    return;
+  if (TCPClientExternConnect(HostNode, msg, BootIp, BootTCP) == -1) {
+    perror(RESET "☠  Function TCPClientExternConnect >> " RED "connect() failed");
+    return 0;
   }
-  /*! TODO: Parser for EXTERN*/
-
-  // Parse the received response and extract the external host information
-  sscanf(TCPAnswer, "EXTERN %s %s %s", Id, Ip, TCP);
-  free(TCPAnswer);
-
-  // If the received node is not an anchor, update the host information and insert into the
-  // forwarding table
-  if (strcmp(Id, HostNode->HostId) != 0) {
-    HostNode->Bck = InitNode(Ip, atoi(TCP), Id, -1);
-    InsertInForwardingTable(HostNode, atoi(HostNode->Ext->Id), atoi(HostNode->Bck->Id));
-  }
+  return 1;
 }

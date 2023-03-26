@@ -41,7 +41,9 @@ void WithdrawHandle(Host *HostNode, char *LeavingId, int SenderFd) {
       // convert port in order to pass argument
       sprintf(BootTCP, "%d", HostNode->Ext->TCPort);
       // Connect to extern and ask for bck
-      SendNewMsg(HostNode, HostNode->HostId, HostNode->Ext->IP, BootTCP);
+      if (!SendNewMsg(HostNode, HostNode->HostId, HostNode->Ext->IP, BootTCP)) {
+        // Do something
+      }
     } else {
       FreeNode(HostNode->Ext);
       HostNode->Ext = HostNode->NodeList;
@@ -81,14 +83,14 @@ void SendExternMsg(Host *HostNode) {
 
   // send EXTERN ext to all intern neighbours only if host is not alone
   for (Node *current = HostNode->NodeList; current != NULL; current = current->next) {
-    if (CustomWrite(current->Fd, msg, (size_t)strlen(msg) + 1) == -1) {
+    if (CustomWrite(current->Fd, msg, (size_t)strlen(msg)) == -1) {
       perror("Function SendExternMsg >> " RED "☠  write() failed");
       continue;
     };
   }
   // check if leaving node was an ancor, notify new extern of bck change
   if (HostNode->Bck == NULL) {
-    if (CustomWrite(HostNode->Ext->Fd, msg, (size_t)strlen(msg) + 1) == -1) {
+    if (CustomWrite(HostNode->Ext->Fd, msg, (size_t)strlen(msg)) == -1) {
       perror("Function SendExternMsg >> " RED "☠  write() failed");
     };
   }
@@ -125,7 +127,7 @@ void BuildWithdrawMessage(Host *HostNode, char *LeavingId, int SenderFd) {
 void ReceiveWithdrawMsg(Host *HostNode, char *Buffer, int SenderFd) {
   char LeavingId[64] = "";
 
-  if (CheckNumberOfArgs(Buffer, 1) == 0 || sscanf(Buffer, "WITHDRAW %s", LeavingId) < 1) {
+  if (sscanf(Buffer, "WITHDRAW %s\n", LeavingId) < 1) {
     return;
   }
 

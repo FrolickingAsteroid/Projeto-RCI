@@ -57,6 +57,8 @@ int CbRead(CircularBuffer *cb, char *buf, size_t len) {
     cb->ReadPos %= BUFFER_SIZE;
     cb->Count--;
     if (buf[i] == '\n') {
+      // Enter \0 to differentiate message from trash
+      buf[i + 1] = '\0';
       return 1;
     }
   }

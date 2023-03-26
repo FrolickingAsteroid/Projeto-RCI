@@ -14,6 +14,6 @@ void JoinNetworkServer(char buffer[], Host *HostNode);
 char *ExternFetch(char *NODELIST, char *Net, char *Id);
 void DJoinNetworkServer(char buffer[], Host *HostNode);
 void CheckSingularityId(Host *HostNode, char *Nodelist, char (*Id)[128]);
-void SendNewMsg(Host *HostNode, char *HostId, char *BootIp, char *BootTCP);
+int SendNewMsg(Host *HostNode, char *HostId, char *BootIp, char *BootTCP);
 
 #endif
