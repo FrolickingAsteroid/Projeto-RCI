@@ -1,12 +1,18 @@
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "newMod.h"
+
 #include "../Common/formatChecking.h"
 #include "../Common/utils.h"
+
 #include "../HostStruct/forwardingTable.h"
+#include "../HostStruct/ncQueue.h"
+#include "../HostStruct/CirBuffer.h"
+
 #include "../Protocols/eventManager.h"
 #include "../SocketProcessing/socketInterface.h"
 
@@ -28,23 +34,23 @@
  *
  * @return void.
  */
-void ReadListeningSock(Host *HostNode, char *Buffer, int NewFd) {
+void HandleNewCon(Host *HostNode, NewConQueue *NewCon) {
+  char Buffer[MAXSIZE] = "";
   char msg[MAXSIZE << 2] = "";
   char NewId[MAXSIZE] = "", NewIp[MAXSIZE] = "", NewTCP[MAXSIZE] = "";
 
-  // read info from new established socket
-  if (CustomRead(NewFd, Buffer, MAXSIZE) == -1) {
-    perror("Function ReadListeningSock >> " RED "☠  read() failed");
+  if (!CbRead(NewCon->Cb, Buffer, sizeof(Buffer))) {
     return;
   }
+
   // fetch input args and check validity
-  if (sscanf(Buffer, "NEW %s %s %s", NewId, NewIp, NewTCP) == 0) {
-    close(NewFd);
+  if (sscanf(Buffer, "NEW %s %s %s\n", NewId, NewIp, NewTCP) == 0) {
+    RemoveNC(HostNode, NewCon->NewFd);
     return;
   }
 
   if (!(CheckNumberOfArgs(Buffer, 3) && BootArgsCheck(NewId, NewIp, NewTCP))) {
-    close(NewFd);
+    RemoveNC(HostNode, NewCon->NewFd);
     return;
   }
 
@@ -52,28 +58,29 @@ void ReadListeningSock(Host *HostNode, char *Buffer, int NewFd) {
 
   // if host is alone in the network send back the received information: create an ancor
   if (HostNode->Ext == NULL) {
-    sprintf(msg, "EXTERN %s %s %s", NewId, NewIp, NewTCP);
+    sprintf(msg, "EXTERN %s %s %s\n", NewId, NewIp, NewTCP);
     // send message back to intern
-    if (write(NewFd, msg, (size_t)strlen(msg)) == -1) {
-      perror("Function ReadListeningSock >> " RED "☠  write() failed");
+    if (write(NewCon->NewFd, msg, strlen(msg)) == -1) {
+      perror("Function HandleNewCon >> " RED "☠  write() failed");
       return;
     }
 
     // plug extern into structure and set host as bck -> NULL
-    HostNode->Ext = InitNode(NewIp, atoi(NewTCP), NewId, NewFd);
+    HostNode->Ext = InitNode(NewIp, atoi(NewTCP), NewId, NewCon->NewFd);
 
   } else {
     sprintf(msg, "EXTERN %s %s %d", HostNode->Ext->Id, HostNode->Ext->IP, HostNode->Ext->TCPort);
     // send message to potential extern
-    if (write(NewFd, msg, (size_t)strlen(msg)) == -1) {
-      perror("Function ReadListeningSock >> " RED "☠  write() failed");
+    if (write(NewCon->NewFd, msg, strlen(msg)) == -1) {
+      perror("Function HandleNewCon >> " RED "☠  write() failed");
       return;
     }
     // set new intern
-    PlugIntern(NewIp, atoi(NewTCP), NewId, NewFd, HostNode);
+    PlugIntern(NewIp, atoi(NewTCP), NewId, NewCon->NewFd, HostNode);
   }
   // insert in forwarding table
   InsertInForwardingTable(HostNode, atoi(NewId), atoi(NewId));
+  RemoveNC(HostNode, NewCon->NewFd);
 }
 /**
  * @brief Handles the reception of an EXTERN message from a neighboring node.

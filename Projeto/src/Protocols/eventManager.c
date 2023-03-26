@@ -12,6 +12,8 @@
 #include "../SocketProcessing/withdrawMod.h"
 #include "../SocketProcessing/socketInterface.h"
 
+#include "../HostStruct/ncQueue.h"
+
 #include "../Common/utils.h"
 
 #include "../UserInterface/userInterface.h"
@@ -118,7 +120,14 @@ static void HandleListeningSocket(Host *HostNode, char *buffer, int *NewFd, stru
     return;
   }
 
-  ReadListeningSock(HostNode, buffer, *NewFd);
+  if (read(*NewFd, buffer, MAXSIZE) == -1) {
+    perror("Function HandleListeningSocket >> " RED "☠  read() failed");
+    close(*NewFd);
+    return;
+  }
+  // inserts new connection in connection queue and handle if message is complete
+  PlugNC(*NewFd, HostNode, buffer);
+  HandleNewCon(HostNode, HostNode->NClist);
 }
 
 /**

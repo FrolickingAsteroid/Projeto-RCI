@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <string.h>
 
 #include "CirBuffer.h"
@@ -42,17 +43,25 @@ size_t CbWrite(CircularBuffer *cb, char *data, size_t len) {
  * @param len Length of data to be read.
  * @return The number of bytes read.
  */
-size_t CbRead(CircularBuffer *cb, char *buf, size_t len) {
+int CbRead(CircularBuffer *cb, char *buf, size_t len) {
   size_t i;
+  int TempReadPos = cb->ReadPos;
+  int TempCount = cb->Count;
+
   for (i = 0; i < len; i++) {
     if (cb->Count == 0) {
-      return i;
+      cb->ReadPos = TempReadPos, cb->Count = TempCount;
+      return 0;
     }
     buf[i] = cb->data[cb->ReadPos++];
     cb->ReadPos %= BUFFER_SIZE;
     cb->Count--;
+    if (buf[i] == '\n') {
+      return 1;
+    }
   }
-  return len;
+  cb->ReadPos = TempReadPos, cb->Count = TempCount;
+  return 0;
 }
 
 /**
@@ -61,7 +70,7 @@ size_t CbRead(CircularBuffer *cb, char *buf, size_t len) {
  * @param cb Pointer to the CircularBuffer structure.
  * @return The number of available bytes.
  */
-size_t CbAvail(CircularBuffer *cb) { return cb->Count; }
+int CbAvail(CircularBuffer *cb) { return BUFFER_SIZE - cb->Count; }
 
 /**
  * @brief Resets the circular buffer.

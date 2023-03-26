@@ -20,7 +20,7 @@ typedef struct {
   char data[BUFFER_SIZE]; // The buffer data.
   int ReadPos;            // The read position in the buffer.
   int WritePos;           // The write position in the buffer.
-  size_t Count;           // The number of elements in the buffer.
+  int Count;              // The number of elements in the buffer.
 } CircularBuffer;
 
 //===----------------------------------------------------------------------===//

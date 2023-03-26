@@ -6,8 +6,8 @@
 
 void CbInit(CircularBuffer *cb);
 size_t CbWrite(CircularBuffer *cb, char *data, size_t len);
-size_t CbRead(CircularBuffer *cb, char *buf, size_t len);
-size_t CbAvail(CircularBuffer *cb);
+int CbRead(CircularBuffer *cb, char *buf, size_t len);
+int CbAvail(CircularBuffer *cb);
 void LiberateCircularBuffer(CircularBuffer *cb);
 
 #endif // !CIRCBUFFER_H
