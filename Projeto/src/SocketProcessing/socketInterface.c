@@ -102,6 +102,7 @@ ssize_t CustomWrite(int Fd, char *Msg, size_t MsgSize) {
 
     // Check if an error occurred during the write operation
     if (BytesSent == -1) {
+      perror("Function CustomWrite >> " RED "☠  write() failed");
       return -1;
     }
     // Add bytes to stack

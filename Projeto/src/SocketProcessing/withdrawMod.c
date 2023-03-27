@@ -42,7 +42,8 @@ void WithdrawHandle(Host *HostNode, char *LeavingId, int SenderFd) {
       sprintf(BootTCP, "%d", HostNode->Ext->TCPort);
       // Connect to extern and ask for bck
       if (!SendNewMsg(HostNode, HostNode->HostId, HostNode->Ext->IP, BootTCP)) {
-        // Do something
+        // remove new extern if connection fails
+        WithdrawHandle(HostNode, HostNode->Ext->Id, HostNode->Ext->Fd);
       }
     } else {
       FreeNode(HostNode->Ext);

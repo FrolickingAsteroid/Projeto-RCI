@@ -64,8 +64,7 @@ void HandleNewCon(Host *HostNode, NewConQueue *NewCon) {
   }
 
   // Send response message
-  if (write(NewCon->NewFd, msg, strlen(msg)) == -1) {
-    perror("Function HandleNewCon >> " RED "☠  write() failed");
+  if (CustomWrite(NewCon->NewFd, msg, strlen(msg)) == -1) {
     close(NewCon->NewFd), RemoveNC(HostNode, NewCon->NewFd);
     return;
   }
@@ -106,7 +105,6 @@ void ExternHandle(char *Buffer, Host *HostNode) {
   if (sscanf(Buffer, "EXTERN %s %s %s\n", Id, Ip, PortTCP) != 3 ||
       BootArgsCheck(Id, Ip, PortTCP) == 0) {
     WithdrawHandle(HostNode, HostNode->Ext->Id, HostNode->Ext->Fd);
-    /*! TODO: BAD FORMAT HANDLES AS WITHDRAW??*/
     return;
   }
 

@@ -93,3 +93,29 @@ int BootArgsCheck(char *BootId, char *BootIp, char *BootTCP) {
   }
   return 1;
 }
+
+/**
+ * @brief Validates the name string.
+ *
+ * This function checks if the provided name is valid, based on size and content.
+ * The name should not exceed 100 characters, and should only contain alphanumeric characters and
+ * dots.
+ *
+ * @param Content: The input name string.
+ *
+ * @return Returns 1 if the name is valid, 0 otherwise.
+ */
+int NameParser(char *Content) {
+  // check name size
+  if (strlen(Content) > 100) {
+    CommandNotFound("Name is too long", Content);
+    return 0;
+  }
+  // check name contents
+  if (!IsAlphanumeric(Content)) {
+    CommandNotFound("Name can only contain alphanumeric charaters and dots", Content);
+    return 0;
+  }
+
+  return 1;
+}

@@ -16,6 +16,13 @@
 
 void ShowTopology(Host *hostNode) {
 
+  // Check if node is in a network
+  if (hostNode->Net == NULL) {
+    fprintf(stdout,
+            RED "🚩 WARNING > " RESET "Not registered in a network, can not show topology\n");
+    return;
+  }
+
   printf(BLU "\nHost Topology: ID %2s NET %3s\n", hostNode->HostId, hostNode->Net);
 
   // Print external node
@@ -66,6 +73,13 @@ void ShowTopology(Host *hostNode) {
  * @param hostNode Pointer to the Host structure representing the local host node.
  */
 void ShowForwardingTable(Host *hostNode) {
+
+  // Check if node is in a network
+  if (hostNode->Net == NULL) {
+    fprintf(stdout, RED "🚩 WARNING > " RESET
+                        "Not registered in a network, can not show forwarding table\n");
+    return;
+  }
   // Print table headers
   printf(GRN "+-----------+-------------+\n");
   printf("| neighbour | destination |\n");

@@ -16,20 +16,48 @@
 
 #define TOKENSIZE 256
 
+/**
+ * @brief Handles the 'get' command to search for a message with a given name.
+ *
+ * This function processes the 'get' command, which searches for a message with the specified name
+ * in the network. The function first checks if the host is registered in a network. If the name is
+ * being searched in the current host, it checks if the message exists. If the message exists in the
+ * host, a success message is displayed, otherwise, a failure message is displayed.
+ *
+ * If the destination is not the current host, the function checks if there's a known path to the
+ * destination. If there's a known path, it sends the query to the neighbor. If the path is unknown,
+ * it sends the query to all neighbors.
+ *
+ * @param HostNode: A pointer to the host for which to process the 'get' command.
+ * @param Buffer: The input command string, including the 'get' command and its arguments.
+ */
 void GetName(Host *HostNode, char *Buffer) {
   char Dest[TOKENSIZE] = "";
   char Name[TOKENSIZE] = "";
   char Query[TOKENSIZE << 2] = "";
 
+  // if Host is not registered in a network return
   if (HostNode->HostId == NULL) {
-    CommandNotFound("Host does not have an ID, first register in a network", Buffer);
+    CommandNotFound("Host does not belong to a network, first register in a network", Buffer);
     return;
   }
 
+  // parse command
   if (sscanf(Buffer, "get %s %s\n", Dest, Name) < 2) {
-    CommandNotFound("Command not found", Buffer);
+    CommandNotFound("Invalid argument invocation, type 'help' for usage", Buffer);
+    return;
+  }
+  // check dest format
+  if (strlen(Dest) != 2 || IsNumber(Dest) == 0) {
+    CommandNotFound("Invalid argument invocation, type 'help' for usage", Buffer);
+    return;
+  }
+  // check name validity
+  if (!NameParser(Name)) {
+    return;
   }
 
+  // check if name is being searched in host
   if (strcmp(Dest, HostNode->HostId) == 0) {
     if (NameExists(HostNode, Name)) {
       fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been found in %s\n", HostNode->HostId);
@@ -46,10 +74,11 @@ void GetName(Host *HostNode, char *Buffer) {
   if (Neigh != NULL) {
     if (CustomWrite(Neigh->Fd, Query, strlen(Query)) == -1) {
       // DO SOMETHING
+      return;
     }
     return;
   }
-
+  // if path is unknown, send msg to all neighbours
   SendProtocolMsg(HostNode, Query, -1);
 }
 
@@ -61,29 +90,21 @@ void GetName(Host *HostNode, char *Buffer) {
  */
 void CreateName(Host *HostNode, char *Buffer) {
   char Content[TOKENSIZE];
-  if (sscanf(Buffer, "create %s", Content) < 1) {
-    CommandNotFound("Name missing", Buffer);
+  // Parse args
+  if (sscanf(Buffer, "create %s\n", Content) < 1) {
+    CommandNotFound("Invalid argument invocation, type 'help' for usage", Buffer);
     return;
   }
 
-  if (!CheckNumberOfArgs(Buffer, 1)) {
+  // check Name validity
+  if (!NameParser(Content)) {
     return;
   }
-
-  if (strlen(Content) > 100) {
-    CommandNotFound(Content, "Name is too long");
-    return;
-  }
-
-  if (!IsAlphanumeric(Content)) {
-    CommandNotFound(Content, "Name can only contain alphanumeric charaters");
-    return;
-  }
-
+  // create a new name item and add it to host
   Name *NewName = CreateNewName(Content);
   AddNameToHost(HostNode, NewName);
 
-  fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been added\n");
+  fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been added to host\n");
 }
 
 /**
@@ -94,22 +115,28 @@ void CreateName(Host *HostNode, char *Buffer) {
  * If the name is found in the HostNode's NameList, it is removed and a success
  * message is printed. If the name is not found, a warning message is printed.
  *
- * @param HostNode A pointer to the Host structure containing the NameList.
- * @param Buffer A string containing the delete command and the content of the name to be deleted.
+ * @param HostNode: A pointer to the Host structure containing the NameList.
+ * @param Buffer: A string containing the delete command and the content of the name to be deleted.
  */
 void DeleteName(Host *HostNode, char *Buffer) {
   char Content[TOKENSIZE];
-  Name *Current = HostNode->NameList;
-  Name *Del = NULL;
+  Name *Current = HostNode->NameList, *Del = NULL;
 
-  if (sscanf(Buffer, "delete %s", Content) < 1) {
-    CommandNotFound(Buffer, "Name missing\n");
+  // Parse input args
+  if (sscanf(Buffer, "delete %s\n", Content) < 1) {
+    CommandNotFound("Invalid argument invocation, type 'help' for usage", Buffer);
     return;
   }
 
+  // Check name validity
+  if (!NameParser(Content)) {
+    return;
+  }
+
+  // search for name and delete it from the list
   if (Current != NULL && strcmp(Content, Current->Content) == 0) {
     HostNode->NameList = Current->next, free(Current);
-    fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been added with success\n");
+    fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been deleted with success\n");
     return;
 
   } else if (Current != NULL) {
@@ -117,11 +144,12 @@ void DeleteName(Host *HostNode, char *Buffer) {
 
       if (strcmp(Content, Current->next->Content) == 0) {
         Del = Current->next, Current->next = Del->next, free(Del);
-        fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been added with success\n");
+        fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been deleted with success\n");
         return;
       }
       Current = Current->next;
     }
   }
-  printf("\x1B[31m🚩 WARNING >\x1B[0m The message '%s' was not found\n", Content);
+
+  fprintf(stdout, RED "🚩 WARNING > " RESET "message '%s' was not found\n", Content);
 }

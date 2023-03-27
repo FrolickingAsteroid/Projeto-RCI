@@ -76,7 +76,7 @@ int IsNumber(char *str) {
  */
 int IsAlphanumeric(char *str) {
   for (size_t i = 0; str[i] != '\0'; i++) {
-    if (!isalnum(str[i])) {
+    if (!isalnum(str[i]) && str[i] != '.') {
       return 0;
     }
   }

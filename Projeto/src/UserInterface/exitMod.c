@@ -12,6 +12,7 @@
  * @brief This function is responsible for removing a host from a network it is currently
  * registered on. If the host is not registered in any network or if it is a DJOIN type host, it
  * simply frees the host and returns.
+ *
  * @param HostNode: pointer to the Host structure representing the host to be removed from
  * the network
  */

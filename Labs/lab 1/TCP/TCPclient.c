@@ -26,7 +26,7 @@ int main() {
   hints.ai_family = AF_INET;       // IPv4
   hints.ai_socktype = SOCK_STREAM; // TCP socket
 
-  errcode = getaddrinfo("192.168.1.80", PORT, &hints, &res);
+  errcode = getaddrinfo("127.0.0.1", PORT, &hints, &res);
   if (errcode != 0) /*error*/
     exit(1);
 
@@ -35,15 +35,18 @@ int main() {
     perror("");
   }
 
-  n = write(fd, "Hello 123 experiência!\n", 25);
+  n = write(fd, "WITHDRAW 00\nWITHDRAW 01\n", 24);
   if (n == -1) /*error*/
     exit(1);
 
+  /*
   n = read(fd, buffer, 1024);
-  if (n == -1) /*error*/
+  if (n == -1)
     exit(1);
+
   write(1, "echo: ", 6);
   write(1, buffer, n);
+  */
 
   freeaddrinfo(res);
   close(fd);
