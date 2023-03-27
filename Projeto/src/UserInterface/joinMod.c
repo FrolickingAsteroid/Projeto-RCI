@@ -67,11 +67,15 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
   char *UDPAnswer = NULL, *DjoinMsg = NULL;
 
   // Retrieve command args and check their validity
-  sscanf(buffer, "join %s %s", Net, Id);
-  if (!(CheckNetAndId(Net, Id) && CheckNumberOfArgs(buffer, 2))) {
+  if (sscanf(buffer, "join %s %s\n", Net, Id) != 2) {
     CommandNotFound("Invalid argument invocation, type 'help' for usage", buffer);
     return;
   }
+  if (!(CheckNetAndId(Net, Id))) {
+    CommandNotFound("Invalid argument invocation, type 'help' for usage", buffer);
+    return;
+  }
+
   // Check if node is already in a network
   if (HostNode->Net != NULL) {
     CommandNotFound("Host is already registered in a network, leave before rejoining", buffer);
@@ -139,7 +143,7 @@ void CheckSingularityId(Host *HostNode, char *Nodelist, char (*Id)[BUFSIZE]) {
   }
   // if id is on the list check if port and ip are the same
   if (sscanf(NodePt, "%*s %s %d", Ip, &Port) < 2) {
-    DieWithSys("sscanf failed");
+    return;
   }
   // if true, return
   if (strcmp(Ip, HostNode->InvocInfo->HostIP) == 0 && Port == HostNode->InvocInfo->HostTCP) {
@@ -164,6 +168,9 @@ void CheckSingularityId(Host *HostNode, char *Nodelist, char (*Id)[BUFSIZE]) {
  */
 char *ExternFetch(char *NODELIST, char *Net, char *Id) {
   char *DjoinMsg = calloc(64, sizeof(char));
+  if (DjoinMsg == NULL) {
+    DieWithSys("calloc() failed");
+  }
   char *array[99] = {" "};
   int i = 0;
 
@@ -299,6 +306,7 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
     }
     char *DjoinMsg = FindNewExtern(BootId, HostNode);
     if (DjoinMsg == NULL) {
+      fprintf(stderr, RED "🚩 WARNING >" RESET " Unable to connect to node %s\n", BootId);
       return;
     }
     DJoinNetworkServer(DjoinMsg, HostNode);

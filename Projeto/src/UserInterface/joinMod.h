@@ -10,10 +10,15 @@
 
 #include "../HostStruct/nodeStructure.h"
 
+// Joins a network server.
 void JoinNetworkServer(char buffer[], Host *HostNode);
+// Fetches external information.
 char *ExternFetch(char *NODELIST, char *Net, char *Id);
+// Joins a network server in double connection mode.
 void DJoinNetworkServer(char buffer[], Host *HostNode);
+// Checks ID uniqueness.
 void CheckSingularityId(Host *HostNode, char *Nodelist, char (*Id)[128]);
+// Sends a connection message to a new host.
 int SendNewMsg(Host *HostNode, char *HostId, char *BootIp, char *BootTCP);
 
 #endif

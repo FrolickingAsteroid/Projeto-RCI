@@ -15,7 +15,4 @@
 // Parses user input and processes the corresponding commands for the HostNode.
 void UserInterfaceParser(char buffer[], Host *HostNode);
 
-// Parses the 'show' commands and displays the output based on the command given.
-void ShowParser(Host *HostNode, char *Buffer);
-
 #endif // !USERINTERFACE_H

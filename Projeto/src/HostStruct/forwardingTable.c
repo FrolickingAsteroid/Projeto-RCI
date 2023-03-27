@@ -6,6 +6,8 @@
 #include "forwardingTable.h"
 #include "nodeStructure.h"
 
+#include "../Common/utils.h"
+
 #define TABLESIZE 100
 /**
  * @brief Updates the forwarding table of a host when another node leaves the network.
@@ -81,6 +83,10 @@ Node *CheckForwardingTable(Host *HostNode, char *dest) {
  * @param HostNode: A pointer to the host node containing the forwarding table.
  */
 void ClearForwardingTable(Host *HostNode) {
+  if (HostNode->Net == NULL) {
+    fprintf(stderr,
+            RED "🚩 WARNING > " RESET "Not registered in a network, no forwarding table to clear\n");
+  }
   // Reset all entries in the forwarding table to -1
   memset(HostNode->ForTable, -1, sizeof(HostNode->ForTable));
 

@@ -94,7 +94,7 @@ void SendProtocolMsg(Host *HostNode, char *msg, int SenderFd) {
  */
 ssize_t CustomWrite(int Fd, char *Msg, size_t MsgSize) {
   ssize_t TotalBytes = 0, BytesSent = 0;
-  const char *Buffer = Msg;
+  char *Buffer = Msg;
 
   // Loop until the entire message has been written or an error occurs
   while (TotalBytes < (ssize_t)MsgSize) {

@@ -35,32 +35,6 @@ int CheckNetAndId(char *Net, char *Id) {
 }
 
 /**
- * @brief Checks if the given buffer contains the specified number of arguments.
- *
- * The function counts the number of space characters in the null-terminated input
- * string `Buffer` and returns 1 if the count matches the specified `ArgNumber`.
- * Otherwise, the function returns 0.
- *
- * @param Buffer: A string that contains the input arguments.
- * @param ArgNumber: The number of arguments that should be in the input string.
- *
- * @return 1 if the input string contains the specified number of arguments, 0 otherwise.
- */
-int CheckNumberOfArgs(char *Buffer, int ArgNumber) {
-  int count = 0;
-  for (int i = 0; Buffer[i] != '\0'; i++) {
-    if (Buffer[i] == ' ')
-      count++;
-  }
-
-  if (count != ArgNumber) {
-    return 0;
-  }
-
-  return 1;
-}
-
-/**
  * @brief Checks if the given boot arguments are valid.
  *
  * The function checks that the `BootId` argument is a two-digit number between 0

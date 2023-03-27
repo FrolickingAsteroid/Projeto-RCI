@@ -16,6 +16,7 @@
  * fields. The IP and UDP port of the node server are hardcoded in this function as
  * requested. If memory allocation fails, the function calls DieWithSys() to
  * terminate the program.
+ *
  * @return A pointer to the newly created UsrInvoc struct
  */
 UsrInvoc *InitUsrInfo() {
@@ -64,6 +65,7 @@ char *CheckValidAdress(char *IP) {
  * DieWithUsr() functions to print an error message and terminate the program.
  *
  * @param PORT: The string representing the TCP port number to check.
+ *
  * @return An integer value representing the TCP port number, if valid.
  */
 int CheckValidPort(char *PORT) {
@@ -85,7 +87,7 @@ int CheckValidPort(char *PORT) {
  * @brief Parses user invocation arguments and returns a UsrInvoc structure containing
  *relevant information.
  *
- *The function receives the number of arguments and a pointer to an
+ *he function receives the number of arguments and a pointer to an
  *array of argument strings. If the number of arguments is not correct, the function
  *terminates the program. Otherwise, it creates a UsrInvoc struct and initializes it with
  *default values. It then checks the validity of the IP and TCP port by calling the
@@ -93,6 +95,7 @@ int CheckValidPort(char *PORT) {
  *
  * @param argc Number of arguments passed.
  * @param argv Array of string arguments passed.
+ *
  * @return Pointer to UsrInvoc structure.
  */
 UsrInvoc *InvocCheck(int argc, char *argv[]) {

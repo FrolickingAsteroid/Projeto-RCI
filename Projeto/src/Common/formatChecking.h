@@ -10,7 +10,6 @@
 #define FORMATCHECKING_H
 
 int CheckNetAndId(char *Net, char *Id);
-int CheckNumberOfArgs(char *Buffer, int ArgNumber);
 int BootArgsCheck(char *BootId, char *BootIp, char *BootTCP);
 int NameParser(char *Content);
 #endif //

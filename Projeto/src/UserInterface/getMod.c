@@ -60,9 +60,9 @@ void GetName(Host *HostNode, char *Buffer) {
   // check if name is being searched in host
   if (strcmp(Dest, HostNode->HostId) == 0) {
     if (NameExists(HostNode, Name)) {
-      fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been found in %s\n", HostNode->HostId);
+      fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Name has been found in %s\n", HostNode->HostId);
     } else {
-      fprintf(stdout, RED "☒ FAILURE > " RESET "Message was not found in %s\n", HostNode->HostId);
+      fprintf(stdout, RED "☒ FAILURE > " RESET "Name was not found in %s\n", HostNode->HostId);
     }
     return;
   }
@@ -104,7 +104,7 @@ void CreateName(Host *HostNode, char *Buffer) {
   Name *NewName = CreateNewName(Content);
   AddNameToHost(HostNode, NewName);
 
-  fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been added to host\n");
+  fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Name has been added to host\n");
 }
 
 /**
@@ -136,7 +136,7 @@ void DeleteName(Host *HostNode, char *Buffer) {
   // search for name and delete it from the list
   if (Current != NULL && strcmp(Content, Current->Content) == 0) {
     HostNode->NameList = Current->next, free(Current);
-    fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been deleted with success\n");
+    fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Name has been deleted with success\n");
     return;
 
   } else if (Current != NULL) {
@@ -144,12 +144,12 @@ void DeleteName(Host *HostNode, char *Buffer) {
 
       if (strcmp(Content, Current->next->Content) == 0) {
         Del = Current->next, Current->next = Del->next, free(Del);
-        fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Message has been deleted with success\n");
+        fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Name has been deleted with success\n");
         return;
       }
       Current = Current->next;
     }
   }
 
-  fprintf(stdout, RED "🚩 WARNING > " RESET "message '%s' was not found\n", Content);
+  fprintf(stderr, RED "🚩 WARNING > " RESET "Name '%s' was not found\n", Content);
 }

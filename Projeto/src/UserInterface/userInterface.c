@@ -10,6 +10,72 @@
 
 #include "../Common/utils.h"
 
+#include "../HostStruct/forwardingTable.h"
+#include "../HostStruct/Name.h"
+
+/**
+ * @brief Clears routing or names information based on the given sub-command.
+ *
+ * This function clears either the forwarding table or the names list of the host
+ * based on the provided sub-command in the buffer. If the sub-command is not
+ * recognized, an error message is displayed.
+ *
+ * @param HostNode: A pointer to the host whose information should be cleared.
+ * @param Buffer: A string containing the sub-command (either "routing" or "names").
+ */
+static void ClrParser(Host *HostNode, char *Buffer) {
+  char SubCommand[128] = "";
+  // Extract the sub-command from the buffer
+  if (sscanf(Buffer, "clear %s\n", SubCommand) < 1) {
+    CommandNotFound("Command not found", "");
+    return;
+  }
+  // Call the appropriate function based on the sub-command
+  if (strcmp(SubCommand, "routing") == 0) {
+    ClearForwardingTable(HostNode);
+
+  } else if (strcmp(SubCommand, "names") == 0) {
+    FreeNameList(HostNode);
+
+  } else {
+    // If the sub-command is not recognized, display an error message
+    CommandNotFound("Command not found", Buffer);
+  }
+}
+
+/**
+ * @brief Parse and execute the "show" command, displaying information about the network, routing
+ * table or name list.
+ *
+ * This function parses the "show" command with its sub-command and calls the appropriate function
+ * to display the requested information. It handles "show topology", "show routing" and "show names"
+ * sub-commands.
+ *
+ * @param HostNode: Pointer to the Host structure representing the local host node.
+ * @param Buffer: Pointer to a character array containing the command and its sub-command.
+ */
+static void ShowParser(Host *HostNode, char *Buffer) {
+  char SubCommand[128] = "";
+  // Extract the sub-command from the buffer
+  if (sscanf(Buffer, "show %s\n", SubCommand) < 1) {
+    CommandNotFound("Command not found", "");
+    return;
+  }
+  // Call the appropriate function based on the sub-command
+  if (strcmp(SubCommand, "topology") == 0) {
+    ShowTopology(HostNode);
+
+  } else if (strcmp(SubCommand, "routing") == 0) {
+    ShowForwardingTable(HostNode);
+
+  } else if (strcmp(SubCommand, "names") == 0) {
+    ShowNames(HostNode);
+  } else {
+    // If the sub-command is not recognized, display an error message
+    CommandNotFound("Command not found", Buffer);
+  }
+}
+
 /**
  * @brief Parses user input command and calls processing functions.
  *
@@ -38,9 +104,12 @@ void UserInterfaceParser(char *buffer, Host *HostNode) {
     HostNode->type = DJOIN; // place flag before entering join function
     DJoinNetworkServer(buffer, HostNode);
 
-  } else if (strcmp(Command, "clear") == 0) {
+  } else if (strcmp(Command, "clr") == 0) {
     clear();
     printf(BLU "# User Interface Activated " GRN "🗹 \n" RESET);
+
+  } else if (strcmp(Command, "clear") == 0) {
+    ClrParser(HostNode, buffer);
 
   } else if (strcmp(Command, "leave") == 0) {
     LeaveNetwork(HostNode);
@@ -81,38 +150,5 @@ void UserInterfaceParser(char *buffer, Host *HostNode) {
   } else {
     CommandNotFound("Command not found", buffer);
     return;
-  }
-}
-
-/**
- * @brief Parse and execute the "show" command, displaying information about the network, routing
- * table or name list.
- *
- * This function parses the "show" command with its sub-command and calls the appropriate function
- * to display the requested information. It handles "show topology", "show routing" and "show names"
- * sub-commands.
- *
- * @param HostNode: Pointer to the Host structure representing the local host node.
- * @param Buffer: Pointer to a character array containing the command and its sub-command.
- */
-void ShowParser(Host *HostNode, char *Buffer) {
-  char SubCommand[128] = "";
-  // Extract the sub-command from the buffer
-  if (sscanf(Buffer, "show %s", SubCommand) < 1) {
-    CommandNotFound("Command not found", "");
-    return;
-  }
-  // Call the appropriate function based on the sub-command
-  if (strcmp(SubCommand, "topology") == 0) {
-    ShowTopology(HostNode);
-
-  } else if (strcmp(SubCommand, "routing") == 0) {
-    ShowForwardingTable(HostNode);
-
-  } else if (strcmp(SubCommand, "names") == 0) {
-    ShowNames(HostNode);
-  } else {
-    // If the sub-command is not recognized, display an error message
-    CommandNotFound("Command not found", Buffer);
   }
 }

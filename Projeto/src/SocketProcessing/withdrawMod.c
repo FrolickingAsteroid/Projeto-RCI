@@ -44,6 +44,7 @@ void WithdrawHandle(Host *HostNode, char *LeavingId, int SenderFd) {
       if (!SendNewMsg(HostNode, HostNode->HostId, HostNode->Ext->IP, BootTCP)) {
         // remove new extern if connection fails
         WithdrawHandle(HostNode, HostNode->Ext->Id, HostNode->Ext->Fd);
+        return;
       }
     } else {
       FreeNode(HostNode->Ext);

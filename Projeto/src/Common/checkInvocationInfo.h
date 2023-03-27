@@ -17,10 +17,13 @@ typedef struct UsrInvoc {
   int RegUDP;   /**< Registrar UDP port number */
 } UsrInvoc;
 
+// Initializes a new UsrInvoc struct
 UsrInvoc *InitUsrInfo();
+// Validates user invocation parameters and returns a UsrInvoc struct
 UsrInvoc *InvocCheck(int argc, char *argv[]);
-
+// Validates the format of an IP address
 char *CheckValidAdress(char *IP);
+// Validates the format of a port number
 int CheckValidPort(char *PORT);
 
 #endif

@@ -12,7 +12,7 @@
 #include "../Common/utils.h"
 #include "../Common/retry.h"
 
-// Maximum buffer size for receiving server responses
+// Maximum buffer size for receiving server UDP responses
 #define MAXSIZE 4096
 
 /**
@@ -58,6 +58,9 @@ char *UDPClient(Host *HostNode, char *msg) {
   }
 
   char *Buffer = calloc(MAXSIZE, sizeof(char));
+  if (Buffer == NULL) {
+    DieWithSys("calloc() failed");
+  }
 
   // Receive server answer:
   socklen_t addrlen = sizeof(ServerAddr);

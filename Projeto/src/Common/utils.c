@@ -161,7 +161,13 @@ void InterfaceUsage() {
   printf("+---------------------------+-----------------------------------+\n");
   printf("| show routing (sr):        | Displays the node's forwarding    |\n");
   printf("|                           | table.                            |\n");
-  printf("+---------------------------+-----------------------------------+\n");
+  printf("+-----------------------------+---------------------------------+\n");
+  printf("| clear routing (cr):       | Clears the node's forwarding      |\n");
+  printf("|                           | table.                            |\n");
+  printf("+------------------------------+--------------------------------+\n");
+  printf("| clear names (cn):         | Clears the names of content       |\n");
+  printf("|                           | items present on the node.        |\n");
+  printf("+------------------------------+--------------------------------+\n");
   printf("| leave:                    | Exits the node from the network.  |\n");
   printf("+---------------------------+-----------------------------------+\n");
   printf("| exit:                     | Closes the application.           |\n");
@@ -173,6 +179,6 @@ void InterfaceUsage() {
   printf("| quiet:                    | Enables quiet mode, suppressing   |\n");
   printf("|                           | non-critical output.              |\n");
   printf("+---------------------------+-----------------------------------+\n");
-  printf("| clear:                    | Clears the terminal screen.       |\n");
+  printf("| clr:                    | Clears the terminal screen.         |\n");
   printf("+---------------------------+-----------------------------------+\n");
 }
