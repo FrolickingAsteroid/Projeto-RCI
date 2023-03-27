@@ -184,6 +184,68 @@ char *ExternFetch(char *NODELIST, char *Net, char *Id) {
 }
 
 /**
+ * @brief Finds a new external node not in the given blacklist.
+ *
+ * This function sends a "NODES" request to the server and receives a list of nodes
+ * in the network. It then finds the first node not present in the given blacklist
+ * and returns its "ID IP TCP" information as a string.
+ *
+ * @param BlckListId: A string representing the blacklisted node ID.
+ * @param HostNode: A pointer to the host for which to find a new external node.
+ *
+ * @return A dynamically allocated string containing the "ID IP TCP" information of
+ *         the first node not in the blacklist. Returns NULL if no valid entry is found.
+ *         The caller is responsible for freeing the returned string.
+ */
+static char *FindNewExtern(char *BlckListId, Host *HostNode) {
+  char *UDPAnswer = NULL;
+  static int BlckList[100];
+  static int Net = -1;
+
+  if (Net != atoi(HostNode->Net)) {
+    memset(BlckList, 0, sizeof(BlckList));
+    BlckList[atoi(HostNode->HostId)] = 1;
+    Net = atoi(HostNode->Net);
+  }
+
+  BlckList[atoi(BlckListId)] = 1;
+
+  char *DjoinMsg = calloc(64, sizeof(char));
+  if (DjoinMsg == NULL) {
+    DieWithSys("Calloc() failed");
+  }
+
+  char msg[BUFSIZE] = "";
+
+  sprintf(msg, "NODES %s", HostNode->Net);
+  UDPAnswer = UDPClient(HostNode, msg);
+
+  // if recvfrom() returns nothing or an error message, return
+  if (!ValidateServerResponse(UDPAnswer, "NODESLIST")) {
+    return NULL;
+  }
+
+  int id, tcp;
+  char ip[16];
+
+  // Skip "NODESLIST <net>\n" part and start processing the list of nodes
+  char *Nodeslist = strstr(UDPAnswer, "\n") + 1;
+  while (Nodeslist != NULL && sscanf(Nodeslist, "%02d %15s %d", &id, ip, &tcp) == 3) {
+
+    if (!BlckList[id]) {
+      sprintf(DjoinMsg, "djoin %s %s %02d %s %d", HostNode->Net, HostNode->HostId, id, ip, tcp);
+      CleanupResources(HostNode->HostId, HostNode->Net);
+      HostNode->Net = HostNode->HostId = NULL;
+      free(UDPAnswer);
+      return DjoinMsg;
+    }
+    Nodeslist = strstr(Nodeslist, "\n") + 1;
+  }
+
+  CleanupResources(UDPAnswer, DjoinMsg);
+  return NULL; // Return NULL if no valid entry is found
+}
+/**
  * @brief Joins the network as a new host without registering in the server.
  *
  * This function allows a new host to join an existing network bypassing the server. It checks the
@@ -204,13 +266,15 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
   }
 
   // Retrieve command args
-  sscanf(buffer, "djoin %s %s %s %s %s\n", Net, Id, BootId, BootIp, BootTCP);
+  if (sscanf(buffer, "djoin %s %s %s %s %s\n", Net, Id, BootId, BootIp, BootTCP) != 5) {
+    CommandNotFound("Invalid argument invocation, type 'help' for usage", buffer);
+    return;
+  }
 
-  // Check wether args come from JoinNetworkServer(), if not, check validity and register
+  // Check wether args comes from JoinNetworkServer(), if not, check validity and register
   // in the network
   if (HostNode->type == DJOIN) {
-    if (!(CheckNumberOfArgs(buffer, 5) && BootArgsCheck(BootId, BootIp, BootTCP) &&
-          CheckNetAndId(Net, Id))) {
+    if (!(BootArgsCheck(BootId, BootIp, BootTCP) && CheckNetAndId(Net, Id))) {
       CommandNotFound("Invalid argument invocation, type 'help' for usage", buffer);
       return;
     }
@@ -224,12 +288,22 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
   }
   // init extern node
   HostNode->Ext = InitNode(BootIp, atoi(BootTCP), BootId, -1);
-  // Connect to Extern and ask for bck
+
+  // Connect to Extern and ask for bck upon failure, fetch new extern
   if (!SendNewMsg(HostNode, Id, BootIp, BootTCP)) {
-    /*! TODO: connect() failed
-     *
-     * @todo randomize new extern
-     */
+    FreeNode(HostNode->Ext), HostNode->Ext = NULL;
+
+    // if on djoin mode return only
+    if (HostNode->type == DJOIN) {
+      return;
+    }
+    char *DjoinMsg = FindNewExtern(BootId, HostNode);
+    if (DjoinMsg == NULL) {
+      return;
+    }
+    DJoinNetworkServer(DjoinMsg, HostNode);
+    CleanupResources(NULL, DjoinMsg);
+    return;
   }
 
   InsertInForwardingTable(HostNode, atoi(HostNode->Ext->Id), atoi(HostNode->Ext->Id));
@@ -240,9 +314,9 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
  * forwarding table if necessary.
  *
  * This function sends a NEW message to a remote host with the specified HostId and BootIP/BootTCP
- * information. It establishes a TCP connection with the remote host and receives a response. If the
- * connection is successful and the response is parsed correctly, the function updates the host
- * information and inserts an entry into the forwarding table.
+ * information. It establishes a TCP connection with the remote host and receives a response. If
+ * the connection is successful and the response is parsed correctly, the function updates the
+ * host information and inserts an entry into the forwarding table.
  *
  * @param HostNode: Pointer to the Host structure representing the local host node.
  * @param HostId: Pointer to a character array containing the Host ID.
@@ -257,7 +331,6 @@ int SendNewMsg(Host *HostNode, char *HostId, char *BootIp, char *BootTCP) {
 
   // Connect to the remote host and send the NEW message
   if (TCPClientExternConnect(HostNode, msg, BootIp, BootTCP) == -1) {
-    perror(RESET "☠  Function TCPClientExternConnect >> " RED "connect() failed");
     return 0;
   }
   return 1;

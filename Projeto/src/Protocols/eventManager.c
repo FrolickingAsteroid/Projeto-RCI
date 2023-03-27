@@ -317,6 +317,7 @@ void EventManager(Host *HostNode) {
       current = current->next;
     }
   }
+  CleanInactiveConnections(HostNode);
 }
 
 /**

@@ -2,7 +2,7 @@
 
 start_port=55000
 end_port=55099
-net=777
+net=064
 server="193.136.138.142"
 port=59000
 
