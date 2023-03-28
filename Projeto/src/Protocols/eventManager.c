@@ -19,8 +19,10 @@
 
 #include "../UserInterface/userInterface.h"
 
-#define MAXSIZE 256
+#define MAXSIZE 256 // Intermidiate Buffer maxsize
+
 #define max(A, B) ((A) >= (B) ? (A) : (B))
+
 /**
  * @brief Set up the file descriptor set for use with select().
  *
@@ -31,6 +33,7 @@
  * - FdListen: the file descriptor for the listening socket.
  * - HostNode->Ext->Fd: the file descriptor for the external node (if it exists).
  * - The file descriptors of all internal nodes in the NodeList linked list.
+ * - The file descriptor of all new connections that have not been processed
  *
  * @param SockSet: Pointer to the `fd_set` structure to be set up.
  * @param FdListen: The file descriptor of the listening socket.
@@ -138,7 +141,10 @@ static void HandleListeningSocket(Host *HostNode, char *buffer, int *NewFd, stru
 
   // inserts new connection in connection queue and handle if message is complete
   PlugNC(*NewFd, HostNode, buffer);
-  HandleNewCon(HostNode, HostNode->NClist);
+
+  if (HostNode->NClist != NULL) {
+    HandleNewCon(HostNode, HostNode->NClist);
+  }
 }
 
 /**
@@ -266,6 +272,41 @@ static void HandleInternalNodeSocket(Host *HostNode, char *buffer, Node *current
 }
 
 /**
+ * @brief Updates the maximum number of file descriptors.
+ *
+ * This function determines the maximum number of file descriptors, the function
+ * compares the listening FD to the maximum file descriptor found so far. The final
+ * maximum file descriptor is returned.
+ *
+ * @param HostNode A pointer to the host for which to update the maximum file descriptor.
+ *
+ * @return The maximum file descriptor for the given host.
+ */
+static int UpdateMaxDes(Host *HostNode) {
+
+  // initialize maxFd to the listen file descriptor
+  int maxFd = HostNode->FdListen;
+
+  if (HostNode->NClist != NULL) {
+
+    // update maxFd if New con FD is greater
+    maxFd = max(maxFd, HostNode->NClist->NewFd);
+  }
+
+  if (HostNode->Ext != NULL) {
+    // update maxFd if external FD is greater
+    maxFd = max(maxFd, HostNode->Ext->Fd);
+  }
+
+  if (HostNode->NodeList != NULL) {
+    // update maxFd if internal FD is greater
+    maxFd = max(maxFd, HostNode->NodeList->Fd);
+  }
+
+  return maxFd;
+}
+
+/**
  * @brief Main event loop for the node program.
  *
  * This function implements the main event loop for the node program. It sets up the necessary file
@@ -329,39 +370,4 @@ void EventManager(Host *HostNode) {
     }
   }
   CleanInactiveConnections(HostNode);
-}
-
-/**
- * @brief Updates the maximum number of file descriptors.
- *
- * This function determines the maximum number of file descriptors, the function
- * compares the listening FD to the maximum file descriptor found so far. The final
- * maximum file descriptor is returned.
- *
- * @param HostNode A pointer to the host for which to update the maximum file descriptor.
- *
- * @return The maximum file descriptor for the given host.
- */
-int UpdateMaxDes(Host *HostNode) {
-
-  // initialize maxFd to the listen file descriptor
-  int maxFd = HostNode->FdListen;
-
-  if (HostNode->NClist != NULL) {
-
-    // update maxFd if New con FD is greater
-    maxFd = max(maxFd, HostNode->NClist->NewFd);
-  }
-
-  if (HostNode->Ext != NULL) {
-    // update maxFd if external FD is greater
-    maxFd = max(maxFd, HostNode->Ext->Fd);
-  }
-
-  if (HostNode->NodeList != NULL) {
-    // update maxFd if internal FD is greater
-    maxFd = max(maxFd, HostNode->NodeList->Fd);
-  }
-
-  return maxFd;
 }

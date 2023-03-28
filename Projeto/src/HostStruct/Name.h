@@ -12,7 +12,6 @@
 
 // Creates a new name with the given content.
 Name *CreateNewName(char *bucks);
-
 // Adds a new name to the host's name list.
 void AddNameToHost(Host *HostNode, Name *NewName);
 

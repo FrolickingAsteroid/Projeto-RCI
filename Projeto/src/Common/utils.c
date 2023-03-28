@@ -37,11 +37,13 @@ void DieWithUsr(const char *msg, const char *detail) {
   fputs(RESET, stderr);
   fputs(detail, stderr);
   fputc('\n', stderr);
+
   exit(EXIT_FAILURE);
 }
 
 void DieWithSys(const char *msg) {
   perror(msg);
+
   exit(EXIT_FAILURE);
 }
 
@@ -96,13 +98,19 @@ int IsAlphanumeric(char *str) {
 void CommandNotFound(char *msg, char *Command) {
 
   fputs(RED, stderr);
-  fputs("🚩 WARNING > ", stderr);
+  fputs("🚩WARNING > ", stderr);
   fputs(RESET, stderr);
   fputs(msg, stderr);
   fputs(": ", stderr);
   fputs(Command, stderr);
 }
 
+/**
+ * @brief Prints a server answer to stdout.
+ *
+ * @param Answer: The server answer to print.
+ * @param place: The location where the answer came from.
+ */
 void ServerAnswer(char *Answer, char *place) {
   int len = (int)strlen(Answer);
 
@@ -187,6 +195,6 @@ void InterfaceUsage() {
   printf("| quiet:                    | Enables quiet mode, suppressing   |\n");
   printf("|                           | non-critical output.              |\n");
   printf("+---------------------------+-----------------------------------+\n");
-  printf("| clr:                    | Clears the terminal screen.         |\n");
+  printf("| clr:                      | Clears the terminal screen.       |\n");
   printf("+---------------------------+-----------------------------------+\n");
 }

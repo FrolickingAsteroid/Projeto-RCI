@@ -1,10 +1,11 @@
-//===-- utils.h - Helper functions -----------------------------------------===//
+//===-- utils.h
+//--------------------------------------------------------------------------------===//
 //
 // This header file defines a set of helper functions, including functions for error handling,
 // string parsing, and printing output to the console. These functions are used throughout  code in
 // this project.
 //
-//===----------------------------------------------------------------------===//
+//===------------------------------------------------------------------------------------------===//
 
 #ifndef UTILS_H
 #define UTILS_H
@@ -19,6 +20,8 @@
 
 // Clear the console screen
 #define clear() printf("\033[H\033[J")
+
+#include "../HostStruct/nodeStructure.h"
 
 extern int Verbose;
 

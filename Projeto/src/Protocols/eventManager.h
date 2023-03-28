@@ -1,12 +1,17 @@
+//===------------------- EventManager.h ------------------------------------===//
+//
+// This file declares the interface for the event manager, which is responsible
+// for handling various events that occur within the host node, such as
+// incoming connections, new messages, and other updates.
+//
+//===----------------------------------------------------------------------===//
+
 #ifndef EventManager_H
 #define EventManager_H
 
-#include <sys/types.h>
-
 #include "../HostStruct/nodeStructure.h"
 
+// Function to manage file descriptor events
 void EventManager(Host *HostNode);
-int UpdateMaxDes(Host *HostNode);
-ssize_t CustomRead(int Fd, char *Buffer, size_t BufferSize);
 
-#endif
+#endif // !EventManager_H

@@ -8,7 +8,7 @@
 
 #include "../Common/utils.h"
 
-#define TABLESIZE 100
+#define TABLESIZE 100 // number of routig table entries
 /**
  * @brief Updates the forwarding table of a host when another node leaves the network.
  *

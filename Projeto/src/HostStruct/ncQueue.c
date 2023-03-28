@@ -6,9 +6,8 @@
 #include "CirBuffer.h"
 
 #include "../Common/utils.h"
-#include "nodeStructure.h"
 
-#define TIMEOUT_NEW_CONNEC 60
+#define TIMEOUT_NEW_CONNEC 300 // Timout for inactive file descriptors
 
 /**
  * @brief Initialize a new connection queue.
@@ -49,7 +48,7 @@ void PlugNC(int Fd, Host *HostNode, char *Buffer) {
 
   if (CbWrite(NewCon->Cb, Buffer, strlen(Buffer)) != strlen(Buffer)) {
     close(NewCon->NewFd), free(NewCon->Cb), free(NewCon);
-    // DieWithSys
+    return;
   }
   NewCon->next = HostNode->NClist;
   HostNode->NClist = NewCon;

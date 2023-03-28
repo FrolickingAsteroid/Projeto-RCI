@@ -6,7 +6,7 @@
 #include "checkInvocationInfo.h"
 #include "utils.h"
 
-#define PORT_RANGE 65535
+#define PORT_RANGE 65535 // Maximum port number
 
 /**
  *

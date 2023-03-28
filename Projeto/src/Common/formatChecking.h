@@ -1,4 +1,4 @@
-//===- formatchecking.h - Input Format Checking Library ------------------===//
+//===- formatchecking.h --------------------------------------------------===//
 //
 // This header file declares functions that check the format of input strings
 // used by the application. These functions verify that the input strings have
