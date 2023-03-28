@@ -105,15 +105,23 @@ void CommandNotFound(char *msg, char *Command) {
 
 void ServerAnswer(char *Answer, char *place) {
   int len = (int)strlen(Answer);
+
   if (Verbose && Answer != NULL) {
-    if (Answer[len - 1] == '\n') {
-      Answer[len - 1] = 0;
+
+    char *Buffer = strdup(Answer);
+    if (Buffer == NULL) {
+      DieWithSys("strdup() failed");
+    }
+    if (Buffer[len - 1] == '\n') {
+      Buffer[len - 1] = 0;
     }
     fprintf(stdout, GRN "\n%s" RESET, place);
     fputs(GRN ":" RESET, stdout);
     fputs("\n", stdout);
-    fputs(Answer, stdout);
+    fputs(Buffer, stdout);
     fputs(GRN "\n---\n" RESET, stdout);
+
+    free(Buffer);
   }
 }
 

@@ -44,14 +44,23 @@ static void SetFileDescriptors(fd_set *SockSet, int FdListen, Node *NodeList, Ho
   FD_SET(STDIN_FILENO, SockSet);
   FD_SET(FdListen, SockSet);
 
+  // Set external Fd
   if (HostNode->Ext != NULL) {
     FD_SET(HostNode->Ext->Fd, SockSet);
   }
 
-  Node *current = NodeList;
-  while (current != NULL) {
-    FD_SET(current->Fd, SockSet);
-    current = current->next;
+  // Set internal Fds
+  Node *current_nodes = NodeList;
+  while (current_nodes != NULL) {
+    FD_SET(current_nodes->Fd, SockSet);
+    current_nodes = current_nodes->next;
+  }
+
+  // Set new con Fd
+  NewConQueue *current_con = HostNode->NClist;
+  while (current_con != NULL) {
+    FD_SET(current_con->NewFd, SockSet);
+    current_con = current_con->next;
   }
 }
 
@@ -88,7 +97,7 @@ static int WaitOnFileDescriptors(fd_set *SockSet, int MaxDescriptor) {
  * @note This function assumes that `buffer` is large enough to hold the input data.
  */
 static void HandleKeyboardInput(Host *HostNode, char *buffer) {
-  if (read(STDIN_FILENO, buffer, MAXSIZE) == -1) {
+  if (read(STDIN_FILENO, buffer, MAXSIZE - 1) == -1) {
     perror("Function HandleKeyboardInput >> " RED "☠  read() failed");
     return;
   }
@@ -121,11 +130,12 @@ static void HandleListeningSocket(Host *HostNode, char *buffer, int *NewFd, stru
     return;
   }
 
-  if (read(*NewFd, buffer, MAXSIZE) == -1) {
+  if (read(*NewFd, buffer, MAXSIZE - 1) == -1) {
     perror("Function HandleListeningSocket >> " RED "☠  read() failed");
     close(*NewFd);
     return;
   }
+
   // inserts new connection in connection queue and handle if message is complete
   PlugNC(*NewFd, HostNode, buffer);
   HandleNewCon(HostNode, HostNode->NClist);
@@ -149,7 +159,7 @@ static int HandleNewConQueue(Host *HostNode, fd_set *SockSet, char *Buffer) {
       FD_CLR(Current->NewFd, SockSet);
 
       // Read data from the file descriptor
-      if (read(Current->NewFd, Buffer, MAXSIZE) <= 0) {
+      if (read(Current->NewFd, Buffer, MAXSIZE - 1) <= 0) {
         perror("Function HandleNewConQueue >> " RED "☠  read() failed");
         close(Current->NewFd), RemoveNC(HostNode, Current->NewFd);
         return 1;
@@ -157,7 +167,7 @@ static int HandleNewConQueue(Host *HostNode, fd_set *SockSet, char *Buffer) {
       // Write the data to the circular buffer
       if (CbWrite(Current->Cb, Buffer, strlen(Buffer)) != strlen(Buffer)) {
         close(Current->NewFd), RemoveNC(HostNode, Current->NewFd);
-        // DieWithSys
+        return 1;
       }
 
       // Handle the new connection
@@ -187,7 +197,7 @@ static int HandleNewConQueue(Host *HostNode, fd_set *SockSet, char *Buffer) {
 static void HandleExternalNodeSocket(Host *HostNode, char *buffer, ssize_t n) {
   char SecBuffer[MAXSIZE] = "";
 
-  n = read(HostNode->Ext->Fd, buffer, MAXSIZE);
+  n = read(HostNode->Ext->Fd, buffer, MAXSIZE - 1);
   if (n == 0) {
     WithdrawHandle(HostNode, HostNode->Ext->Id, HostNode->Ext->Fd);
     return;
@@ -231,7 +241,7 @@ static void HandleExternalNodeSocket(Host *HostNode, char *buffer, ssize_t n) {
 static void HandleInternalNodeSocket(Host *HostNode, char *buffer, Node *current, ssize_t n) {
   char SecBuffer[MAXSIZE] = "";
 
-  n = read(current->Fd, buffer, MAXSIZE);
+  n = read(current->Fd, buffer, MAXSIZE - 1);
   if (n == 0) {
     WithdrawHandle(HostNode, current->Id, current->Fd);
     return;
@@ -239,13 +249,14 @@ static void HandleInternalNodeSocket(Host *HostNode, char *buffer, Node *current
     perror("Function HandleInternalNodeSocket >> " RED "☠  read() failed");
     return;
   }
+
   // Check if Cb is not full, if so, flush contents
-  if (CbAvail(HostNode->Ext->Cb) == 0) {
+  if (CbAvail(current->Cb) == 0) {
     LiberateCircularBuffer(current->Cb);
   }
 
   // write into circular buffer
-  if (CbWrite(current->Cb, buffer, strlen(buffer))) {
+  if (CbWrite(current->Cb, buffer, strlen(buffer)) != strlen(buffer)) {
     return;
   }
   // while Cb contains complete messages process them
@@ -337,6 +348,7 @@ int UpdateMaxDes(Host *HostNode) {
   int maxFd = HostNode->FdListen;
 
   if (HostNode->NClist != NULL) {
+
     // update maxFd if New con FD is greater
     maxFd = max(maxFd, HostNode->NClist->NewFd);
   }

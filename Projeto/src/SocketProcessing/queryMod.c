@@ -51,9 +51,9 @@ void QueryHandle(Host *HostNode, char *Buffer, Node *SenderNode) {
   char Orig[TOKENSIZE] = "";
   char Name[TOKENSIZE] = "";
 
-  // Parse the QUERY message
+    // Parse the QUERY message
   if (sscanf(Buffer, "QUERY %s %s %s\n", Dest, Orig, Name) < 3) {
-    return;
+        return;
   }
 
   // Argument checker

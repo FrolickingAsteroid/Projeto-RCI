@@ -23,7 +23,6 @@ void SocketInterfaceParser(char *Buffer, Host *HostNode, Node *SenderNode) {
 
   // Parse type of message from buffer
   sscanf(Buffer, "%s", Token);
-
   // Call appropriate message handler function
   if (strcmp(Token, "EXTERN") == 0) {
     ExternHandle(Buffer, HostNode);
@@ -58,7 +57,8 @@ void SocketInterfaceParser(char *Buffer, Host *HostNode, Node *SenderNode) {
  *
  */
 void SendProtocolMsg(Host *HostNode, char *msg, int SenderFd) {
-  size_t MsgLen = strlen(msg); // NULL terminator
+  size_t MsgLen = strlen(msg);
+
   // send protocol to interns
   for (Node *temp = HostNode->NodeList; temp != NULL; temp = temp->next) {
     if (SenderFd == temp->Fd) {
@@ -94,11 +94,10 @@ void SendProtocolMsg(Host *HostNode, char *msg, int SenderFd) {
  */
 ssize_t CustomWrite(int Fd, char *Msg, size_t MsgSize) {
   ssize_t TotalBytes = 0, BytesSent = 0;
-  char *Buffer = Msg;
 
   // Loop until the entire message has been written or an error occurs
   while (TotalBytes < (ssize_t)MsgSize) {
-    BytesSent = write(Fd, Buffer + TotalBytes, MsgSize - (size_t)TotalBytes);
+    BytesSent = write(Fd, Msg + TotalBytes, MsgSize - (size_t)TotalBytes);
 
     // Check if an error occurred during the write operation
     if (BytesSent == -1) {
