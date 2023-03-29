@@ -146,7 +146,6 @@ void LiberateHost(Host *HostNode) {
   HostNode->HostId = NULL;
 
   FreeNodeList(HostNode);
-  FreeNameList(HostNode);
   FreeNCList(HostNode);
 }
 

@@ -51,9 +51,9 @@ void QueryHandle(Host *HostNode, char *Buffer, Node *SenderNode) {
   char Orig[TOKENSIZE] = "";
   char Name[TOKENSIZE] = "";
 
-    // Parse the QUERY message
+  // Parse the QUERY message
   if (sscanf(Buffer, "QUERY %s %s %s\n", Dest, Orig, Name) < 3) {
-        return;
+    return;
   }
 
   // Argument checker
@@ -64,6 +64,7 @@ void QueryHandle(Host *HostNode, char *Buffer, Node *SenderNode) {
   ServerAnswer(Buffer, "Neighbouring TCP connection request");
 
   // Update the forwarding table with QUERY info
+  InsertInForwardingTable(HostNode, atoi(SenderNode->Id), atoi(SenderNode->Id));
   InsertInForwardingTable(HostNode, atoi(SenderNode->Id), atoi(Orig));
 
   // If the QUERY reached the target destination, search for the content
@@ -168,6 +169,7 @@ void ContentHandle(Host *HostNode, char *Buffer, int ContentFlag, Node *SenderNo
   ServerAnswer(Buffer, "Neighbouring TCP connection answer");
 
   // Insert into forwarding table the new path
+  InsertInForwardingTable(HostNode, atoi(SenderNode->Id), atoi(SenderNode->Id));
   InsertInForwardingTable(HostNode, atoi(SenderNode->Id), atoi(Orig));
 
   // Check if the message reached its destination

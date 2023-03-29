@@ -7,6 +7,7 @@
 
 #include "../Common/utils.h"
 #include "../Protocols/UDP.h"
+#include "../HostStruct/Name.h"
 
 /**
  * @brief This function is responsible for removing a host from a network it is currently
@@ -67,6 +68,7 @@ void ExitProgram(Host *HostNode) {
 
   // close listening socket and free Host skeleton
   close(HostNode->FdListen);
+  FreeNameList(HostNode);
   free(HostNode->InvocInfo);
   free(HostNode);
 
