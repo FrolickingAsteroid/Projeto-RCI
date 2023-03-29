@@ -81,7 +81,7 @@ ssize_t SendtoRetry(int sockfd, char *buffer, size_t buflen, int flags,
   struct timeval tv = {.tv_sec = 1, .tv_usec = 0};
 
   // Set timeout for server answer
-  if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+  if (setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv)) < 0) {
     perror(RED "☠  setsockopt() failed");
     close(sockfd);
   }
