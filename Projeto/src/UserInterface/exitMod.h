@@ -10,7 +10,9 @@
 
 #include "../HostStruct/nodeStructure.h"
 
+// Exits the program
 void ExitProgram(Host *HostNode);
+// Leaves network
 void LeaveNetwork(Host *HostNode);
 
 #endif

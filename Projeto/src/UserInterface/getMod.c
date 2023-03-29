@@ -14,7 +14,8 @@
 
 #include "../SocketProcessing/socketInterface.h"
 
-#define TOKENSIZE 256
+#define TOKENSIZE 256 // Protocol size arguments
+#define MSGSIZE 1024  // Msg to send size
 
 /**
  * @brief Handles the 'get' command to search for a message with a given name.
@@ -34,22 +35,24 @@
 void GetName(Host *HostNode, char *Buffer) {
   char Dest[TOKENSIZE] = "";
   char Name[TOKENSIZE] = "";
-  char Query[TOKENSIZE << 2] = "";
+  char Query[MSGSIZE] = "";
 
   // if Host is not registered in a network return
   if (HostNode->HostId == NULL) {
-    CommandNotFound("Host does not belong to a network, first register in a network", Buffer);
+    CommandNotFound("Host does not belong to a network, register first", Buffer);
     return;
   }
 
   // parse command
   if (sscanf(Buffer, "get %s %s\n", Dest, Name) < 2) {
-    CommandNotFound("Invalid argument invocation, type 'help' for usage", Buffer);
+    CommandNotFound("Invalid argument invocation, 'get' must have 2 input arguments", Buffer);
+    fprintf(stderr, YEL "> type 'help' for more information\n" RESET);
     return;
   }
   // check dest format
   if (strlen(Dest) != 2 || IsNumber(Dest) == 0) {
-    CommandNotFound("Invalid argument invocation, type 'help' for usage", Buffer);
+    CommandNotFound("Invalid argument invocation, 'Dest' must be a two digit number", Buffer);
+    fprintf(stderr, YEL "> type 'help' for more information\n" RESET);
     return;
   }
   // check name validity
@@ -91,7 +94,8 @@ void CreateName(Host *HostNode, char *Buffer) {
   char Content[TOKENSIZE];
   // Parse args
   if (sscanf(Buffer, "create %s\n", Content) < 1) {
-    CommandNotFound("Invalid argument invocation, type 'help' for usage", Buffer);
+    CommandNotFound("Invalid argument invocation, 'create' must have 1 input argument", Buffer);
+    fprintf(stderr, YEL "> type 'help' for more information\n" RESET);
     return;
   }
 
@@ -101,6 +105,10 @@ void CreateName(Host *HostNode, char *Buffer) {
   }
   // create a new name item and add it to host
   Name *NewName = CreateNewName(Content);
+  if (NewName == NULL) {
+    DieWithSys("Function CreateNewName >>" RED " calloc() failed", HostNode);
+  }
+
   AddNameToHost(HostNode, NewName);
 
   fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Name has been added to host\n");
@@ -123,7 +131,8 @@ void DeleteName(Host *HostNode, char *Buffer) {
 
   // Parse input args
   if (sscanf(Buffer, "delete %s\n", Content) < 1) {
-    CommandNotFound("Invalid argument invocation, type 'help' for usage", Buffer);
+    CommandNotFound("Invalid argument invocation, 'delete' must have 1 input argument", Buffer);
+    fprintf(stderr, YEL "> type 'help' for more information\n" RESET);
     return;
   }
 
@@ -150,5 +159,5 @@ void DeleteName(Host *HostNode, char *Buffer) {
     }
   }
 
-  fprintf(stderr, RED "🚩 WARNING > " RESET "Name '%s' was not found\n", Content);
+  fprintf(stderr, RED "(!!!) WARNING > " RESET "Name '%s' was not found\n", Content);
 }

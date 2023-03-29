@@ -25,7 +25,7 @@ UsrInvoc *InitUsrInfo() {
 
   // Check if allocation was successful
   if (UsrInfo == NULL) {
-    DieWithSys("Function InitUsrInfo >>" RED "☠  malloc() failed");
+    DieWithSys("Function InitUsrInfo >>" RED "malloc() failed", NULL);
   }
 
   // Initialize fields of UsrInvoc struct
@@ -47,9 +47,7 @@ char *CheckValidAdress(char *IP) {
 
   // Check if the provided IP is valid
   if (inet_pton(AF_INET, IP, &(sa.sin_addr)) != 1) {
-    // If the IP is not valid, print usage and exit with an error message
-    Usage("./cot");
-    DieWithUsr(IP, "Invalid IP format");
+    return NULL;
   }
   // Return the validated IP address
   return IP;
@@ -69,16 +67,13 @@ char *CheckValidAdress(char *IP) {
  * @return An integer value representing the TCP port number, if valid.
  */
 int CheckValidPort(char *PORT) {
-
   if (!IsNumber(PORT)) {
-    Usage("./cot");
-    DieWithUsr(PORT, "Invalid TCP port format");
+    return -1;
   }
 
   int TCP = atoi(PORT);
   if (TCP > PORT_RANGE || TCP < 0) {
-    Usage("./cot");
-    DieWithUsr(PORT, "TCP port exceeds range of possible values");
+    return -1;
   }
   return TCP;
 }
@@ -109,12 +104,42 @@ UsrInvoc *InvocCheck(int argc, char *argv[]) {
 
   // Parse and check Host IP and TCP port
   UsrInfo->HostIP = CheckValidAdress(argv[1]);
+  if (UsrInfo->HostIP == NULL) {
+    free(UsrInfo);
+
+    // If the IP is not valid, print usage and exit with an error message
+    Usage("./cot");
+    DieWithUsr(argv[1], "Invalid IP format");
+  }
+
   UsrInfo->HostTCP = CheckValidPort(argv[2]);
+  if (UsrInfo->HostTCP == -1) {
+    free(UsrInfo);
+
+    // If the IP is not valid, print usage and exit with an error message
+    Usage("./cot");
+    DieWithUsr(argv[2], "Invalid IP format");
+  }
 
   // Parse and check server IP and UDP port if provided
   if (argc == 5) {
     UsrInfo->RegIP = CheckValidAdress(argv[3]);
+    if (UsrInfo->RegIP == NULL) {
+      free(UsrInfo);
+
+      // If the IP is not valid, print usage and exit with an error message
+      Usage("./cot");
+      DieWithUsr(argv[3], "Invalid IP format");
+    }
+
     UsrInfo->RegUDP = CheckValidPort(argv[4]);
+    if (UsrInfo->RegUDP == -1) {
+      free(UsrInfo);
+
+      // If the IP is not valid, print usage and exit with an error message
+      Usage("./cot");
+      DieWithUsr(argv[4], "Invalid IP format");
+    }
   }
 
   return UsrInfo;

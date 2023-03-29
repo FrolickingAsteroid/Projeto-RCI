@@ -9,7 +9,11 @@
 #ifndef FORMATCHECKING_H
 #define FORMATCHECKING_H
 
+// Checks the format of the network and ID strings
 int CheckNetAndId(char *Net, char *Id);
+// Validates the boot ID, boot IP, and boot TCP arguments
 int BootArgsCheck(char *BootId, char *BootIp, char *BootTCP);
+// Parses the content of a name string and checks its format
 int NameParser(char *Content);
-#endif //
+
+#endif // FORMATCHECKING_H

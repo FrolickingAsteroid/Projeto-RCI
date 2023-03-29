@@ -22,7 +22,8 @@
 Host *InitHostStructure(int Fd, UsrInvoc *UsrInfo) {
   Host *node = calloc(1, sizeof(Host));
   if (node == NULL) {
-    DieWithSys("Function InitHostStructure: calloc() failed");
+    free(UsrInfo);
+    DieWithSys("Function InitHostStructure: calloc() failed", NULL);
   }
 
   memset(node->ForTable, -1, sizeof(node->ForTable));
@@ -52,11 +53,11 @@ void PlugHostNetId(char *Net, char *Id, Host *HostNode) {
   // Init char dependent variables for string copy and plug
   HostNode->HostId = (char *)malloc(3 * sizeof(char));
   if (HostNode->HostId == NULL) {
-    DieWithSys("Function PlugHostNetId: malloc() failed");
+    DieWithSys("Function PlugHostNetId: malloc() failed", NULL);
   }
   HostNode->Net = (char *)malloc(4 * sizeof(char));
   if (HostNode->Net == NULL) {
-    DieWithSys("Function PlugHostNetId: malloc() failed");
+    DieWithSys("Function PlugHostNetId: malloc() failed", NULL);
   }
   sprintf(HostNode->HostId, "%s", Id);
   sprintf(HostNode->Net, "%s", Net);
@@ -78,21 +79,21 @@ Node *InitNode(char *Ip, int TCP, char *Id, int Fd) {
   // Init Node struct
   Node *Node = (struct Node *)malloc(sizeof(struct Node));
   if (Node == NULL) {
-    DieWithSys("Function InitNode: malloc() failed");
+    DieWithSys("Function InitNode: malloc() failed", NULL);
   }
 
   // Init char dependent variables for string copy and plug aswell as CircularBuffer
   Node->Id = (char *)malloc((strlen(Id) + 1) * sizeof(char));
   if (Node->Id == NULL) {
-    DieWithSys("Function InitNode: malloc() failed");
+    DieWithSys("Function InitNode: malloc() failed", NULL);
   }
   Node->IP = (char *)malloc((strlen(Ip) + 1) * sizeof(char));
   if (Node->IP == NULL) {
-    DieWithSys("Function InitNode: malloc() failed");
+    DieWithSys("Function InitNode: malloc() failed", NULL);
   }
   Node->Cb = (CircularBuffer *)malloc(sizeof(CircularBuffer));
   if (Node->Cb == NULL) {
-    DieWithSys("Function InitNode: malloc() failed");
+    DieWithSys("Function InitNode: malloc() failed", NULL);
   }
 
   CbInit(Node->Cb);

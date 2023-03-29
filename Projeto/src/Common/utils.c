@@ -5,6 +5,8 @@
 
 #include "utils.h"
 
+#include "../HostStruct/Name.h"
+
 int Verbose = 0;
 
 /**
@@ -28,21 +30,33 @@ void Usage(char *name) {
                       "\t  to 193.136.138.142 and 59000 respectively.\n\n");
 }
 
-// Error Message and close -- might need tweaking
 void DieWithUsr(const char *msg, const char *detail) {
   fputs(RED, stderr);
-  fputs("[☠ ] ", stderr);
+  fputs("(X) FATAL ERROR: ", stderr);
   fputs(msg, stderr);
   fputs(": ", stderr);
   fputs(RESET, stderr);
   fputs(detail, stderr);
   fputc('\n', stderr);
-
   exit(EXIT_FAILURE);
 }
 
-void DieWithSys(const char *msg) {
+void PerrorWrapper(const char *msg) {
+  fputs(RED, stderr);
+  fputs("(X) FATAL ERROR: ", stderr);
+  fputs(RESET, stderr);
   perror(msg);
+}
+
+void DieWithSys(const char *msg, Host *HostNode) {
+
+  PerrorWrapper(msg);
+
+  if (HostNode != NULL) {
+    LiberateHost(HostNode);
+    FreeNameList(HostNode);
+    free(HostNode);
+  }
 
   exit(EXIT_FAILURE);
 }
@@ -98,11 +112,13 @@ int IsAlphanumeric(char *str) {
 void CommandNotFound(char *msg, char *Command) {
 
   fputs(RED, stderr);
-  fputs("🚩WARNING > ", stderr);
+  fputs("(!!!) WARNING > ", stderr);
   fputs(RESET, stderr);
   fputs(msg, stderr);
   fputs(": ", stderr);
+  fputs(RED, stderr);
   fputs(Command, stderr);
+  fputs(RESET, stderr);
 }
 
 /**
@@ -118,7 +134,7 @@ void ServerAnswer(char *Answer, char *place) {
 
     char *Buffer = strdup(Answer);
     if (Buffer == NULL) {
-      DieWithSys("strdup() failed");
+      DieWithSys("strdup() failed", NULL);
     }
     if (Buffer[len - 1] == '\n') {
       Buffer[len - 1] = 0;

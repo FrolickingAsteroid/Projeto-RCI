@@ -30,7 +30,7 @@ void LeaveNetwork(Host *HostNode) {
 
   // check if Host is registered in a network
   if (HostNode->Net == NULL) {
-    fprintf(stderr, RED "🚩 WARNING >" RESET "Host is not registered in any a network\n");
+    CommandNotFound("Unable to leave", "Host is not registered in any network");
     return;
   }
 
@@ -43,7 +43,8 @@ void LeaveNetwork(Host *HostNode) {
     if (UDPAnswer != NULL) {
       free(UDPAnswer);
     }
-    fprintf(stderr, RED "🚩 WARNING >" RESET " Unable to get proper communication with server\n");
+    CommandNotFound("Unable to leave", "Could not get proper communication with server");
+    return;
   }
 
   // unplug connections from node structures

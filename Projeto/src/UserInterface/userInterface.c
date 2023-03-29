@@ -27,7 +27,8 @@ static void ClrParser(Host *HostNode, char *Buffer) {
   char SubCommand[128] = "";
   // Extract the sub-command from the buffer
   if (sscanf(Buffer, "clear %s\n", SubCommand) < 1) {
-    CommandNotFound("Command not found", Buffer);
+    CommandNotFound("Invalid argument invocation, 'clear' must have 1 input argument", Buffer);
+    fprintf(stderr, YEL "> type 'help' for more information\n" RESET);
     return;
   }
   // Call the appropriate function based on the sub-command
@@ -35,11 +36,12 @@ static void ClrParser(Host *HostNode, char *Buffer) {
     ClearForwardingTable(HostNode);
 
   } else if (strcmp(SubCommand, "names") == 0) {
-    FreeNameList(HostNode);
+    ClearNames(HostNode);
 
   } else {
     // If the sub-command is not recognized, display an error message
-    CommandNotFound("Command not found", Buffer);
+    CommandNotFound("Invalid input argument", Buffer);
+    fprintf(stderr, YEL "\n> type 'help' for more information\n" RESET);
   }
 }
 
@@ -58,7 +60,8 @@ static void ShowParser(Host *HostNode, char *Buffer) {
   char SubCommand[128] = "";
   // Extract the sub-command from the buffer
   if (sscanf(Buffer, "show %s\n", SubCommand) < 1) {
-    CommandNotFound("Command not found", Buffer);
+    CommandNotFound("Invalid argument invocation, 'show' must have 1 input argument", Buffer);
+    fprintf(stderr, YEL "> type 'help' for more information\n" RESET);
     return;
   }
   // Call the appropriate function based on the sub-command
@@ -72,7 +75,8 @@ static void ShowParser(Host *HostNode, char *Buffer) {
     ShowNames(HostNode);
   } else {
     // If the sub-command is not recognized, display an error message
-    CommandNotFound("Command not found", Buffer);
+    CommandNotFound("Invalid input argument", Buffer);
+    fprintf(stderr, YEL "> type 'help' for more information\n" RESET);
   }
 }
 
@@ -91,7 +95,8 @@ void UserInterfaceParser(char *buffer, Host *HostNode) {
 
   // Parse Command from buffer
   if (sscanf(buffer, "%s", Command) < 1) {
-    CommandNotFound("Command not found", " ");
+    CommandNotFound("Invalid argument invocation", "Must input a command");
+    fprintf(stderr, YEL "\n> type 'help' for more information\n" RESET);
     return;
   }
 
@@ -115,7 +120,7 @@ void UserInterfaceParser(char *buffer, Host *HostNode) {
     ClearForwardingTable(HostNode);
 
   } else if (strcmp(Command, "cn") == 0) {
-    FreeNameList(HostNode);
+    ClearNames(HostNode);
 
   } else if (strcmp(Command, "leave") == 0) {
     LeaveNetwork(HostNode);
@@ -155,6 +160,7 @@ void UserInterfaceParser(char *buffer, Host *HostNode) {
 
   } else {
     CommandNotFound("Command not found", buffer);
+    fprintf(stderr, YEL "> type 'help' for more information\n" RESET);
     return;
   }
 }

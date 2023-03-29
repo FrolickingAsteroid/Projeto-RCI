@@ -17,7 +17,9 @@
 #include "../Protocols/eventManager.h"
 #include "../SocketProcessing/socketInterface.h"
 
-#define MAXSIZE 256
+#define TOKENSIZE 256 // Size of protocol args
+#define MSGSIZE 1024  // message size
+
 /**
  * @brief Reads input from a newly established socket and performs the following tasks:
  *
@@ -33,8 +35,8 @@
  * @param NewCon: A pointer to a new connection waiting to be processed
  */
 void HandleNewCon(Host *HostNode, NewConQueue *NewCon) {
-  char Buffer[MAXSIZE] = "", msg[MAXSIZE << 2] = "";
-  char NewId[MAXSIZE] = "", NewIp[MAXSIZE] = "", NewTCP[MAXSIZE] = "";
+  char Buffer[TOKENSIZE] = "", msg[MSGSIZE] = "";
+  char NewId[TOKENSIZE] = "", NewIp[TOKENSIZE] = "", NewTCP[TOKENSIZE] = "";
 
   // Read the data from the circular buffer
   if (!CbRead(NewCon->Cb, Buffer, sizeof(Buffer) - 1)) {
@@ -96,7 +98,7 @@ void HandleNewCon(Host *HostNode, NewConQueue *NewCon) {
  * @param HostNode: A pointer to the host node structure.
  */
 void ExternHandle(char *Buffer, Host *HostNode) {
-  char Id[MAXSIZE] = "", Ip[MAXSIZE] = "", PortTCP[MAXSIZE] = "";
+  char Id[TOKENSIZE] = "", Ip[TOKENSIZE] = "", PortTCP[TOKENSIZE] = "";
 
   // Free old bck
   FreeNode(HostNode->Bck), HostNode->Bck = NULL;

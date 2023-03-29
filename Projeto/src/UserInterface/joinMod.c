@@ -3,13 +3,17 @@
 #include <string.h>
 
 #include "joinMod.h"
+#include "exitMod.h"
 
 #include "../HostStruct/forwardingTable.h"
+
 #include "../Protocols/TCP.h"
 #include "../Protocols/UDP.h"
+
 #include "../Common/formatChecking.h"
 #include "../Common/utils.h"
-#define BUFSIZE 128
+
+#define BUFSIZE 128 // Size of input arguments
 
 /**
  * @brief Frees allocated memory for UDPAnswer and DjoinMsg if they are not NULL.
@@ -68,17 +72,20 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
 
   // Retrieve command args and check their validity
   if (sscanf(buffer, "join %s %s\n", Net, Id) != 2) {
-    CommandNotFound("Invalid argument invocation, type 'help' for usage", buffer);
+    CommandNotFound("Invalid argument invocation, 'join' must have two input arguments", buffer);
+    fprintf(stderr, YEL "\n> type 'help' for more information\n" RESET);
     return;
   }
   if (!(CheckNetAndId(Net, Id))) {
-    CommandNotFound("Invalid argument invocation, type 'help' for usage", buffer);
+    CommandNotFound("Invalid argument invocation, invalid 'NET' and 'ID' parameters", buffer);
+    fprintf(stderr, YEL "\n> type 'help' for more information\n" RESET);
     return;
   }
 
   // Check if node is already in a network
   if (HostNode->Net != NULL) {
-    CommandNotFound("Host is already registered in a network, leave before rejoining", buffer);
+    CommandNotFound("Host is already registered in a network, must leave before joining again",
+                    buffer);
     return;
   }
 
@@ -154,7 +161,8 @@ void CheckSingularityId(Host *HostNode, char *Nodelist, char (*Id)[BUFSIZE]) {
     sprintf(DelId, "\n%s ", (*Id));
   }
 
-  fprintf(stderr, RED "🚩 WARNING >" RESET " Id already registered in the network, using Id %s\n",
+  fprintf(stderr,
+          RED "(!!!) WARNING >" RESET " Id already registered in the network, using Id %s\n",
           (*Id));
 }
 
@@ -169,7 +177,7 @@ void CheckSingularityId(Host *HostNode, char *Nodelist, char (*Id)[BUFSIZE]) {
 char *ExternFetch(char *NODELIST, char *Net, char *Id) {
   char *DjoinMsg = calloc(64, sizeof(char));
   if (DjoinMsg == NULL) {
-    DieWithSys("calloc() failed");
+    DieWithSys("calloc() failed", NULL);
   }
   char *array[100] = {" "};
   int i = 0;
@@ -214,19 +222,18 @@ static char *FindNewExtern(char *BlckListId, Host *HostNode) {
   static int BlckList[100];
   static int Net = -1;
 
-  // Insert self into blcklist
-  BlckList[atoi(HostNode->HostId)] = 1;
-
   if (Net != atoi(HostNode->Net)) {
     memset(BlckList, 0, sizeof(BlckList));
     Net = atoi(HostNode->Net);
   }
 
+  // Insert self into blcklist
+  BlckList[atoi(HostNode->HostId)] = 1;
   BlckList[atoi(BlckListId)] = 1;
 
   char *DjoinMsg = calloc(64, sizeof(char));
   if (DjoinMsg == NULL) {
-    DieWithSys("Calloc() failed");
+    DieWithSys("Calloc() failed", HostNode);
   }
 
   char msg[BUFSIZE] = "";
@@ -277,13 +284,15 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
 
   // Check if node is already in a network
   if (HostNode->Net != NULL) {
-    CommandNotFound("Host is already registered in a network, leave before rejoining", buffer);
+    CommandNotFound("Host is already registered in a network, must leave before joining again",
+                    buffer);
     return;
   }
 
   // Retrieve command args
   if (sscanf(buffer, "djoin %s %s %s %s %s\n", Net, Id, BootId, BootIp, BootTCP) != 5) {
-    CommandNotFound("Invalid argument invocation, type 'help' for usage", buffer);
+    CommandNotFound("Invalid argument invocation, 'djoin' must have 5 input arguments", buffer);
+    fprintf(stderr, YEL "\n> type 'help' for more information\n" RESET);
     return;
   }
 
@@ -291,7 +300,8 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
   // in the network
   if (HostNode->type == DJOIN) {
     if (!(BootArgsCheck(BootId, BootIp, BootTCP) && CheckNetAndId(Net, Id))) {
-      CommandNotFound("Invalid argument invocation, type 'help' for usage", buffer);
+      CommandNotFound("Invalid argument invocation, invalid format", buffer);
+      fprintf(stderr, YEL "\n> type 'help' for more information\n" RESET);
       return;
     }
   }
@@ -311,12 +321,15 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
 
     // if on djoin mode return only
     if (HostNode->type == DJOIN) {
+      fprintf(stderr, RED "(!!!) WARNING >" RESET " Unable to connect to requested node\n");
+      LeaveNetwork(HostNode);
       return;
     }
+
     char *DjoinMsg = FindNewExtern(BootId, HostNode);
     if (DjoinMsg == NULL) {
-      fprintf(stderr,
-              RED "🚩 WARNING >" RESET " Unable to connect to any node, alone in the network\n");
+      fprintf(stderr, RED "(!!!) WARNING >" RESET " Unable to connect to any node in network %s\n",
+              HostNode->Net);
       return;
     }
     DJoinNetworkServer(DjoinMsg, HostNode);
@@ -349,6 +362,7 @@ int SendNewMsg(Host *HostNode, char *HostId, char *BootIp, char *BootTCP) {
 
   // Connect to the remote host and send the NEW message
   if (TCPClientExternConnect(HostNode, msg, BootIp, BootTCP) == -1) {
+    printf("1\n");
     return 0;
   }
   return 1;

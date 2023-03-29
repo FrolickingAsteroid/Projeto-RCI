@@ -23,12 +23,13 @@ int main(int argc, char *argv[]) {
 
   // Main loop
   clear();
-  printf(BLU "# User Interface Activated " GRN "🗹 \n" RESET);
+  fprintf(stdout, BLU "# User Interface Activated " GRN "🗹 \n" RESET);
+
   // Init Keyboard prompt
+  printf(KMAG ">>> " RESET);
+  fflush(stdout);
 
   FOREVER {
-    printf(KMAG "\n>>> " RESET);
-    fflush(stdout);
 
     // Event Parser and Manage
     EventManager(HostNode);

@@ -20,12 +20,12 @@ NewConQueue *InitNCQueue(int NewFd) {
   // Init Queue struct
   NewConQueue *NewCon = (struct NewConQueue *)malloc(sizeof(struct NewConQueue));
   if (NewCon == NULL) {
-    DieWithSys("Function InitNCQueue: malloc() failed");
+    return NULL;
   }
 
   NewCon->Cb = (CircularBuffer *)malloc(sizeof(CircularBuffer));
   if (NewCon->Cb == NULL) {
-    DieWithSys("Function InitNCQueue: malloc() failed");
+    return NULL;
   }
 
   CbInit(NewCon->Cb);
@@ -45,6 +45,9 @@ NewConQueue *InitNCQueue(int NewFd) {
  */
 void PlugNC(int Fd, Host *HostNode, char *Buffer) {
   NewConQueue *NewCon = InitNCQueue(Fd);
+  if (NewCon == NULL) {
+    DieWithSys("Function InitNCQueue >> " RED " malloc() failed", HostNode);
+  }
 
   if (CbWrite(NewCon->Cb, Buffer, strlen(Buffer)) != strlen(Buffer)) {
     close(NewCon->NewFd), free(NewCon->Cb), free(NewCon);

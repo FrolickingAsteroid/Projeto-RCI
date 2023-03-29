@@ -82,12 +82,17 @@ int BootArgsCheck(char *BootId, char *BootIp, char *BootTCP) {
 int NameParser(char *Content) {
   // check name size
   if (strlen(Content) > 100) {
-    CommandNotFound("Name is too long", Content);
+    CommandNotFound("Invalid argument invocation, name must have less than 100 characters",
+                    Content);
+    fprintf(stderr, YEL "\n> type 'help' for more information\n" RESET);
     return 0;
   }
   // check name contents
   if (!IsAlphanumeric(Content)) {
-    CommandNotFound("Name can only contain alphanumeric charaters and dots", Content);
+    CommandNotFound(
+        "Invalid argument invocation, name can only contain alphanumeric charaters and dots",
+        Content);
+    fprintf(stderr, YEL "\n> type 'help' for more information\n" RESET);
     return 0;
   }
 

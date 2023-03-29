@@ -10,7 +10,7 @@
 
 #include "../Common/utils.h"
 
-#define MAXSIZE 128
+#define TOKENSIZE 64 // size of usr input arg
 
 /**
  * @brief Parses the received buffer and calls the appropriate message handler function
@@ -19,7 +19,7 @@
  * @param hostNode: The pointer to the host node receiving the protocol
  */
 void SocketInterfaceParser(char *Buffer, Host *HostNode, Node *SenderNode) {
-  char Token[64] = "";
+  char Token[TOKENSIZE] = "";
 
   // Parse type of message from buffer
   sscanf(Buffer, "%s", Token);
@@ -67,7 +67,7 @@ void SendProtocolMsg(Host *HostNode, char *msg, int SenderFd) {
 
     if (CustomWrite(temp->Fd, msg, MsgLen) == -1) {
       // if connection is not available continue
-      perror("Function SendProtocolMsg >> " RED "☠  write() failed");
+      PerrorWrapper("Function SendProtocolMsg >> " RED "write() failed" RESET);
       continue;
     }
   }
@@ -75,7 +75,7 @@ void SendProtocolMsg(Host *HostNode, char *msg, int SenderFd) {
   // send protocol to extern
   if (HostNode->Ext != NULL && SenderFd != HostNode->Ext->Fd) {
     if (CustomWrite(HostNode->Ext->Fd, msg, MsgLen) == -1) {
-      perror("Function SendProtocolMsg >> " RED "☠  write() failed");
+      PerrorWrapper("Function SendProtocolMsg >> " RED "write() failed" RESET);
     }
   }
 }
@@ -101,7 +101,7 @@ ssize_t CustomWrite(int Fd, char *Msg, size_t MsgSize) {
 
     // Check if an error occurred during the write operation
     if (BytesSent == -1) {
-      perror("Function CustomWrite >> " RED "☠  write() failed");
+      PerrorWrapper("Function CustomWrite >> " RED "write() failed" RESET);
       return -1;
     }
     // Add bytes to stack

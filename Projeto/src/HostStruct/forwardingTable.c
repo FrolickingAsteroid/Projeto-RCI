@@ -9,6 +9,7 @@
 #include "../Common/utils.h"
 
 #define TABLESIZE 100 // number of routig table entries
+
 /**
  * @brief Updates the forwarding table of a host when another node leaves the network.
  *
@@ -83,13 +84,15 @@ Node *CheckForwardingTable(Host *HostNode, char *dest) {
  * @param HostNode: A pointer to the host node containing the forwarding table.
  */
 void ClearForwardingTable(Host *HostNode) {
+
   if (HostNode->Net == NULL) {
-    fprintf(stderr,
-            RED "🚩 WARNING > " RESET "Not registered in a network, no forwarding table to clear\n");
+    CommandNotFound("Not registered in a network", "Unable to clear forwarding table\n");
+    return;
   }
   // Reset all entries in the forwarding table to -1
   memset(HostNode->ForTable, -1, sizeof(HostNode->ForTable));
 
   // Insert itself in forwarding table after delete
   InsertInForwardingTable(HostNode, atoi(HostNode->HostId), atoi(HostNode->HostId));
+  fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Cleared name list\n");
 }

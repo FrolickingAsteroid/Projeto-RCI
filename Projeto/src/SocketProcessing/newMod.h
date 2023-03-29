@@ -7,6 +7,7 @@
 #define NEWMOD_H
 
 #include "../HostStruct/nodeStructure.h"
+
 // Handles new connections for the host.
 void HandleNewCon(Host *HostNode, NewConQueue *NewCon);
 // Handles external connections for the host.

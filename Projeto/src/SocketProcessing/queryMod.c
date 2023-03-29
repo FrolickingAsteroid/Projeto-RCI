@@ -13,7 +13,8 @@
 
 #include "socketInterface.h"
 
-#define TOKENSIZE 256
+#define TOKENSIZE 256 // Size of protocol args
+#define MSGSIZE 512   // Size of msg to send
 
 /**
  * @brief Checks the validity of destination, origin, and name parameters.
@@ -101,7 +102,7 @@ void QueryHandle(Host *HostNode, char *Buffer, Node *SenderNode) {
  * @param Name The content name.
  */
 void SendContent(int neighFd, char *Dest, char *Orig, char *Name) {
-  char msg[TOKENSIZE << 1] = "";
+  char msg[MSGSIZE] = "";
 
   // Construct the CONTENT message
   sprintf(msg, "CONTENT %s %s %s\n", Dest, Orig, Name);
@@ -121,7 +122,7 @@ void SendContent(int neighFd, char *Dest, char *Orig, char *Name) {
  * @param Name The content name.
  */
 void SendNoContent(int neighFd, char *Dest, char *Orig, char *Name) {
-  char msg[TOKENSIZE << 1] = "";
+  char msg[MSGSIZE] = "";
 
   // Construct the NOCONTENT message
   sprintf(msg, "NOCONTENT %s %s %s\n", Dest, Orig, Name);

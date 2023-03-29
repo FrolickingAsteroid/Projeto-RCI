@@ -1,14 +1,17 @@
-//===------------ UDP.h -----------------------------------------------------===//
+//===-- udp.h ------------------------------------------------------------===//
 //
-// This file provides an interface for UDP communication, offering a simple
-// function to send messages to a server and receive responses.
+// This header file declares functions for managing UDP client communication.
+// The functions allow sending messages to a server and receiving responses
+// using the User Datagram Protocol (UDP).
 //
 //===----------------------------------------------------------------------===//
+
 #ifndef UDP_H
 #define UDP_H
 
 #include "../HostStruct/nodeStructure.h"
 
+// Sends a message to a server using UDP and returns the received response
 char *UDPClient(Host *HostNode, char *msg);
 
-#endif
+#endif // UDP_H

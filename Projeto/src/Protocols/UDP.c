@@ -12,8 +12,7 @@
 #include "../Common/utils.h"
 #include "../Common/retry.h"
 
-// Maximum buffer size for receiving server UDP responses
-#define MAXSIZE 4096
+#define MAXSIZE 4096 // Maximum buffer size for receiving server UDP responses
 
 /**
  * @brief Sends a message to a server via UDP and receives the server's response.
@@ -35,26 +34,27 @@ char *UDPClient(Host *HostNode, char *msg) {
 
   ServerAddr.sin_family = AF_INET;
   if (inet_pton(AF_INET, HostNode->InvocInfo->RegIP, &(ServerAddr.sin_addr)) != 1) {
-    DieWithSys("Function TCPServer >> inet_pton() failed");
+    DieWithSys("Function TCPServer >> " RED "inet_pton() failed" RESET, HostNode);
   }
   ServerAddr.sin_port = htons((in_port_t)HostNode->InvocInfo->RegUDP);
 
   // Send message to server
   if (SendtoRetry(Fd, msg, strlen(msg), 0, (struct sockaddr *)&ServerAddr, sizeof(ServerAddr)) ==
       -1) {
-    perror("Function UDPServer >> " RED "☠  sendto() failed");
+    PerrorWrapper("Function UDPServer >> " RED "sendto() failed" RESET);
     close(Fd);
     return NULL;
   }
 
   char *Buffer = calloc(MAXSIZE, sizeof(char));
   if (Buffer == NULL) {
-    DieWithSys("calloc() failed");
+    DieWithSys("calloc() failed", HostNode);
   }
 
+  // Receive msg from server
   socklen_t addrlen = sizeof(ServerAddr);
-  if (retry(recvfrom, Fd, Buffer, MAXSIZE, 0, (struct sockaddr *)&ServerAddr, &addrlen) == -1) {
-    perror("Function UDPServer >> " RED "☠  recvfrom() failed");
+  if (retry(recvfrom, Fd, Buffer, MAXSIZE - 1, 0, (struct sockaddr *)&ServerAddr, &addrlen) == -1) {
+    perror("Function UDPServer >> " RED "recvfrom() failed" RESET);
     free(Buffer);
     close(Fd);
     return NULL;

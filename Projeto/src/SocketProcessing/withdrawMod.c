@@ -14,7 +14,7 @@
 
 #include "../UserInterface/joinMod.h"
 
-#define BUFSIZE 256
+#define BUFSIZE 256 // Buffer args size
 
 /**
  * @brief Handles a withdrawal event by updating the host's neighbor list
@@ -86,14 +86,14 @@ void SendExternMsg(Host *HostNode) {
   // send EXTERN ext to all intern neighbours only if host is not alone
   for (Node *current = HostNode->NodeList; current != NULL; current = current->next) {
     if (CustomWrite(current->Fd, msg, (size_t)strlen(msg)) == -1) {
-      perror("Function SendExternMsg >> " RED "☠  write() failed");
+      PerrorWrapper("Function SendExternMsg >> " RED "write() failed" RESET);
       continue;
     };
   }
   // check if leaving node was an ancor, notify new extern of bck change
   if (HostNode->Bck == NULL) {
     if (CustomWrite(HostNode->Ext->Fd, msg, (size_t)strlen(msg)) == -1) {
-      perror("Function SendExternMsg >> " RED "☠  write() failed");
+      PerrorWrapper("Function SendExternMsg >> " RED "write() failed" RESET);
     };
   }
 }

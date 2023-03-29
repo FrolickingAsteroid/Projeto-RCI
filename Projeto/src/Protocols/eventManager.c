@@ -80,10 +80,10 @@ static void SetFileDescriptors(fd_set *SockSet, int FdListen, Node *NodeList, Ho
  *
  * @note This function assumes that `SockSet` has already been set up using `SetFileDescriptors()`.
  */
-static int WaitOnFileDescriptors(fd_set *SockSet, int MaxDescriptor) {
+static int WaitOnFileDescriptors(fd_set *SockSet, int MaxDescriptor, Host *HostNode) {
   int Counter = select(MaxDescriptor + 1, SockSet, NULL, NULL, NULL);
   if (Counter == -1) {
-    DieWithSys("Function WaitOnFileDescriptors >>" RED "☠  select() failed");
+    DieWithSys("Function WaitOnFileDescriptors >>" RED "select() failed" RESET, HostNode);
   }
   return Counter;
 }
@@ -101,7 +101,7 @@ static int WaitOnFileDescriptors(fd_set *SockSet, int MaxDescriptor) {
  */
 static void HandleKeyboardInput(Host *HostNode, char *buffer) {
   if (read(STDIN_FILENO, buffer, MAXSIZE - 1) == -1) {
-    perror("Function HandleKeyboardInput >> " RED "☠  read() failed");
+    PerrorWrapper("Function HandleKeyboardInput >> " RED "read() failed" RESET);
     return;
   }
   UserInterfaceParser(buffer, HostNode);
@@ -129,12 +129,12 @@ static void HandleListeningSocket(Host *HostNode, char *buffer, int *NewFd, stru
   *NewFd = accept(HostNode->FdListen, addr, addrlen);
 
   if (*NewFd == -1) {
-    perror("Function HandleListeningSocket >> " RED "☠  accept() failed");
+    PerrorWrapper("Function HandleListeningSocket >> " RED "accept() failed" RESET);
     return;
   }
 
   if (read(*NewFd, buffer, MAXSIZE - 1) == -1) {
-    perror("Function HandleListeningSocket >> " RED "☠  read() failed");
+    PerrorWrapper("Function HandleListeningSocket >> " RED "read() failed" RESET);
     close(*NewFd);
     return;
   }
@@ -166,7 +166,7 @@ static int HandleNewConQueue(Host *HostNode, fd_set *SockSet, char *Buffer) {
 
       // Read data from the file descriptor
       if (read(Current->NewFd, Buffer, MAXSIZE - 1) <= 0) {
-        perror("Function HandleNewConQueue >> " RED "☠  read() failed");
+        PerrorWrapper("Function HandleNewConQueue >> " RED "read() failed" RESET);
         close(Current->NewFd), RemoveNC(HostNode, Current->NewFd);
         return 1;
       }
@@ -208,7 +208,7 @@ static void HandleExternalNodeSocket(Host *HostNode, char *buffer, ssize_t n) {
     WithdrawHandle(HostNode, HostNode->Ext->Id, HostNode->Ext->Fd);
     return;
   } else if (n == -1) {
-    perror("Function HandleExternalNodeSocket >> " RED "☠  read() failed");
+    PerrorWrapper("Function HandleExternalNodeSocket >> " RED "read() failed" RESET);
     return;
   }
 
@@ -252,7 +252,7 @@ static void HandleInternalNodeSocket(Host *HostNode, char *buffer, Node *current
     WithdrawHandle(HostNode, current->Id, current->Fd);
     return;
   } else if (n == -1) {
-    perror("Function HandleInternalNodeSocket >> " RED "☠  read() failed");
+    PerrorWrapper("Function HandleInternalNodeSocket >> " RED "read() failed" RESET);
     return;
   }
 
@@ -332,7 +332,7 @@ void EventManager(Host *HostNode) {
   SetFileDescriptors(&SockSet, HostNode->FdListen, HostNode->NodeList, HostNode);
   MaxDescriptor = UpdateMaxDes(HostNode);
 
-  int Counter = WaitOnFileDescriptors(&SockSet, MaxDescriptor);
+  int Counter = WaitOnFileDescriptors(&SockSet, MaxDescriptor, HostNode);
   while (Counter--) {
     memset(buffer, 0, MAXSIZE);
     // Keyboard

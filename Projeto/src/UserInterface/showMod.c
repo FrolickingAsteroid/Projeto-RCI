@@ -19,7 +19,7 @@ void ShowTopology(Host *hostNode) {
   // Check if node is in a network
   if (hostNode->Net == NULL) {
     fprintf(stderr,
-            RED "🚩 WARNING > " RESET "Not registered in a network, can not show topology\n");
+            RED "(!!!) WARNING > " RESET "Not registered in a network, no topology to show\n");
     return;
   }
 
@@ -76,8 +76,8 @@ void ShowForwardingTable(Host *hostNode) {
 
   // Check if node is in a network
   if (hostNode->Net == NULL) {
-    fprintf(stderr, RED "🚩 WARNING > " RESET
-                        "Not registered in a network, can not show forwarding table\n");
+    fprintf(stderr, RED "(!!!) WARNING > " RESET
+                        "Not registered in a network, no forwarding table to show\n");
     return;
   }
   // Print table headers
