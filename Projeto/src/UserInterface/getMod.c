@@ -73,7 +73,6 @@ void GetName(Host *HostNode, char *Buffer) {
   Node *Neigh = CheckForwardingTable(HostNode, Dest);
   if (Neigh != NULL) {
     if (CustomWrite(Neigh->Fd, Query, strlen(Query)) == -1) {
-      // DO SOMETHING
       return;
     }
     return;

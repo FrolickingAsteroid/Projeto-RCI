@@ -47,7 +47,7 @@ static int ValidateServerResponse(char *response, char *ExpectedPrefix) {
   if (strstr(response, ExpectedPrefix) != NULL) {
     return 1;
   }
-  CommandNotFound("Server Answer", response);
+  CommandNotFound("Unexpected server Answer", response);
   return 0;
 }
 
@@ -171,22 +171,27 @@ char *ExternFetch(char *NODELIST, char *Net, char *Id) {
   if (DjoinMsg == NULL) {
     DieWithSys("calloc() failed");
   }
-  char *array[99] = {" "};
+  char *array[100] = {" "};
   int i = 0;
 
   // Separate Nodelist into array
   array[i] = strtok(NODELIST, "\n");
-  while (array[i] != NULL) {
+  while (i != 100 && array[i] != NULL) {
     array[++i] = strtok(NULL, "\n");
   }
+
   // Return if list is empty
   if (i == 1) {
     free(DjoinMsg);
     return NULL;
   }
+
   // choose a node from the array as extern and make Djoin command
-  char *Extern = array[(rand() % (i - 1)) + 1];
+  int index = (rand() % (i - 1)) + 1;
+
+  char *Extern = array[index];
   sprintf(DjoinMsg, "djoin %s %s %s", Net, Id, Extern);
+
   return DjoinMsg;
 }
 
@@ -209,9 +214,11 @@ static char *FindNewExtern(char *BlckListId, Host *HostNode) {
   static int BlckList[100];
   static int Net = -1;
 
+  // Insert self into blcklist
+  BlckList[atoi(HostNode->HostId)] = 1;
+
   if (Net != atoi(HostNode->Net)) {
     memset(BlckList, 0, sizeof(BlckList));
-    BlckList[atoi(HostNode->HostId)] = 1;
     Net = atoi(HostNode->Net);
   }
 
@@ -229,6 +236,7 @@ static char *FindNewExtern(char *BlckListId, Host *HostNode) {
 
   // if recvfrom() returns nothing or an error message, return
   if (!ValidateServerResponse(UDPAnswer, "NODESLIST")) {
+    CleanupResources(DjoinMsg, UDPAnswer);
     return NULL;
   }
 
@@ -250,7 +258,8 @@ static char *FindNewExtern(char *BlckListId, Host *HostNode) {
   }
 
   CleanupResources(UDPAnswer, DjoinMsg);
-  return NULL; // Return NULL if no valid entry is found
+  memset(BlckList, 0, sizeof(BlckList)); // Reset blcklist for future attempts upon failure
+  return NULL;                           // Return NULL if no valid entry is found
 }
 /**
  * @brief Joins the network as a new host without registering in the server.
@@ -306,7 +315,8 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
     }
     char *DjoinMsg = FindNewExtern(BootId, HostNode);
     if (DjoinMsg == NULL) {
-      fprintf(stderr, RED "🚩 WARNING >" RESET " Unable to connect to node %s\n", BootId);
+      fprintf(stderr,
+              RED "🚩 WARNING >" RESET " Unable to connect to any node, alone in the network\n");
       return;
     }
     DJoinNetworkServer(DjoinMsg, HostNode);

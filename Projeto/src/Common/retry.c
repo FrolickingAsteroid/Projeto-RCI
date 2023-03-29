@@ -7,7 +7,7 @@
 #include "retry.h"
 #include "utils.h"
 
-#define MAX_ATTEMPTS 10 // Number of attempts before giving up
+#define MAX_ATTEMPTS 5 // Number of attempts before giving up
 
 /**
  * @brief Retry function for socket operations with exponential backoff (used mainly with

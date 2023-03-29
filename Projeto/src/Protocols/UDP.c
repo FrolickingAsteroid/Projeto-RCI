@@ -25,9 +25,6 @@
  */
 char *UDPClient(Host *HostNode, char *msg) {
 
-  // Set Timeout for Server answer
-  struct timeval tv = {.tv_sec = 15, .tv_usec = 0};
-
   int Fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
   if (Fd == -1)
     exit(EXIT_FAILURE);
@@ -50,19 +47,11 @@ char *UDPClient(Host *HostNode, char *msg) {
     return NULL;
   }
 
-  // Set timeout for server answer
-  if (setsockopt(Fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
-    perror("Function UDPServer >> " RED "☠  setsockopt() failed");
-    close(Fd);
-    return NULL;
-  }
-
   char *Buffer = calloc(MAXSIZE, sizeof(char));
   if (Buffer == NULL) {
     DieWithSys("calloc() failed");
   }
 
-  // Receive server answer:
   socklen_t addrlen = sizeof(ServerAddr);
   if (retry(recvfrom, Fd, Buffer, MAXSIZE, 0, (struct sockaddr *)&ServerAddr, &addrlen) == -1) {
     perror("Function UDPServer >> " RED "☠  recvfrom() failed");

@@ -27,7 +27,7 @@ static void ClrParser(Host *HostNode, char *Buffer) {
   char SubCommand[128] = "";
   // Extract the sub-command from the buffer
   if (sscanf(Buffer, "clear %s\n", SubCommand) < 1) {
-    CommandNotFound("Command not found", "");
+    CommandNotFound("Command not found", Buffer);
     return;
   }
   // Call the appropriate function based on the sub-command
@@ -58,7 +58,7 @@ static void ShowParser(Host *HostNode, char *Buffer) {
   char SubCommand[128] = "";
   // Extract the sub-command from the buffer
   if (sscanf(Buffer, "show %s\n", SubCommand) < 1) {
-    CommandNotFound("Command not found", "");
+    CommandNotFound("Command not found", Buffer);
     return;
   }
   // Call the appropriate function based on the sub-command
@@ -91,7 +91,7 @@ void UserInterfaceParser(char *buffer, Host *HostNode) {
 
   // Parse Command from buffer
   if (sscanf(buffer, "%s", Command) < 1) {
-    CommandNotFound("Command not found", "");
+    CommandNotFound("Command not found", " ");
     return;
   }
 
@@ -110,6 +110,12 @@ void UserInterfaceParser(char *buffer, Host *HostNode) {
 
   } else if (strcmp(Command, "clear") == 0) {
     ClrParser(HostNode, buffer);
+
+  } else if (strcmp(Command, "cr") == 0) {
+    ClearForwardingTable(HostNode);
+
+  } else if (strcmp(Command, "cn") == 0) {
+    FreeNameList(HostNode);
 
   } else if (strcmp(Command, "leave") == 0) {
     LeaveNetwork(HostNode);
