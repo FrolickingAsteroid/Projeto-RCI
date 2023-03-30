@@ -108,9 +108,8 @@ static void HandleKeyboardInput(Host *HostNode, char *buffer) {
   }
   UserInterfaceParser(buffer, HostNode);
   if (!Verbose) {
-    // Init Keyboard prompt
-    printf(KMAG ">>> " RESET);
-    fflush(stdout);
+    // Print prompt only if in verbose mode
+    prompt();
   }
 }
 

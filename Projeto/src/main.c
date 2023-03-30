@@ -26,8 +26,7 @@ int main(int argc, char *argv[]) {
   fprintf(stdout, BLU "# User Interface Activated " GRN "🗹 \n" RESET);
 
   // Init Keyboard prompt
-  printf(KMAG ">>> " RESET);
-  fflush(stdout);
+  prompt();
 
   FOREVER {
 

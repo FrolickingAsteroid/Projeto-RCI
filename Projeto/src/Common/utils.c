@@ -149,6 +149,16 @@ void ServerAnswer(char *Answer, char *place) {
   }
 }
 
+void prompt() {
+  printf(KMAG ">>> " RESET);
+  fflush(stdout);
+}
+
+void clear_stdout_line() {
+  printf("\33[2K\r");
+  fflush(stdout);
+}
+
 /**
  * @brief Displays usage information for the user interface.
  *
@@ -156,61 +166,62 @@ void ServerAnswer(char *Answer, char *place) {
  * descriptions to the console.
  */
 void InterfaceUsage() {
-
-  printf(GRN "+---------------------------------------------------------------+\n");
-  printf("|                       Usage Guide                             |\n");
-  printf("+---------------------------+-----------------------------------+\n" RESET);
-  printf("+---------------------------+-----------------------------------+\n");
-  printf("| help:                     | Displays the usage guide, showing |\n");
-  printf("|                           | available commands and their      |\n");
-  printf("|                           | descriptions.                     |\n");
-  printf("+---------------------------+-----------------------------------+\n");
-  printf("| join net id:              | Registers a node with the given   |\n");
-  printf("|                           | identifier to the network.        |\n");
-  printf("+---------------------------+-----------------------------------+\n");
-  printf("| djoin net id bootid bootIP| Adds a node with the given        |\n");
-  printf("| bootTCP:                  | identifier to the network, using  |\n");
-  printf("|                           | the provided boot node for        |\n");
-  printf("|                           | initial connection.               |\n");
-  printf("+---------------------------+-----------------------------------+\n");
-  printf("| create name:              | Creates a content item with the   |\n");
-  printf("|                           | given name.                       |\n");
-  printf("+---------------------------+-----------------------------------+\n");
-  printf("| delete name:              | Deletes the content item with     |\n");
-  printf("|                           | the given name.                   |\n");
-  printf("+---------------------------+-----------------------------------+\n");
-  printf("| get dest name:            | Searches for the content item     |\n");
-  printf("|                           | with the given name on the        |\n");
-  printf("|                           | specified destination node.       |\n");
-  printf("+---------------------------+-----------------------------------+\n");
-  printf("| show topology (st):       | Displays the identifiers and      |\n");
-  printf("|                           | contacts of the internal          |\n");
-  printf("|                           | neighbors, external neighbor,     |\n");
-  printf("|                           | and recovery neighbor.            |\n");
-  printf("+---------------------------+-----------------------------------+\n");
-  printf("| show names (sn):          | Displays the names of content     |\n");
-  printf("|                           | items present on the node.        |\n");
-  printf("+---------------------------+-----------------------------------+\n");
-  printf("| show routing (sr):        | Displays the node's forwarding    |\n");
-  printf("|                           | table.                            |\n");
-  printf("+-----------------------------+---------------------------------+\n");
-  printf("| clear routing (cr):       | Clears the node's forwarding      |\n");
-  printf("|                           | table.                            |\n");
-  printf("+------------------------------+--------------------------------+\n");
-  printf("| clear names (cn):         | Clears the names of content       |\n");
-  printf("|                           | items present on the node.        |\n");
-  printf("+------------------------------+--------------------------------+\n");
-  printf("| leave:                    | Exits the node from the network.  |\n");
-  printf("+---------------------------+-----------------------------------+\n");
-  printf("| exit:                     | Closes the application.           |\n");
-  printf("+---------------------------+-----------------------------------+\n");
-  printf("| verbose:                  | Enables verbose mode, displaying  |\n");
-  printf("|                           | additional information during     |\n");
-  printf("|                           | program execution.                |\n");
-  printf("+---------------------------+-----------------------------------+\n");
-  printf("| quiet:                    | Enables quiet mode, suppressing   |\n");
-  printf("|                           | non-critical output.              |\n");
-  printf("+---------------------------+-----------------------------------+\n");
-  printf("| clr:                      | Clears the terminal screen.       |\n");
-  printf("+---------------------------+-----------------------------------+\n");
+  printf(GRN "+-----------------------------------------------------------------------------+\n");
+  printf("|                                 Usage Guide                                 |\n");
+  printf("+--------------------------------+--------------------------------------------+\n" RESET);
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| help:                          | Displays the usage guide, showing          |\n");
+  printf("|                                | available commands and their descriptions. |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| join net id:                   | Registers a node with the given identifier |\n");
+  printf("| " GRN "join <000-999> <00-99>" RESET
+         "         | to the network.                            |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| djoin net id bootid bootIP     | Adds a node with the given identifier to   |\n");
+  printf("| bootTCP:                       | the network, using the provided boot node  |\n");
+  printf("| " GRN "djoin <000-999> <00-99>" RESET
+         "        | for initial connection.                    |\n");
+  printf("| " GRN "<IPV4> <0-65535>" RESET
+         "               |                                            |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| create name:                   | Creates a content item with the given name:|\n");
+  printf("| " GRN "create file.txt" RESET
+         "                | Must be alphanumeric and may contain '.'   |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| delete name:                   | Deletes the content item with the given    |\n");
+  printf("| " GRN "delete file.txt" RESET
+         "                | name: Must exits in Host.                  |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| get dest name:                 | Searches for the content item with the     |\n");
+  printf("| " GRN "get <00-99> file.txt" RESET
+         "           | given name on the specified destination    |\n");
+  printf("|                                | node.                                      |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| show topology (st):            | Displays the identifiers and contacts of   |\n");
+  printf("|                                | the internal neighbors, external neighbor, |\n");
+  printf("|                                | and recovery neighbor.                     |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| show names (sn):               | Displays the names of content items        |\n");
+  printf("|                                | present on the node.                       |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| show routing (sr):             | Displays the node's forwarding table.      |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| clear routing (cr):            | Clears the node's forwarding table.        |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| clear names (cn):              | Clears the names of content items present  |\n");
+  printf("|                                | on the node.                               |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| leave:                         | Exits the node from the network.           |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| exit:                          | Closes the application.                    |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| verbose:                       | Enables verbose mode, displaying           |\n");
+  printf("|                                | additional information during program      |\n");
+  printf("|                                | execution.                                 |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| quiet:                         | Enables quiet mode, suppressing            |\n");
+  printf("|                                | non-critical output.                       |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
+  printf("| clr:                           | Clears the terminal screen.                |\n");
+  printf("+--------------------------------+--------------------------------------------+\n");
 }

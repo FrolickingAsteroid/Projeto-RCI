@@ -1,67 +1,37 @@
-
-Project Layout
-===============
-
-This project is organized into several directories and files, which are structured as follows:
-
-main.c
-The main source file of the project
-
-Common
-------
-The Common directory contains utility functions and modules used throughout the project.
-
-- checkInvocationInfo.c          ->Functions for validating user input and invocation info
-- checkInvocationInfo.h
-- formatChecking.c               ->Functions to check and validate formatting
-- formatChecking.h
-- utils.c                        ->General utility functions used across the project
-- utils.h
-
-HostStruct
-----------
-The HostStruct directory includes the files related to the host structure functions.
-
-- forwardingTable.c              ->Functions for managing the forwardingTable
-- forwardingTable.h
-- nodeStructure.c                ->Functions and structures for managing nodes and the host
-- nodeStructure.h
-
-Protocols
----------
-The Protocols directory contains modules related to event management and network protocols (TCP and UDP).
-
-- eventManager.c                 ->Functions to manage and handle socket events in the project (select())
-- eventManager.h
-- TCP.c                          ->Functions related to the TCP protocol connections
-- TCP.h
-- UDP.c                          ->Functions related to the UDP protocol connections
-- UDP.h
-
-SocketProcessing
------------------
-The SocketProcessing directory contains the files related to socket processing and communication.
-
-- newMod.c                       ->Functions related to creating and processing new connections
-- newMod.h
-- queryMod.c                     ->Functions related to query and content processing
-- queryMod.h
-- socketInterface.c              ->Functions for managing sockets and their interactions
-- socketInterface.h
-- withdrawMod.c                  ->Functions related to withdrawing and disconnecting from the network
-- withdrawMod.h
-
-UserInterface
--------------
-The UserInterface directory contains the files related to user interaction and command handling.
-
-- exitMod.c                      ->Functions for handling exit/leave-related commands
-- exitMod.h
-- getMod.c                       ->Functions for handling get-related commands
-- getMod.h
-- joinMod.c                      ->Functions for handling join/djoin-related commands
-- joinMod.h
-- showMod.c                      ->Functions for handling show-related commands
-- showMod.h
-- userInterface.c                ->Main user interface functions and command parsing
-- userInterface.h
+.
+├── src
+│   ├── Common
+│   │   ├── checkInvocationInfo.c      - File containing functions for validating user invocation parameters
+│   │   ├── checkInvocationInfo.h      - Header file for checkInvocationInfo.c
+│   │   ├── formatChecking.c           - File containing functions for checking input string formats
+│   │   ├── formatChecking.h           - Header file for formatChecking.c
+│   │   ├── retry.c                    - File containing functions for retrying operations
+│   │   ├── retry.h                    - Header file for retry.c
+│   │   ├── utils.c                    - File containing utility functions for the project
+│   │   └── utils.h                    - Header file for utils.c
+│   ├── HostStruct
+│   │   ├── CirBuffer.c                - File containing circular buffer implementation
+│   │   ├── CirBuffer.h                - Header file for CirBuffer.c
+│   │   ├── forwardingTable.c          - File containing forwarding table functions
+│   │   ├── forwardingTable.h          - Header file for forwardingTable.c
+│   │   ├── Name.c                     - File containing name manipulation functions
+│   │   ├── Name.h                     - Header file for Name.c
+│   │   ├── ncQueue.c                 - File containing network command queue functions
+│   │   ├── ncQueue.h                 - Header file for ncQueue.c
+│   │   ├── nodeStructure.c           - File containing functions related to node structures
+│   │   └── nodeStructure.h           - Header file for nodeStructure.c
+│   ├── main.c                        - Main file of the project
+│   ├── Protocols
+│   │   ├── eventManager.c            - File containing event manager functions
+│   │   ├── eventManager.h            - Header file for eventManager.c
+│   │   ├── TCP.c                     - File containing functions for TCP communication
+│   │   ├── TCP.h                     - Header file for TCP.c
+│   │   ├── UDP.c                     - File containing functions for UDP communication
+│   │   └── UDP.h                     - Header file for UDP.c
+│   ├── README.txt                    - This file
+│   ├── SocketProcessing
+│   │   ├── newMod.c                  - File containing functions for new module processing
+│   │   ├── newMod.h                  - Header file for newMod.c
+│   │   ├── queryMod.c                - File containing functions for query module processing
+│   │   ├── queryMod.h                - Header file for queryMod.c
+│   │   ├── socketInterface.c

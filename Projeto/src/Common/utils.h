@@ -21,7 +21,7 @@
 
 #include "../HostStruct/nodeStructure.h"
 
-extern int Verbose;
+extern int Verbose; // global variable for verbose mode use
 
 // Display a user error message and terminate the program
 void DieWithUsr(const char *msg, const char *detail);
@@ -41,5 +41,9 @@ void ServerAnswer(char *Answer, char *place);
 void InterfaceUsage();
 
 void PerrorWrapper(const char *msg);
+
+void prompt();
+
+void clear_stdout_line();
 
 #endif // UTILS_H
