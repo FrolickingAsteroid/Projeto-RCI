@@ -111,7 +111,7 @@ void CreateName(Host *HostNode, char *Buffer) {
 
   AddNameToHost(HostNode, NewName);
 
-  fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Name has been added to host\n");
+  fprintf(stdout, GRN "\n🗹 SUCCESS > " RESET "Name has been added to host\n\n");
 }
 
 /**
@@ -132,7 +132,7 @@ void DeleteName(Host *HostNode, char *Buffer) {
   // Parse input args
   if (sscanf(Buffer, "delete %s\n", Content) < 1) {
     CommandNotFound("Invalid argument invocation, 'delete' must have 1 input argument", Buffer);
-    fprintf(stderr, YEL "> type 'help' for more information\n" RESET);
+    fprintf(stderr, YEL "> type 'help' for more information\n\n" RESET);
     return;
   }
 
@@ -159,5 +159,5 @@ void DeleteName(Host *HostNode, char *Buffer) {
     }
   }
 
-  fprintf(stderr, RED "(!!!) WARNING > " RESET "Name '%s' was not found\n", Content);
+  fprintf(stderr, RED "\n(!!!) WARNING > " RESET "Name '%s' was not found\n\n", Content);
 }

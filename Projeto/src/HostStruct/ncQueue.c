@@ -31,7 +31,7 @@ NewConQueue *InitNCQueue(int NewFd) {
   CbInit(NewCon->Cb);
   NewCon->NewFd = NewFd;
   NewCon->next = NULL;
-  NewCon->LastActivity = time(NULL);
+  NewCon->ActivityTimer = TIMEOUT_NEW_CONNEC;
 
   return NewCon;
 }
@@ -102,6 +102,13 @@ void FreeNCList(Host *HostNode) {
   HostNode->NClist = NULL;
 }
 
+static void DecrementActivityTimer(Host *HostNode) {
+
+  for (NewConQueue *Current = HostNode->NClist; Current != NULL; Current = Current->next) {
+    Current->ActivityTimer--;
+  }
+}
+
 /**
  * @brief Remove inactive connections from the host's connection queue.
  *
@@ -111,10 +118,10 @@ void CleanInactiveConnections(Host *HostNode) {
   NewConQueue *Prev = NULL;
   NewConQueue *Curr = HostNode->NClist;
 
-  time_t CurrentTime = time(NULL);
+  DecrementActivityTimer(HostNode);
 
   while (Curr != NULL) {
-    if (CurrentTime - Curr->LastActivity > TIMEOUT_NEW_CONNEC) {
+    if (Curr->ActivityTimer <= 0) {
       // Connection timeout exceeded
       if (Prev == NULL) {
         // If curr is the head of the list

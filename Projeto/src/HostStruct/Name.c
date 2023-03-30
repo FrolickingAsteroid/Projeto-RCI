@@ -72,10 +72,10 @@ void FreeNameList(Host *HostNode) {
 
 void ClearNames(Host *HostNode) {
   if (HostNode->NameList == NULL) {
-    CommandNotFound("No Names registered in Host", "Unable to clear name list\n");
+    CommandNotFound("No Names registered in Host", "Unable to clear name list\n\n");
     return;
   }
 
   FreeNameList(HostNode);
-  fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Cleared name list\n");
+  fprintf(stdout, GRN "\n🗹 SUCCESS > " RESET "Cleared name list\n\n");
 }

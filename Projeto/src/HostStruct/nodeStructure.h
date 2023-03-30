@@ -29,7 +29,7 @@ typedef struct {
 typedef struct NewConQueue {
   int NewFd; // New file descriptor to be processed
   CircularBuffer *Cb;
-  time_t LastActivity; // Time of the last activity
+  int ActivityTimer;
 
   struct NewConQueue *next; // pointer to nest item in  the list
 } NewConQueue;

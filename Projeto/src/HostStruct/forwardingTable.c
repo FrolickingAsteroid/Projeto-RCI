@@ -86,7 +86,7 @@ Node *CheckForwardingTable(Host *HostNode, char *dest) {
 void ClearForwardingTable(Host *HostNode) {
 
   if (HostNode->Net == NULL) {
-    CommandNotFound("Not registered in a network", "Unable to clear forwarding table\n");
+    CommandNotFound("Not registered in a network", "Unable to clear forwarding table\n\n");
     return;
   }
   // Reset all entries in the forwarding table to -1
@@ -94,5 +94,5 @@ void ClearForwardingTable(Host *HostNode) {
 
   // Insert itself in forwarding table after delete
   InsertInForwardingTable(HostNode, atoi(HostNode->HostId), atoi(HostNode->HostId));
-  fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Cleared name list\n");
+  fprintf(stdout, GRN "\n🗹 SUCCESS > " RESET "Cleared name list\n\n");
 }

@@ -118,6 +118,7 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
   if (DjoinMsg == NULL) {
     CleanupResources(UDPAnswer, NULL);
     PlugHostNetId(Net, Id, HostNode);
+    fprintf(stdout, GRN "\n🗹 SUCCESS > " RESET "Connected to network %s\n\n", HostNode->Net);
     return;
   }
 
@@ -162,7 +163,7 @@ void CheckSingularityId(Host *HostNode, char *Nodelist, char (*Id)[BUFSIZE]) {
   }
 
   fprintf(stderr,
-          RED "(!!!) WARNING >" RESET " Id already registered in the network, using Id %s\n",
+          RED "\n(!!!) WARNING >" RESET " Id already registered in the network, using Id %s\n",
           (*Id));
 }
 
@@ -292,7 +293,7 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
   // Retrieve command args
   if (sscanf(buffer, "djoin %s %s %s %s %s\n", Net, Id, BootId, BootIp, BootTCP) != 5) {
     CommandNotFound("Invalid argument invocation, 'djoin' must have 5 input arguments", buffer);
-    fprintf(stderr, YEL "\n> type 'help' for more information\n" RESET);
+    fprintf(stderr, YEL "\n> type 'help' for more information\n\n" RESET);
     return;
   }
 
@@ -301,7 +302,7 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
   if (HostNode->type == DJOIN) {
     if (!(BootArgsCheck(BootId, BootIp, BootTCP) && CheckNetAndId(Net, Id))) {
       CommandNotFound("Invalid argument invocation, invalid format", buffer);
-      fprintf(stderr, YEL "\n> type 'help' for more information\n" RESET);
+      fprintf(stderr, YEL "\n> type 'help' for more information\n\n" RESET);
       return;
     }
   }
@@ -321,14 +322,16 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
 
     // if on djoin mode return only
     if (HostNode->type == DJOIN) {
-      fprintf(stderr, RED "(!!!) WARNING >" RESET " Unable to connect to requested node\n");
+      fprintf(stderr, RED "\n(!!!) WARNING >" RESET " Unable to connect to requested node\n");
       LeaveNetwork(HostNode);
       return;
     }
 
     char *DjoinMsg = FindNewExtern(BootId, HostNode);
     if (DjoinMsg == NULL) {
-      fprintf(stderr, RED "(!!!) WARNING >" RESET " Unable to connect to any node in network %s\n",
+      fprintf(stderr,
+              RED "\n(!!!) WARNING >" RESET
+                  " Unable to connect to any node in network %s, remaining alone\n\n",
               HostNode->Net);
       return;
     }
@@ -337,6 +340,8 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
     return;
   }
 
+  fprintf(stdout, GRN "\n🗹 SUCCESS > " RESET "Connected to node %s in network %s\n\n",
+          HostNode->Ext->Id, HostNode->Net);
   InsertInForwardingTable(HostNode, atoi(HostNode->Ext->Id), atoi(HostNode->Ext->Id));
 }
 
@@ -362,7 +367,6 @@ int SendNewMsg(Host *HostNode, char *HostId, char *BootIp, char *BootTCP) {
 
   // Connect to the remote host and send the NEW message
   if (TCPClientExternConnect(HostNode, msg, BootIp, BootTCP) == -1) {
-    printf("1\n");
     return 0;
   }
   return 1;

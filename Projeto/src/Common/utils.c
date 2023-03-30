@@ -43,7 +43,7 @@ void DieWithUsr(const char *msg, const char *detail) {
 
 void PerrorWrapper(const char *msg) {
   fputs(RED, stderr);
-  fputs("(X) FATAL ERROR: ", stderr);
+  fputs("\n(X) ERROR: ", stderr);
   fputs(RESET, stderr);
   perror(msg);
 }
@@ -112,7 +112,7 @@ int IsAlphanumeric(char *str) {
 void CommandNotFound(char *msg, char *Command) {
 
   fputs(RED, stderr);
-  fputs("(!!!) WARNING > ", stderr);
+  fputs("\n(!!!) WARNING > ", stderr);
   fputs(RESET, stderr);
   fputs(msg, stderr);
   fputs(": ", stderr);
@@ -134,7 +134,7 @@ void ServerAnswer(char *Answer, char *place) {
 
     char *Buffer = strdup(Answer);
     if (Buffer == NULL) {
-      DieWithSys("strdup() failed", NULL);
+      DieWithSys("Function ServerAnswer >> " RED "strdup() failed", NULL);
     }
     if (Buffer[len - 1] == '\n') {
       Buffer[len - 1] = 0;

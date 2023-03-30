@@ -2,7 +2,7 @@
 
 IP=127.0.0.1
 start_port=55000
-end_port=55009
+end_port=55003
 net=064
 
 # Compile the program

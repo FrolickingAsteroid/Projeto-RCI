@@ -23,7 +23,7 @@ void LeaveNetwork(Host *HostNode) {
 
   // check need to contact server
   if (HostNode->type == DJOIN) {
-    fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Left network %s\n", HostNode->Net);
+    fprintf(stdout, GRN "\n🗹 SUCCESS > " RESET "Left network %s\n\n", HostNode->Net);
     LiberateHost(HostNode);
     return;
   }
@@ -48,7 +48,7 @@ void LeaveNetwork(Host *HostNode) {
   }
 
   // unplug connections from node structures
-  fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Left network %s\n", HostNode->Net);
+  fprintf(stdout, GRN "\n🗹 SUCCESS > " RESET "Left network %s\n\n", HostNode->Net);
   LiberateHost(HostNode);
   free(UDPAnswer);
 }
@@ -73,6 +73,6 @@ void ExitProgram(Host *HostNode) {
   free(HostNode->InvocInfo);
   free(HostNode);
 
-  printf(BLU "# User Interface Deactivated " RED "🗹 \n" RESET);
+  printf(BLU "# User Interface Deactivated " RED "🗹 \n\n" RESET);
   exit(EXIT_SUCCESS);
 }

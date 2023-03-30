@@ -81,7 +81,9 @@ static void SetFileDescriptors(fd_set *SockSet, int FdListen, Node *NodeList, Ho
  * @note This function assumes that `SockSet` has already been set up using `SetFileDescriptors()`.
  */
 static int WaitOnFileDescriptors(fd_set *SockSet, int MaxDescriptor, Host *HostNode) {
-  int Counter = select(MaxDescriptor + 1, SockSet, NULL, NULL, NULL);
+  struct timeval tv = {.tv_sec = 0, tv.tv_usec = 100000};
+
+  int Counter = select(MaxDescriptor + 1, SockSet, NULL, NULL, &tv);
   if (Counter == -1) {
     DieWithSys("Function WaitOnFileDescriptors >>" RED "select() failed" RESET, HostNode);
   }
@@ -105,6 +107,11 @@ static void HandleKeyboardInput(Host *HostNode, char *buffer) {
     return;
   }
   UserInterfaceParser(buffer, HostNode);
+  if (!Verbose) {
+    // Init Keyboard prompt
+    printf(KMAG ">>> " RESET);
+    fflush(stdout);
+  }
 }
 
 /**
@@ -333,6 +340,11 @@ void EventManager(Host *HostNode) {
   MaxDescriptor = UpdateMaxDes(HostNode);
 
   int Counter = WaitOnFileDescriptors(&SockSet, MaxDescriptor, HostNode);
+
+  if (!Counter) {
+    CleanInactiveConnections(HostNode);
+  }
+
   while (Counter--) {
     memset(buffer, 0, MAXSIZE);
     // Keyboard
@@ -369,5 +381,4 @@ void EventManager(Host *HostNode) {
       current = current->next;
     }
   }
-  CleanInactiveConnections(HostNode);
 }
