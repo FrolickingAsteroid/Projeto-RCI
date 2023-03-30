@@ -94,5 +94,5 @@ void ClearForwardingTable(Host *HostNode) {
 
   // Insert itself in forwarding table after delete
   InsertInForwardingTable(HostNode, atoi(HostNode->HostId), atoi(HostNode->HostId));
-  fprintf(stdout, GRN "\n🗹 SUCCESS > " RESET "Cleared name list\n\n");
+  fprintf(stdout, GRN "\n🗹 SUCCESS > " RESET "Cleared forwarding table\n\n");
 }

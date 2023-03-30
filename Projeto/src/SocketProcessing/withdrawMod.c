@@ -25,6 +25,7 @@
  */
 void WithdrawHandle(Host *HostNode, char *LeavingId, int SenderFd) {
   char BootTCP[BUFSIZE] = "";
+  int ancor = 0;
 
   // Update Forwarding table and send withdraw to all neighbours
   UpdateForwardingTable(HostNode, LeavingId);
@@ -47,6 +48,8 @@ void WithdrawHandle(Host *HostNode, char *LeavingId, int SenderFd) {
         return;
       }
     } else {
+      // Set ancor status
+      ancor = 1;
       FreeNode(HostNode->Ext);
       HostNode->Ext = HostNode->NodeList;
       // verify if there were only two nodes in the network
@@ -55,7 +58,7 @@ void WithdrawHandle(Host *HostNode, char *LeavingId, int SenderFd) {
       }
     }
     if (HostNode->Ext != NULL) {
-      SendExternMsg(HostNode);
+      SendExternMsg(HostNode, ancor);
     }
   }
 
@@ -75,7 +78,7 @@ void WithdrawHandle(Host *HostNode, char *LeavingId, int SenderFd) {
  * @note The message is sent to all internal neighbors and the new external neighbor,
  *       if applicable.
  */
-void SendExternMsg(Host *HostNode) {
+void SendExternMsg(Host *HostNode, int ancor) {
   char msg[256] = "";
 
   if (HostNode->Ext == NULL) {
@@ -91,7 +94,7 @@ void SendExternMsg(Host *HostNode) {
     };
   }
   // check if leaving node was an ancor, notify new extern of bck change
-  if (HostNode->Bck == NULL) {
+  if (ancor) {
     if (CustomWrite(HostNode->Ext->Fd, msg, (size_t)strlen(msg)) == -1) {
       PerrorWrapper("Function SendExternMsg >> " RED "write() failed" RESET);
     };

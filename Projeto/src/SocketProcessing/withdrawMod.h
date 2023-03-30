@@ -16,6 +16,6 @@ void WithdrawHandle(Host *HostNode, char *LeavingId, int SenderFd);
 // Receives a withdraw message from the specified neighbor
 void ReceiveWithdrawMsg(Host *HostNode, char *Buffer, int SenderFd);
 // Sends an external message for the given node
-void SendExternMsg(Host *HostNode);
+void SendExternMsg(Host *HostNode, int ancor);
 
 #endif
