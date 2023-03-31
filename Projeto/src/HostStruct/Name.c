@@ -70,6 +70,14 @@ void FreeNameList(Host *HostNode) {
   HostNode->NameList = NULL;
 }
 
+/**
+ * @brief wrapper for clear names command
+ *
+ * This function calls FreeNameList, which iterates through the NameList in the HostNode,
+ * deallocating each Name entry and setting the NameList to NULL when completed.
+ *
+ * @param HostNode Pointer to the Host structure containing the NameList to be freed.
+ */
 void ClearNames(Host *HostNode) {
   if (HostNode->NameList == NULL) {
     CommandNotFound("No Names registered in Host", "Unable to clear name list\n\n");

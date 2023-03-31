@@ -13,7 +13,8 @@
 #include "../Common/formatChecking.h"
 #include "../Common/utils.h"
 
-#define BUFSIZE 128 // Size of input arguments
+#define BUFSIZE 128          // Size of input arguments
+#define MAX_ID_ATTEMPTS 1000 // Max number of ID find reattempts
 
 /**
  * @brief Frees allocated memory for UDPAnswer and DjoinMsg if they are not NULL.
@@ -94,10 +95,15 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
 
   // if recvfrom() returns nothing or an error message, return
   if (!ValidateServerResponse(UDPAnswer, "NODESLIST")) {
+    CleanupResources(UDPAnswer, NULL);
     return;
   }
 
   CheckSingularityId(HostNode, UDPAnswer, &Id);
+  if (strcmp(Id, "-1") == 0) {
+    CleanupResources(UDPAnswer, NULL);
+    return;
+  }
 
   // Return Djoin command for TCP connection
   DjoinMsg = ExternFetch(UDPAnswer, Net, Id);
@@ -157,9 +163,21 @@ void CheckSingularityId(Host *HostNode, char *Nodelist, char (*Id)[BUFSIZE]) {
   if (strcmp(Ip, HostNode->InvocInfo->HostIP) == 0 && Port == HostNode->InvocInfo->HostTCP) {
     return;
   }
+
+  int attempts = 0;
   while (strstr(Nodelist, DelId) != NULL) {
+    attempts++;
     sprintf((*Id), "%02d", rand() % 100);
     sprintf(DelId, "\n%s ", (*Id));
+
+    if (attempts >= MAX_ID_ATTEMPTS) {
+      // Unable to generate a new, unique ID after MAX_ID_ATTEMPTS attempts
+      // Return an error or raise an exception here
+      fprintf(stderr, RED "\n(!) WARNING >" RESET
+                          " Unable to generate a new, unique ID, network is full\n");
+      sprintf((*Id), "%d", -1);
+      return;
+    }
   }
 
   fprintf(stderr,

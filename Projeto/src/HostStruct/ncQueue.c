@@ -7,7 +7,7 @@
 
 #include "../Common/utils.h"
 
-#define TIMEOUT_NEW_CONNEC 300 // Timout for inactive file descriptors
+#define TIMEOUT_NEW_CONNEC 3000 // Timout for inactive file descriptors
 
 /**
  * @brief Initialize a new connection queue.

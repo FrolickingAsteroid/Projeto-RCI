@@ -25,7 +25,7 @@ UsrInvoc *InitUsrInfo() {
 
   // Check if allocation was successful
   if (UsrInfo == NULL) {
-    DieWithSys("Function InitUsrInfo >>" RED "malloc() failed", NULL);
+    DieWithSys("Function InitUsrInfo >> malloc() failed", NULL);
   }
 
   // Initialize fields of UsrInvoc struct

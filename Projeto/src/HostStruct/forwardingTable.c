@@ -13,7 +13,7 @@
 /**
  * @brief Updates the forwarding table of a host when another node leaves the network.
  *
- *This function updates the forwarding table of the host pointed to by HostNode when
+ * This function updates the forwarding table of the host pointed to by HostNode when
  * another node with ID LeavingId leaves the network. It goes through each entry in the
  * forwarding table and sets the entry to -1 if it matches the LeavingId.
  *

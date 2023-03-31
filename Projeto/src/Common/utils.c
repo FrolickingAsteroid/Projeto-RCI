@@ -30,6 +30,12 @@ void Usage(char *name) {
                       "\t  to 193.136.138.142 and 59000 respectively.\n\n");
 }
 
+/**
+ * @brief Displays a fatal error message with user-provided details and terminates the program.
+ *
+ * @param msg The main error message to display.
+ * @param detail The detailed error message to display.
+ */
 void DieWithUsr(const char *msg, const char *detail) {
   fputs(RED, stderr);
   fputs("(X) FATAL ERROR > ", stderr);
@@ -41,6 +47,11 @@ void DieWithUsr(const char *msg, const char *detail) {
   exit(EXIT_FAILURE);
 }
 
+/**
+ * @brief Wrapper for perror() function, displaying a warning message.
+ *
+ * @param msg The error message to display.
+ */
 void PerrorWrapper(const char *msg) {
   fputs(RED, stderr);
   fputs("\n(!) WARNING > ", stderr);
@@ -48,6 +59,12 @@ void PerrorWrapper(const char *msg) {
   perror(msg);
 }
 
+/**
+ * @brief Displays a system error message, frees the host resources, and terminates the program.
+ *
+ * @param msg The error message to display.
+ * @param HostNode The host structure to be freed.
+ */
 void DieWithSys(const char *msg, Host *HostNode) {
 
   PerrorWrapper(msg);
@@ -149,11 +166,17 @@ void ServerAnswer(char *Answer, char *place) {
   }
 }
 
+/**
+ * @brief Displays a command prompt to the user.
+ */
 void prompt() {
   printf(KMAG ">>> " RESET);
   fflush(stdout);
 }
 
+/**
+ * @brief Clears the current line on the terminal screen.
+ */
 void clear_stdout_line() {
   printf("\33[2K\r");
   fflush(stdout);

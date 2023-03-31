@@ -40,11 +40,11 @@ void CommandNotFound(char *Command, char *msg);
 void ServerAnswer(char *Answer, char *place);
 // Print usage instructions for the network interface
 void InterfaceUsage();
-
+// wrapper for perror error print
 void PerrorWrapper(const char *msg);
-
+// print user prompt
 void prompt();
-
+// clears stdout line to prevent prompt overlap
 void clear_stdout_line();
 
 #endif // UTILS_H
