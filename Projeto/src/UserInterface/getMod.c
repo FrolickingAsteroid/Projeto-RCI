@@ -159,5 +159,5 @@ void DeleteName(Host *HostNode, char *Buffer) {
     }
   }
 
-  fprintf(stderr, RED "\n(!!!) WARNING > " RESET "Name '%s' was not found\n", Content);
+  fprintf(stderr, RED "\n(!) WARNING > " RESET "Name '%s' was not found\n", Content);
 }

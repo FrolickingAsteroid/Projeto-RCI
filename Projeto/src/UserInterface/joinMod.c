@@ -163,7 +163,7 @@ void CheckSingularityId(Host *HostNode, char *Nodelist, char (*Id)[BUFSIZE]) {
   }
 
   fprintf(stderr,
-          RED "\n(!!!) WARNING >" RESET " Id already registered in the network, using Id %s\n",
+          RED "\n(!) WARNING >" RESET " Id already registered in the network, using Id %s\n",
           (*Id));
 }
 
@@ -322,7 +322,7 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
 
     // if on djoin mode return only
     if (HostNode->type == DJOIN) {
-      fprintf(stderr, RED "\n(!!!) WARNING >" RESET " Unable to connect to requested node\n");
+      fprintf(stderr, RED "\n(!) WARNING >" RESET " Unable to connect to requested node\n");
       LeaveNetwork(HostNode);
       return;
     }
@@ -330,7 +330,7 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
     char *DjoinMsg = FindNewExtern(BootId, HostNode);
     if (DjoinMsg == NULL) {
       fprintf(stderr,
-              RED "\n(!!!) WARNING >" RESET
+              RED "\n(!) WARNING >" RESET
                   " Unable to connect to any node in network %s, remaining alone\n\n",
               HostNode->Net);
       return;

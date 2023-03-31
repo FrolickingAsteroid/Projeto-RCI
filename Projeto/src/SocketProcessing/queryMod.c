@@ -176,9 +176,14 @@ void ContentHandle(Host *HostNode, char *Buffer, int ContentFlag, Node *SenderNo
   // Check if the message reached its destination
   if (strcmp(HostNode->HostId, Dest) == 0) {
     if (ContentFlag) {
-      fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Name was found in %s\n", Orig);
+      // fix prompt print
+      clear_stdout_line();
+      fprintf(stdout, GRN "\n🗹 SUCCESS > " RESET "Name was found in %s\n\n", Orig);
+      prompt();
     } else {
-      fprintf(stdout, RED "☒ FAILURE > " RESET "Name was not found in %s\n", Orig);
+      clear_stdout_line();
+      fprintf(stdout, RED "\n☒ FAILURE > " RESET "Name was not found in %s\n\n", Orig);
+      prompt();
     }
     return;
   }

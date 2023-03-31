@@ -43,7 +43,7 @@ void DieWithUsr(const char *msg, const char *detail) {
 
 void PerrorWrapper(const char *msg) {
   fputs(RED, stderr);
-  fputs("\n(X) ERROR: ", stderr);
+  fputs("\n(!) WARNING > ", stderr);
   fputs(RESET, stderr);
   perror(msg);
 }
