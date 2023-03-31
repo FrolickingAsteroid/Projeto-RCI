@@ -178,7 +178,7 @@ void CheckSingularityId(Host *HostNode, char *Nodelist, char (*Id)[BUFSIZE]) {
 char *ExternFetch(char *NODELIST, char *Net, char *Id) {
   char *DjoinMsg = calloc(64, sizeof(char));
   if (DjoinMsg == NULL) {
-    DieWithSys("calloc() failed", NULL);
+    DieWithSys("Function ExterFetch >> calloc() failed", NULL);
   }
   char *array[100] = {" "};
   int i = 0;
