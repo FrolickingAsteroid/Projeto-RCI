@@ -11,10 +11,11 @@
 // ANSI color codes for printing colored output to the console
 #define RESET "\x1B[0m"
 #define RED "\x1B[31m"
-#define GRN "\x1B[32m"
+#define GRN "\033[1;92m"
 #define YEL "\x1B[33m"
-#define BLU "\x1B[34m"
+#define BLU "\033[1;94m"
 #define KMAG "\x1B[35m"
+#define CYAN "\033[0;36m"
 
 // Clear the console screen
 #define clear() printf("\033[H\033[J")

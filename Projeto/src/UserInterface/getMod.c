@@ -63,9 +63,9 @@ void GetName(Host *HostNode, char *Buffer) {
   // check if name is being searched in host
   if (strcmp(Dest, HostNode->HostId) == 0) {
     if (NameExists(HostNode, Name)) {
-      fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Name has been found in %s\n", HostNode->HostId);
+      fprintf(stdout, GRN "\n🗹 SUCCESS > " RESET "Name has been found in %s\n\n", HostNode->HostId);
     } else {
-      fprintf(stdout, RED "☒ FAILURE > " RESET "Name was not found in %s\n", HostNode->HostId);
+      fprintf(stdout, RED "\n☒ FAILURE > " RESET "Name was not found in %s\n\n", HostNode->HostId);
     }
     return;
   }
@@ -132,7 +132,7 @@ void DeleteName(Host *HostNode, char *Buffer) {
   // Parse input args
   if (sscanf(Buffer, "delete %s\n", Content) < 1) {
     CommandNotFound("Invalid argument invocation, 'delete' must have 1 input argument", Buffer);
-    fprintf(stderr, YEL "> type 'help' for more information\n\n" RESET);
+    fprintf(stderr, YEL "> type 'help' for more information\n" RESET);
     return;
   }
 
@@ -144,7 +144,7 @@ void DeleteName(Host *HostNode, char *Buffer) {
   // search for name and delete it from the list
   if (Current != NULL && strcmp(Content, Current->Content) == 0) {
     HostNode->NameList = Current->next, free(Current);
-    fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Name has been deleted with success\n");
+    fprintf(stdout, GRN "\n🗹 SUCCESS > " RESET "Name has been deleted with success\n\n");
     return;
 
   } else if (Current != NULL) {
@@ -152,12 +152,12 @@ void DeleteName(Host *HostNode, char *Buffer) {
 
       if (strcmp(Content, Current->next->Content) == 0) {
         Del = Current->next, Current->next = Del->next, free(Del);
-        fprintf(stdout, GRN "🗹 SUCCESS > " RESET "Name has been deleted with success\n");
+        fprintf(stdout, GRN "\n🗹 SUCCESS > " RESET "Name has been deleted with success\n\n");
         return;
       }
       Current = Current->next;
     }
   }
 
-  fprintf(stderr, RED "\n(!!!) WARNING > " RESET "Name '%s' was not found\n\n", Content);
+  fprintf(stderr, RED "\n(!!!) WARNING > " RESET "Name '%s' was not found\n", Content);
 }

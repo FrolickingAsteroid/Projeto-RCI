@@ -32,7 +32,7 @@ void Usage(char *name) {
 
 void DieWithUsr(const char *msg, const char *detail) {
   fputs(RED, stderr);
-  fputs("(X) FATAL ERROR: ", stderr);
+  fputs("(X) FATAL ERROR > ", stderr);
   fputs(msg, stderr);
   fputs(": ", stderr);
   fputs(RESET, stderr);

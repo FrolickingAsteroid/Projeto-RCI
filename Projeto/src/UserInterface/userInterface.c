@@ -41,7 +41,7 @@ static void ClrParser(Host *HostNode, char *Buffer) {
   } else {
     // If the sub-command is not recognized, display an error message
     CommandNotFound("Invalid input argument", Buffer);
-    fprintf(stderr, YEL "\n> type 'help' for more information\n" RESET);
+    fprintf(stderr, YEL "> type 'help' for more information\n" RESET);
   }
 }
 
@@ -96,7 +96,7 @@ void UserInterfaceParser(char *buffer, Host *HostNode) {
   // Parse Command from buffer
   if (sscanf(buffer, "%s", Command) < 1) {
     CommandNotFound("Invalid argument invocation", "Must input a command");
-    fprintf(stderr, YEL "\n> type 'help' for more information\n" RESET);
+    fprintf(stderr, YEL "> type 'help' for more information\n" RESET);
     return;
   }
 

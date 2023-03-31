@@ -30,7 +30,7 @@ void LeaveNetwork(Host *HostNode) {
 
   // check if Host is registered in a network
   if (HostNode->Net == NULL) {
-    CommandNotFound("Unable to leave", "Host is not registered in any network");
+    CommandNotFound("Unable to leave", "Host is not registered in any network\n");
     return;
   }
 
@@ -43,7 +43,7 @@ void LeaveNetwork(Host *HostNode) {
     if (UDPAnswer != NULL) {
       free(UDPAnswer);
     }
-    CommandNotFound("Unable to leave", "Could not get proper communication with server");
+    CommandNotFound("Unable to leave", "Could not get proper communication with server\n");
     return;
   }
 

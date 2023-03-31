@@ -73,12 +73,12 @@ void JoinNetworkServer(char buffer[], Host *HostNode) {
   // Retrieve command args and check their validity
   if (sscanf(buffer, "join %s %s\n", Net, Id) != 2) {
     CommandNotFound("Invalid argument invocation, 'join' must have two input arguments", buffer);
-    fprintf(stderr, YEL "\n> type 'help' for more information\n" RESET);
+    fprintf(stderr, YEL "> type 'help' for more information\n" RESET);
     return;
   }
   if (!(CheckNetAndId(Net, Id))) {
     CommandNotFound("Invalid argument invocation, invalid 'NET' and 'ID' parameters", buffer);
-    fprintf(stderr, YEL "\n> type 'help' for more information\n" RESET);
+    fprintf(stderr, YEL "> type 'help' for more information\n" RESET);
     return;
   }
 
@@ -234,7 +234,7 @@ static char *FindNewExtern(char *BlckListId, Host *HostNode) {
 
   char *DjoinMsg = calloc(64, sizeof(char));
   if (DjoinMsg == NULL) {
-    DieWithSys("Calloc() failed", HostNode);
+    DieWithSys("FindNewExtern >> Calloc() failed", HostNode);
   }
 
   char msg[BUFSIZE] = "";
@@ -293,7 +293,7 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
   // Retrieve command args
   if (sscanf(buffer, "djoin %s %s %s %s %s\n", Net, Id, BootId, BootIp, BootTCP) != 5) {
     CommandNotFound("Invalid argument invocation, 'djoin' must have 5 input arguments", buffer);
-    fprintf(stderr, YEL "\n> type 'help' for more information\n\n" RESET);
+    fprintf(stderr, YEL "> type 'help' for more information\n\n" RESET);
     return;
   }
 
@@ -302,7 +302,7 @@ void DJoinNetworkServer(char buffer[], Host *HostNode) {
   if (HostNode->type == DJOIN) {
     if (!(BootArgsCheck(BootId, BootIp, BootTCP) && CheckNetAndId(Net, Id))) {
       CommandNotFound("Invalid argument invocation, invalid format", buffer);
-      fprintf(stderr, YEL "\n> type 'help' for more information\n\n" RESET);
+      fprintf(stderr, YEL "> type 'help' for more information\n\n" RESET);
       return;
     }
   }
