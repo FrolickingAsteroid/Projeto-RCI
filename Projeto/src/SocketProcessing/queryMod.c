@@ -179,11 +179,15 @@ void ContentHandle(Host *HostNode, char *Buffer, int ContentFlag, Node *SenderNo
       // fix prompt print
       clear_stdout_line();
       fprintf(stdout, GRN "\n🗹 SUCCESS > " RESET "Name was found in %s\n\n", Orig);
-      prompt();
+      if (!Verbose) {
+        prompt();
+      }
     } else {
       clear_stdout_line();
       fprintf(stdout, RED "\n☒ FAILURE > " RESET "Name was not found in %s\n\n", Orig);
-      prompt();
+      if (!Verbose) {
+        prompt();
+      }
     }
     return;
   }
