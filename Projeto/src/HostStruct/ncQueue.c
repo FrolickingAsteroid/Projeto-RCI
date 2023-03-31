@@ -101,7 +101,11 @@ void FreeNCList(Host *HostNode) {
   }
   HostNode->NClist = NULL;
 }
-
+/**
+ * @brief Decrements the activity timers for each connection in the NewConQueue.
+ *
+ * @param HostNode A pointer to the host structure containing the NewConQueue.
+ */
 static void DecrementActivityTimer(Host *HostNode) {
 
   for (NewConQueue *Current = HostNode->NClist; Current != NULL; Current = Current->next) {
